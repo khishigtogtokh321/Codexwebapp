@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+/* Base Styles */
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 font-sans antialiased;
+  }
+}
+
+/* Component Styles */
+@layer components {
+  /* Card/Panel styles */
+  .dental-card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200;
+  }
+
+  /* Button styles */
+  .btn-primary {
+    @apply bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors font-medium;
+  }
+
+  .btn-success {
+    @apply bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium;
+  }
+
+  /* Input styles */
+  .input-field {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent;
+  }
+
+  /* Tooth status colors */
+  .tooth-healthy {
+    @apply bg-white border-gray-300;
+  }
+
+  .tooth-treated {
+    @apply bg-blue-50 border-blue-300;
+  }
+
+  .tooth-problem {
+    @apply bg-red-50 border-red-300;
+  }
+
+  .tooth-planned {
+    @apply bg-amber-50 border-amber-300;
+  }
+
+  .tooth-missing {
+    @apply bg-gray-100 border-gray-400;
+  }
+}
+
+/* Utility Styles */
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-gray-100;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400;
+  }
+}
