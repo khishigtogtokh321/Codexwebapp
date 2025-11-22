@@ -15,11 +15,11 @@ const props = defineProps({
 const emit = defineEmits(['toggle'])
 
 const surfaces = [
-  { id: 'M', label: 'M - Mesial', name: TOOTH_SURFACES.M },
-  { id: 'O', label: 'O - Occlusal', name: TOOTH_SURFACES.O },
-  { id: 'D', label: 'D - Distal', name: TOOTH_SURFACES.D },
-  { id: 'B', label: 'B - Buccal', name: TOOTH_SURFACES.B },
-  { id: 'L', label: 'L - Lingual', name: TOOTH_SURFACES.L },
+  { id: 'B', label: 'B/F', name: TOOTH_SURFACES.B, position: 'top' },
+  { id: 'M', label: 'M', name: TOOTH_SURFACES.M, position: 'left' },
+  { id: 'D', label: 'D', name: TOOTH_SURFACES.D, position: 'right' },
+  { id: 'L', label: 'L/P', name: TOOTH_SURFACES.L, position: 'bottom' },
+  { id: 'O', label: 'O/I', name: TOOTH_SURFACES.O, position: 'center' },
 ]
 
 function isSelected(surfaceId) {
@@ -34,40 +34,114 @@ function handleToggle(surfaceId) {
 </script>
 
 <template>
-  <div class="space-y-3 p-4 bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-300">
-    <label class="block text-sm font-semibold text-gray-800 flex items-center gap-2">
-      <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-      </svg>
-      Шүдний гадаргуу
-    </label>
-    <div class="grid grid-cols-2 gap-2">
+  <div class="space-y-3 p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+    <div class="flex items-center justify-between">
+      <label class="text-sm font-semibold text-gray-800">2. Гадаргуу сонгох</label>
+    </div>
+
+    <div class="relative mx-auto aspect-square w-[200px] sm:w-[220px]">
+      <div class="absolute inset-0 rounded-lg border border-gray-300 bg-gradient-to-br from-slate-50 to-white shadow-inner"></div>
+      <div class="absolute inset-[28%] rounded-md border border-gray-200 bg-white shadow-sm"></div>
+
       <button
         v-for="surface in surfaces"
         :key="surface.id"
         type="button"
+        :title="surface.name"
+        :aria-pressed="isSelected(surface.id)"
+        :aria-label="surface.name"
         :disabled="disabled"
+        class="surface-zone"
         :class="[
-          'px-3 py-2.5 text-sm font-semibold rounded-lg border-2 transition-all duration-300 transform hover:scale-105',
-          isSelected(surface.id)
-            ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white border-blue-600 shadow-lg shadow-blue-200'
-            : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:bg-blue-50 hover:shadow-md',
-          disabled ? 'opacity-50 cursor-not-allowed hover:scale-100' : 'cursor-pointer',
+          `zone-${surface.position}`,
+          isSelected(surface.id) ? 'surface-zone--active' : 'surface-zone--idle',
+          disabled ? 'cursor-not-allowed opacity-60' : 'hover:shadow-lg',
         ]"
         @click="handleToggle(surface.id)"
       >
-        {{ surface.label }}
+        <span class="text-xs font-semibold tracking-wide drop-shadow-sm">{{ surface.label }}</span>
       </button>
     </div>
-    <p v-if="selectedSurfaces.length > 0" class="text-xs text-blue-600 font-medium mt-2 flex items-center gap-1">
-      <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-      </svg>
-      Сонгосон: {{ selectedSurfaces.join(', ') }}
+
+    <p v-if="selectedSurfaces.length > 0" class="text-xs text-blue-700 font-semibold">
+      Сонгосон гадаргуу: {{ selectedSurfaces.join(', ') }}
     </p>
+    <p v-else class="text-xs text-gray-500">Гадаргуу дарж сонгоно уу.</p>
   </div>
 </template>
 
 <style scoped>
-/* Additional styles if needed */
+.surface-zone {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 52px;
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  color: #0f172a;
+  background: linear-gradient(145deg, #f8fafc, #eef2f7);
+  transition: all 160ms ease;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  z-index: 10;
+}
+
+.surface-zone--idle {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.surface-zone--active {
+  background: linear-gradient(145deg, #2563eb, #1d4ed8);
+  color: #fff;
+  border-color: #1d4ed8;
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.25);
+}
+
+.zone-top {
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90px;
+  height: 50px;
+}
+
+.zone-bottom {
+  bottom: 5px;
+  left: 50%;
+  width: 90px;
+  transform: translateX(-50%);
+  height: 50px;
+}
+
+.zone-left {
+  left: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 90px;
+}
+
+.zone-right {
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 90px;
+}
+
+.zone-center {
+  width: 46%;
+  height: 46%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 12px;
+  z-index: 20;
+}
+
+.surface-zone:focus-visible {
+  outline: 2px solid #1d4ed8;
+  outline-offset: 2px;
+}
 </style>
