@@ -1,97 +1,89 @@
 /**
- * Dental treatment type definitions
- * Used for categorizing and selecting treatment procedures
+ * Dental treatment type definitions with toothRequired flag for workflow filtering
  */
 
 export const treatmentTypes = [
-  // Examination and Consultation
-  { id: 'exam', label: 'Үзлэг / Examination', category: 'diagnostic' },
-  { id: 'consult', label: 'Зөвлөгөө / Consultation', category: 'diagnostic' },
-  { id: 'xray', label: 'Рентген зураг / X-Ray', category: 'diagnostic' },
-  { id: 'panoramic', label: 'Панорам зураг / Panoramic X-Ray', category: 'diagnostic' },
+  // General (no tooth)
+  { id: 'exam', label: 'Ерөнхий үзлэг', category: 'diagnostic', toothRequired: false },
+  { id: 'consult', label: 'Зөвлөгөө', category: 'diagnostic', toothRequired: false },
+  { id: 'xray', label: 'Рентген', category: 'diagnostic', toothRequired: false },
+  { id: 'panoramic', label: 'Панорам рентген', category: 'diagnostic', toothRequired: false },
 
-  // Preventive Care
-  { id: 'cleaning', label: 'Шүд цэвэрлэх / Teeth Cleaning', category: 'preventive' },
-  { id: 'scaling', label: 'Шүдний чулуу авах / Scaling', category: 'preventive' },
-  { id: 'fluoride', label: 'Фторжуулалт / Fluoride Treatment', category: 'preventive' },
-  { id: 'sealant', label: 'Фиссур битүүмжлэх / Sealant', category: 'preventive' },
+  // Preventive (tooth-based)
+  { id: 'cleaning', label: 'Шүд цэвэрлэгээ', category: 'preventive', toothRequired: true },
+  { id: 'scaling', label: 'Усалгаатай цэвэрлэгээ', category: 'preventive', toothRequired: true },
+  { id: 'fluoride', label: 'Фтор түрхлэг', category: 'preventive', toothRequired: true },
+  { id: 'sealant', label: 'Лак/битүүмжлэл', category: 'preventive', toothRequired: true },
 
   // Restorative
-  { id: 'filling', label: 'Шүдломбодох / Filling', category: 'restorative' },
-  { id: 'composite', label: 'Композит / Composite Filling', category: 'restorative' },
-  { id: 'amalgam', label: 'Амальгам / Amalgam Filling', category: 'restorative' },
-  { id: 'inlay', label: 'Инлэй / Inlay', category: 'restorative' },
-  { id: 'onlay', label: 'Онлэй / Onlay', category: 'restorative' },
+  { id: 'filling', label: 'Ломбдолт', category: 'restorative', toothRequired: true },
+  { id: 'composite', label: 'Композит ломбо', category: 'restorative', toothRequired: true },
+  { id: 'amalgam', label: 'Амальгам ломбо', category: 'restorative', toothRequired: true },
+  { id: 'inlay', label: 'Инлей', category: 'restorative', toothRequired: true },
+  { id: 'onlay', label: 'Онлей', category: 'restorative', toothRequired: true },
 
-  // Endodontics
-  { id: 'root-canal', label: 'Сувгийн эмчилгээ / Root Canal', category: 'endodontic' },
-  { id: 'pulpotomy', label: 'Пульпотоми / Pulpotomy', category: 'endodontic' },
-  { id: 'pulpectomy', label: 'Пульпэктоми / Pulpectomy', category: 'endodontic' },
-  { id: 'apico', label: 'Апикотоми / Apicoectomy', category: 'endodontic' },
+  // Endodontic
+  { id: 'root-canal', label: 'Суваг эмчилгээ', category: 'endodontic', toothRequired: true },
+  { id: 'pulpotomy', label: 'Пульпотом', category: 'endodontic', toothRequired: true },
+  { id: 'pulpectomy', label: 'Пульпектом', category: 'endodontic', toothRequired: true },
+  { id: 'apico', label: 'Апикэктоми', category: 'endodontic', toothRequired: true },
 
-  // Prosthodontics
-  { id: 'crown', label: 'Титэм / Crown', category: 'prosthetic' },
-  { id: 'bridge', label: 'Гүүр / Bridge', category: 'prosthetic' },
-  { id: 'denture', label: 'Хиймэл шүд / Denture', category: 'prosthetic' },
-  { id: 'partial-denture', label: 'Хэсэгчилсэн хиймэл шүд / Partial Denture', category: 'prosthetic' },
-  { id: 'implant', label: 'Имплант / Implant', category: 'prosthetic' },
-  { id: 'veneer', label: 'Винир / Veneer', category: 'prosthetic' },
+  // Prosthetic
+  { id: 'crown', label: 'Титэм', category: 'prosthetic', toothRequired: true },
+  { id: 'bridge', label: 'Гүүрэн протез', category: 'prosthetic', toothRequired: true },
+  { id: 'denture', label: 'Салдаг хиймэл шүд', category: 'prosthetic', toothRequired: true },
+  { id: 'partial-denture', label: 'Хэсгийн салдаг хиймэл', category: 'prosthetic', toothRequired: true },
+  { id: 'implant', label: 'Имплант', category: 'prosthetic', toothRequired: true },
+  { id: 'veneer', label: 'Винир', category: 'prosthetic', toothRequired: true },
 
-  // Oral Surgery
-  { id: 'extraction', label: 'Шүд авах / Extraction', category: 'surgery' },
-  { id: 'surgical-extraction', label: 'Мэс заслын аргаар шүд авах / Surgical Extraction', category: 'surgery' },
-  { id: 'wisdom-tooth', label: 'Ухааны шүд авах / Wisdom Tooth Removal', category: 'surgery' },
-  { id: 'bone-graft', label: 'Ясны шилжүүлэлт / Bone Graft', category: 'surgery' },
-  { id: 'sinus-lift', label: 'Синус өргөх / Sinus Lift', category: 'surgery' },
+  // Surgery
+  { id: 'extraction', label: 'Шүд авах', category: 'surgery', toothRequired: true },
+  { id: 'surgical-extraction', label: 'Мэс заслын авах', category: 'surgery', toothRequired: true },
+  { id: 'wisdom-tooth', label: 'Агт араа авах', category: 'surgery', toothRequired: true },
+  { id: 'bone-graft', label: 'Ясны суулгац', category: 'surgery', toothRequired: true },
+  { id: 'sinus-lift', label: 'Синус лифт', category: 'surgery', toothRequired: true },
 
-  // Periodontics
-  { id: 'perio-therapy', label: 'Шүдний махбодын эмчилгээ / Periodontal Therapy', category: 'periodontal' },
-  { id: 'deep-cleaning', label: 'Гүн цэвэрлэгээ / Deep Cleaning', category: 'periodontal' },
-  { id: 'gum-surgery', label: 'Буйлны мэс засал / Gum Surgery', category: 'periodontal' },
-  { id: 'graft', label: 'Буйлны шилжүүлэлт / Gum Graft', category: 'periodontal' },
+  // Periodontal
+  { id: 'perio-therapy', label: 'Буйлны эмчилгээ', category: 'periodontal', toothRequired: true },
+  { id: 'deep-cleaning', label: 'Гүн цэвэрлэгээ', category: 'periodontal', toothRequired: true },
+  { id: 'gum-surgery', label: 'Буйлны мэс засал', category: 'periodontal', toothRequired: true },
+  { id: 'graft', label: 'Буйл шилжүүлэн суулгалт', category: 'periodontal', toothRequired: true },
 
-  // Orthodontics
-  { id: 'braces', label: 'Шүдний хаалт / Braces', category: 'orthodontic' },
-  { id: 'retainer', label: 'Хадгалагч / Retainer', category: 'orthodontic' },
-  { id: 'aligners', label: 'Тунгалагцуур / Clear Aligners', category: 'orthodontic' },
+  // Orthodontic
+  { id: 'braces', label: 'Шүдний аппарат', category: 'orthodontic', toothRequired: true },
+  { id: 'retainer', label: 'Ретейнер тохируулга', category: 'orthodontic', toothRequired: true },
+  { id: 'aligners', label: 'Илэнгэр/алайнэр', category: 'orthodontic', toothRequired: true },
 
   // Cosmetic
-  { id: 'whitening', label: 'Шүд цайруулах / Teeth Whitening', category: 'cosmetic' },
-  { id: 'bonding', label: 'Бондинг / Bonding', category: 'cosmetic' },
-  { id: 'reshaping', label: 'Хэлбэржүүлэх / Reshaping', category: 'cosmetic' },
+  { id: 'whitening', label: 'Цайруулалт', category: 'cosmetic', toothRequired: true },
+  { id: 'bonding', label: 'Бондинг', category: 'cosmetic', toothRequired: true },
+  { id: 'reshaping', label: 'Хэлбэр засах', category: 'cosmetic', toothRequired: true },
 
   // Emergency
-  { id: 'emergency', label: 'Яаралтай тусламж / Emergency Treatment', category: 'emergency' },
-  { id: 'pain-relief', label: 'Өвдөлт намдаах / Pain Relief', category: 'emergency' },
+  { id: 'emergency', label: 'Яаралтай эмчилгээ', category: 'emergency', toothRequired: true },
+  { id: 'pain-relief', label: 'Өвчин намдаалт', category: 'emergency', toothRequired: true },
 
   // Other
-  { id: 'base', label: 'Үндсэн эмчилгээ / Base Treatment', category: 'other' },
-  { id: 'other', label: 'Бусад / Other', category: 'other' },
+  { id: 'base', label: 'Суурь эмчилгээ', category: 'other', toothRequired: true },
+  { id: 'other', label: 'Бусад', category: 'other', toothRequired: true },
 ]
 
-// Helper function to get treatment by ID
-export const getTreatmentById = (id) => {
-  return treatmentTypes.find(t => t.id === id)
-}
+export const getTreatmentById = (id) => treatmentTypes.find((t) => t.id === id)
 
-// Helper function to get treatments by category
-export const getTreatmentsByCategory = (category) => {
-  return treatmentTypes.filter(t => t.category === category)
-}
+export const getTreatmentsByCategory = (category) => treatmentTypes.filter((t) => t.category === category)
 
-// Treatment categories
 export const treatmentCategories = [
-  { id: 'diagnostic', label: 'Оношлогоо / Diagnostic' },
-  { id: 'preventive', label: 'Урьдчилан сэргийлэх / Preventive' },
-  { id: 'restorative', label: 'Сэргээх / Restorative' },
-  { id: 'endodontic', label: 'Эндодонтик / Endodontic' },
-  { id: 'prosthetic', label: 'Хиймэл шүд / Prosthetic' },
-  { id: 'surgery', label: 'Мэс засал / Surgery' },
-  { id: 'periodontal', label: 'Шүдний махбод / Periodontal' },
-  { id: 'orthodontic', label: 'Ортодонтик / Orthodontic' },
-  { id: 'cosmetic', label: 'Гоо сайхан / Cosmetic' },
-  { id: 'emergency', label: 'Яаралтай / Emergency' },
-  { id: 'other', label: 'Бусад / Other' },
+  { id: 'diagnostic', label: 'Оношилгоо' },
+  { id: 'preventive', label: 'Урьдчилан сэргийлэх' },
+  { id: 'restorative', label: 'Сэргээх' },
+  { id: 'endodontic', label: 'Эндодонт' },
+  { id: 'prosthetic', label: 'Протез' },
+  { id: 'surgery', label: 'Мэс засал' },
+  { id: 'periodontal', label: 'Буйл' },
+  { id: 'orthodontic', label: 'Шүдний гажиг' },
+  { id: 'cosmetic', label: 'Гоо сайхан' },
+  { id: 'emergency', label: 'Яаралтай' },
+  { id: 'other', label: 'Бусад' },
 ]
 
 export default treatmentTypes

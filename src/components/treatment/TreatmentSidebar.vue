@@ -17,9 +17,17 @@ const props = defineProps({
     type: String,
     default: 'planned',
   },
-  selectedTreatmentType: {
-    type: String,
-    default: '',
+  selectedTreatmentTypes: {
+    type: Array,
+    default: () => [],
+  },
+  treatments: {
+    type: Array,
+    default: () => [],
+  },
+  treatmentDisabled: {
+    type: Boolean,
+    default: false,
   },
 })
 
@@ -37,9 +45,11 @@ const canSubmit = computed(() => {
   return (
     props.selectedTeeth.length > 0 &&
     props.selectedSurfaces.length > 0 &&
-    props.selectedTreatmentType
+    props.selectedTreatmentTypes.length > 0
   )
 })
+
+const treatmentSelectorDisabled = computed(() => props.treatmentDisabled)
 
 function handleSurfaceToggle(surface) {
   emit('surface-toggle', surface)
@@ -68,7 +78,7 @@ function handleCancel() {
   <div class="dental-card h-full flex flex-col">
     <!-- Header -->
     <div class="p-4 border-b border-gray-200">
-      <h2 class="text-lg font-semibold text-gray-800">Эмчилгээний дэлгэрэнгүй</h2>
+      <h2 class="text-lg font-semibold text-gray-800">Эмчилгээ бүртгэл</h2>
       <div v-if="selectedTeeth.length > 0" class="mt-2">
         <p class="text-sm font-medium text-gray-700">
           Сонгосон шүд: {{ selectedTeeth.length }}
@@ -84,7 +94,7 @@ function handleCancel() {
         </div>
       </div>
       <p v-else class="text-sm text-amber-600 mt-1">
-        ⚠ Шүд сонгоно уу 
+        Эхлээд шүд сонгоно уу
       </p>
     </div>
 
@@ -106,9 +116,10 @@ function handleCancel() {
 
       <!-- Treatment Type Selector -->
       <TreatmentTypeSelector
-        :selected-type="selectedTreatmentType"
-        :disabled="isFormDisabled"
-        @select="handleTreatmentTypeSelect"
+        :selected-types="selectedTreatmentTypes"
+        :disabled="treatmentSelectorDisabled"
+        :treatments="treatments"
+        @toggle="handleTreatmentTypeSelect"
       />
     </div>
 
@@ -124,10 +135,10 @@ function handleCancel() {
         @click="handleAddTreatment"
       >
         <span v-if="selectedTeeth.length > 1">
-          Эмчилгээ нэмэх ({{ selectedTeeth.length }} шүд)
+          Эмчилгээг нэмэх ({{ selectedTeeth.length }} шүд)
         </span>
         <span v-else>
-          Эмчилгээ нэмэх
+          Эмчилгээг нэмэх
         </span>
       </button>
       <button
@@ -141,8 +152,8 @@ function handleCancel() {
 
       <!-- Validation Messages -->
       <div v-if="selectedTeeth.length > 0 && !canSubmit" class="text-xs text-amber-600 mt-2 space-y-1">
-        <p v-if="selectedSurfaces.length === 0">⚠ Талбар сонгоно уу</p>
-        <p v-if="!selectedTreatmentType">⚠ Эмчилгээний төрөл сонгоно уу </p>
+        <p v-if="selectedSurfaces.length === 0">Гадаргуу сонгоно уу.</p>
+        <p v-if="selectedTreatmentTypes.length === 0">Дор хаяж нэг эмчилгээний төрөл сонгоно уу.</p>
       </div>
     </div>
   </div>

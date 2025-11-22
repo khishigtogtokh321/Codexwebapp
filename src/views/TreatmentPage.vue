@@ -1,153 +1,152 @@
 <script setup>
-import { computed } from 'vue'
+import { reactive, computed, ref } from 'vue'
 import SideNav from '@/components/layout/SideNav.vue'
 import PatientHeader from '@/components/patient/PatientHeader.vue'
 import ToothChart from '@/components/tooth/ToothChart.vue'
 import TreatmentSidebar from '@/components/treatment/TreatmentSidebar.vue'
 import HistorySearchBar from '@/components/history/HistorySearchBar.vue'
 import TreatmentHistoryTable from '@/components/history/TreatmentHistoryTable.vue'
-
-// Composables
-import { useTreatmentState } from '@/composables/useTreatmentState'
+import { treatmentTypes, getTreatmentById } from '@/data/treatmentTypes'
+import { mockPatient, mockToothStatuses } from '@/data'
 import { useToothStatus } from '@/composables/useToothStatus'
-import { useTreatmentHistory } from '@/composables/useTreatmentHistory'
-
-// Data
-import { mockPatient, mockTreatmentHistory, mockToothStatuses } from '@/data'
-import { getTreatmentById } from '@/data/treatmentTypes'
 import { formatToothNumber } from '@/utils/toothHelpers'
 
-// Initialize composables
-const {
-  selectedTeeth,
-  selectedSurfaces,
-  selectedStatus,
-  selectedTreatmentType,
-  isFormValid,
-  surfacesString,
-  teethString,
-  selectTeeth,
-  toggleSurface,
-  setStatus,
-  selectTreatmentType,
-  resetForm,
-  resetSelection,
-} = useTreatmentState()
+const state = reactive({
+  selectedTeeth: [],
+  selectedSurfaces: [],
+  selectedTreatments: [],
+  selectedDiagnoses: [],
+  selectedStatus: 'planned',
+  treatmentLog: [],
+})
 
-const {
-  toothStatuses,
-  updateToothStatusFromTreatment,
-  updateStatusesFromHistory,
-} = useToothStatus(mockToothStatuses)
+const searchQuery = ref('')
 
-const {
-  treatments,
-  searchQuery,
-  filteredTreatments,
-  treatmentStats,
-  addTreatment,
-  deleteTreatment,
-  setSearchQuery,
-  setFilter,
-} = useTreatmentHistory(mockTreatmentHistory)
+const { toothStatuses, updateToothStatusFromTreatment } = useToothStatus(mockToothStatuses)
 
-// Initialize tooth statuses from history
-updateStatusesFromHistory(mockTreatmentHistory)
+const selectedTeethList = computed(() => state.selectedTeeth)
+const selectedSurfacesList = computed(() => state.selectedSurfaces)
+const selectedTreatmentIds = computed(() => state.selectedTreatments)
 
-// Patient stats
+const filteredToothTreatments = computed(() => treatmentTypes.filter((t) => t.toothRequired))
+const filteredGeneralTreatments = computed(() => treatmentTypes.filter((t) => !t.toothRequired))
+
+const availableTreatments = computed(() => (state.selectedTeeth.length ? filteredToothTreatments.value : filteredGeneralTreatments.value))
+
+const surfaceDisabled = computed(() => state.selectedTeeth.length === 0)
+const treatmentSelectorDisabled = computed(() => false)
+
+const filteredLog = computed(() => {
+  if (!searchQuery.value) return state.treatmentLog
+  const q = searchQuery.value.toLowerCase()
+  return state.treatmentLog.filter((item) =>
+    (item.treatmentType || '').toLowerCase().includes(q) ||
+    (item.diagnosis || '').toLowerCase().includes(q)
+  )
+})
+
 const patientStats = computed(() => ({
-  totalTreatments: treatmentStats.value.total,
-  completedTreatments: treatmentStats.value.completed,
-  plannedTreatments: treatmentStats.value.planned,
+  totalTreatments: state.treatmentLog.length,
+  completedTreatments: state.treatmentLog.filter((t) => t.status === 'done').length,
+  plannedTreatments: state.treatmentLog.filter((t) => t.status !== 'done').length,
 }))
 
-// Event Handlers
-
-// Teeth selection (multi-select)
-function handleTeethSelect(teeth) {
-  selectTeeth(teeth)
-}
-
-// Select all teeth
-function handleSelectAll(teeth) {
-  selectTeeth(teeth)
-}
-
-// Clear selection
-function handleClearSelection() {
-  resetForm()
-}
-
-// Surface toggle
-function handleSurfaceToggle(surface) {
-  toggleSurface(surface)
-}
-
-// Status change
-function handleStatusChange(status) {
-  setStatus(status)
-}
-
-// Treatment type selection
-function handleTreatmentTypeSelect(typeId) {
-  selectTreatmentType(typeId)
-}
-
-// Add treatment
-function handleAddTreatment() {
-  if (!isFormValid.value) return
-
-  // Get treatment type label
-  const treatmentType = getTreatmentById(selectedTreatmentType.value)
-  const treatmentLabel = treatmentType ? treatmentType.label : selectedTreatmentType.value
-
-  // Add treatment for each selected tooth
-  selectedTeeth.value.forEach((toothNum) => {
-    const newTreatment = {
-      tooth: formatToothNumber(toothNum),
-      surface: surfacesString.value,
-      diagnosis: treatmentLabel, // Use treatment label as diagnosis
-      treatmentType: treatmentLabel,
-      doctor: 'Б. Болд',
-      price: treatmentType?.price || '0₮',
-      status: selectedStatus.value,
-      notes: '',
-    }
-
-    const added = addTreatment(newTreatment)
-    updateToothStatusFromTreatment(added)
-  })
-
-  // Reset form but keep teeth selected
-  resetSelection()
-}
-
-// Cancel selection
-function handleCancel() {
-  resetForm()
-}
-
-// Search treatments
-function handleSearch(query) {
-  setSearchQuery(query)
-}
-
-// Filter by status
-function handleFilterStatus(status) {
-  setFilter('status', status)
-}
-
-// Edit treatment
-function handleEditTreatment(treatmentId) {
-  console.log('Edit treatment:', treatmentId)
-}
-
-// Delete treatment
-function handleDeleteTreatment(treatmentId) {
-  if (confirm('Эмчилгээг устгах уу?')) {
-    deleteTreatment(treatmentId)
-    updateStatusesFromHistory(treatments.value)
+function selectTooth(teeth) {
+  const next = Array.isArray(teeth) ? teeth.filter(Boolean) : teeth ? [teeth] : []
+  state.selectedTeeth = [...new Set(next)]
+  if (state.selectedTeeth.length === 0) {
+    state.selectedSurfaces = []
+    state.selectedTreatments = []
   }
+}
+
+function selectSurface(surface) {
+  if (!state.selectedTeeth.length) return
+  if (state.selectedSurfaces.includes(surface)) {
+    state.selectedSurfaces = state.selectedSurfaces.filter((s) => s !== surface)
+  } else {
+    state.selectedSurfaces = [...state.selectedSurfaces, surface]
+  }
+}
+
+function selectStatus(status) {
+  state.selectedStatus = status
+}
+
+function selectTreatment(typeId) {
+  const treatment = getTreatmentById(typeId)
+  if (!treatment) return
+  if (treatment.toothRequired === false) {
+    applyGeneralWorkflow(treatment)
+    return
+  }
+  state.selectedTreatments = state.selectedTreatments.includes(typeId)
+    ? state.selectedTreatments.filter((id) => id !== typeId)
+    : [...state.selectedTreatments, typeId]
+}
+
+function applyToothWorkflow() {
+  if (!state.selectedTeeth.length || !state.selectedSurfaces.length || !state.selectedTreatments.length) return
+  const surfaceText = state.selectedSurfaces.join(', ')
+  state.selectedTeeth.forEach((tooth) => {
+    state.selectedTreatments.forEach((treatmentId) => {
+      const treatment = getTreatmentById(treatmentId)
+      const label = treatment?.label || treatmentId
+      const entry = {
+        id: crypto.randomUUID(),
+        date: new Date().toISOString(),
+        tooth: formatToothNumber(tooth),
+        surface: surfaceText,
+        diagnosis: label,
+        treatmentType: label,
+        doctor: '',
+        price: '',
+        status: state.selectedStatus || 'done',
+      }
+      state.treatmentLog.unshift(entry)
+      updateToothStatusFromTreatment(entry)
+    })
+  })
+  state.selectedSurfaces = []
+  state.selectedTreatments = []
+}
+
+function applyGeneralWorkflow(treatment) {
+  const entry = {
+    id: crypto.randomUUID(),
+    date: new Date().toISOString(),
+    tooth: '',
+    surface: '',
+    diagnosis: treatment.label,
+    treatmentType: treatment.label,
+    doctor: '',
+    price: '',
+    status: state.selectedStatus || 'done',
+  }
+  state.treatmentLog.unshift(entry)
+}
+
+function handleAddTreatment() {
+  applyToothWorkflow()
+}
+
+function handleCancel() {
+  state.selectedSurfaces = []
+  state.selectedTreatments = []
+  state.selectedStatus = 'planned'
+  state.selectedTeeth = []
+}
+
+function handleSearch(query) {
+  searchQuery.value = query
+}
+
+function handleFilterStatus() {
+  // Placeholder: status filter not required for current workflows
+}
+
+function handleDeleteTreatment(treatmentId) {
+  state.treatmentLog = state.treatmentLog.filter((t) => t.id !== treatmentId)
 }
 </script>
 
@@ -172,25 +171,27 @@ function handleDeleteTreatment(treatmentId) {
           <!-- Left: Tooth Chart (3 cols on desktop) -->
           <div class="lg:col-span-3">
             <ToothChart
-              :selected-teeth="selectedTeeth"
+              :selected-teeth="selectedTeethList"
               :tooth-statuses="toothStatuses"
               :multi-select="true"
-              @teeth-select="handleTeethSelect"
-              @select-all="handleSelectAll"
-              @clear-selection="handleClearSelection"
+              @teeth-select="selectTooth"
+              @select-all="selectTooth"
+              @clear-selection="() => selectTooth([])"
             />
           </div>
 
           <!-- Right: Treatment Sidebar (2 cols on desktop) -->
           <div class="lg:col-span-2">
             <TreatmentSidebar
-              :selected-teeth="selectedTeeth"
-              :selected-surfaces="selectedSurfaces"
-              :selected-status="selectedStatus"
-              :selected-treatment-type="selectedTreatmentType"
-              @surface-toggle="handleSurfaceToggle"
-              @status-change="handleStatusChange"
-              @treatment-type-select="handleTreatmentTypeSelect"
+              :selected-teeth="selectedTeethList"
+              :selected-surfaces="selectedSurfacesList"
+              :selected-status="state.selectedStatus"
+              :selected-treatment-types="selectedTreatmentIds"
+              :treatments="availableTreatments"
+              :treatment-disabled="treatmentSelectorDisabled"
+              @surface-toggle="selectSurface"
+              @status-change="selectStatus"
+              @treatment-type-select="selectTreatment"
               @add-treatment="handleAddTreatment"
               @cancel="handleCancel"
             />
@@ -214,9 +215,9 @@ function handleDeleteTreatment(treatmentId) {
           <!-- History Table -->
           <div class="overflow-x-auto">
             <TreatmentHistoryTable
-              :treatments="filteredTreatments"
+              :treatments="filteredLog"
               :loading="false"
-              @edit="handleEditTreatment"
+              @edit="() => {}"
               @delete="handleDeleteTreatment"
             />
           </div>
@@ -234,3 +235,5 @@ function handleDeleteTreatment(treatmentId) {
   }
 }
 </style>
+
+
