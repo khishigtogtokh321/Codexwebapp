@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, computed } from 'vue'
 import { diagnoses } from '@/data'
 
@@ -17,15 +17,11 @@ const emit = defineEmits(['toggle'])
 
 const searchQuery = ref('')
 
-// Filter diagnoses based on search query
 const filteredDiagnoses = computed(() => {
   if (!searchQuery.value) return diagnoses
 
   const query = searchQuery.value.toLowerCase()
-  return diagnoses.filter(
-    (d) =>
-      d.code.toLowerCase().includes(query) || d.name.toLowerCase().includes(query)
-  )
+  return diagnoses.filter((d) => d.code.toLowerCase().includes(query) || d.name.toLowerCase().includes(query))
 })
 
 function isSelected(code) {
@@ -40,20 +36,17 @@ function handleToggle(code) {
 </script>
 
 <template>
-  <div class="space-y-2">
+  <div class="space-y-1.5">
     <label class="block text-sm font-medium text-gray-700">
-      Оношлогоо
-      <span v-if="selectedDiagnoses.length > 0" class="text-blue-600">
-        ({{ selectedDiagnoses.length }} сонгосон)
-      </span>
+      Оношилгоо сонгох
+      <span v-if="selectedDiagnoses.length > 0" class="text-blue-600">({{ selectedDiagnoses.length }} сонгогдсон)</span>
     </label>
 
-    <!-- Search input -->
     <div class="relative">
       <input
         v-model="searchQuery"
         type="text"
-        placeholder="Оношлогоо хайх..."
+        placeholder="Онош хайх..."
         class="input-field pl-8"
         :disabled="disabled"
       />
@@ -72,16 +65,13 @@ function handleToggle(code) {
       </svg>
     </div>
 
-    <!-- Diagnosis list -->
-    <div class="h-64 overflow-y-auto border border-gray-300 rounded-lg bg-white scrollbar-thin">
-      <div v-if="filteredDiagnoses.length === 0" class="p-4 text-center text-gray-500 text-sm">
-        Оношлогоо олдсонгүй
-      </div>
+    <div class="h-[200px] max-h-[220px] overflow-y-auto border border-gray-300 rounded-lg bg-white scrollbar-thin">
+      <div v-if="filteredDiagnoses.length === 0" class="p-3 text-center text-gray-500 text-sm">Онош олдсонгүй</div>
       <label
         v-for="diagnosis in filteredDiagnoses"
         :key="diagnosis.code"
         :class="[
-          'flex items-start gap-3 p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0',
+          'flex items-start gap-2.5 p-2.5 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0',
           isSelected(diagnosis.code) ? 'bg-blue-50' : '',
           disabled ? 'opacity-50 cursor-not-allowed' : '',
         ]"
@@ -105,10 +95,7 @@ function handleToggle(code) {
       </label>
     </div>
 
-    <!-- Selected count -->
-    <p v-if="selectedDiagnoses.length > 0" class="text-xs text-gray-500">
-      Сонгосон кодууд: {{ selectedDiagnoses.join(', ') }}
-    </p>
+    <p v-if="selectedDiagnoses.length > 0" class="text-xs text-gray-500">Сонгосон онош: {{ selectedDiagnoses.join(', ') }}</p>
   </div>
 </template>
 

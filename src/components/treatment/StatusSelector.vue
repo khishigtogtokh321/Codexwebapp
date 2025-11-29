@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 const props = defineProps({
   selectedStatus: {
     type: String,
@@ -30,21 +30,21 @@ function isSelected(statusId) {
 </script>
 
 <template>
-  <div class="space-y-3 p-4 bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-300">
+  <div class="w-full max-w-[360px] min-h-[120px] space-y-1.5 p-2.5 md:p-3 bg-gradient-to-br from-gray-50 to-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-300">
     <label class="block text-sm font-semibold text-gray-800 flex items-center gap-2">
       <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
       </svg>
       Төлөв
     </label>
-    <div class="flex gap-2">
+    <div class="flex gap-1.5">
       <button
         v-for="status in statuses"
         :key="status.id"
         type="button"
         :disabled="disabled"
         :class="[
-          'flex-1 px-4 py-2.5 text-sm font-semibold rounded-lg border-2 transition-all duration-300 transform hover:scale-105',
+          'flex-1 px-3 py-1.5 text-sm font-semibold rounded-lg border-2 transition-all duration-300 transform hover:scale-102',
           isSelected(status.id) && status.color === 'amber'
             ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white border-amber-500 shadow-lg shadow-amber-200'
             : '',

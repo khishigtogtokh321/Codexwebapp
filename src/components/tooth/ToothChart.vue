@@ -1,7 +1,7 @@
-<script setup>
+﻿<script setup>
 import { ref, computed } from 'vue'
 import ToothItem from './ToothItem.vue'
-import { FDI_NOTATION, TOOTH_STATUS_LABELS } from '@/utils/toothHelpers'
+import { FDI_NOTATION } from '@/utils/toothHelpers'
 
 const props = defineProps({
   selectedTeeth: {
@@ -20,18 +20,12 @@ const props = defineProps({
 
 const emit = defineEmits(['tooth-select', 'teeth-select', 'select-all', 'clear-selection'])
 
-// Tooth type filter
 const toothTypeFilter = ref('all')
-
-// Upper teeth arrays (reversed for proper display)
 const upperRightTeeth = computed(() => [...FDI_NOTATION.UPPER_RIGHT].reverse())
 const upperLeftTeeth = computed(() => FDI_NOTATION.UPPER_LEFT)
-
-// Lower teeth arrays (reversed for proper display)
 const lowerRightTeeth = computed(() => [...FDI_NOTATION.LOWER_RIGHT].reverse())
 const lowerLeftTeeth = computed(() => FDI_NOTATION.LOWER_LEFT)
 
-// All teeth
 const allTeeth = computed(() => [
   ...FDI_NOTATION.UPPER_RIGHT,
   ...FDI_NOTATION.UPPER_LEFT,
@@ -41,21 +35,17 @@ const allTeeth = computed(() => [
 
 function handleToothClick(toothNumber) {
   if (props.multiSelect) {
-    // Multi-select mode
     const currentSelection = [...props.selectedTeeth]
     const index = currentSelection.indexOf(toothNumber)
 
     if (index > -1) {
-      // Deselect
       currentSelection.splice(index, 1)
     } else {
-      // Select
       currentSelection.push(toothNumber)
     }
 
     emit('teeth-select', currentSelection)
   } else {
-    // Single select mode
     emit('tooth-select', toothNumber)
   }
 }
@@ -80,12 +70,12 @@ function clearSelection() {
 }
 
 function selectByStatus(status) {
-  const teeth = allTeeth.value.filter(tooth => getToothStatus(String(tooth)) === status)
+  const teeth = allTeeth.value.filter((tooth) => getToothStatus(String(tooth)) === status)
   emit('teeth-select', teeth.map(String))
 }
 
 function selectByStatusNot(status) {
-  const teeth = allTeeth.value.filter(tooth => getToothStatus(String(tooth)) !== status)
+  const teeth = allTeeth.value.filter((tooth) => getToothStatus(String(tooth)) !== status)
   emit('teeth-select', teeth.map(String))
 }
 
@@ -93,10 +83,8 @@ function selectByType(type) {
   let teeth = []
 
   if (type === 'permanent') {
-    // Байнгийн шүд: 11-18, 21-28, 31-38, 41-48
     teeth = allTeeth.value
   } else if (type === 'primary') {
-    // Сүүн шүд: 51-55, 61-65, 71-75, 81-85
     teeth = [
       51, 52, 53, 54, 55,
       61, 62, 63, 64, 65,
@@ -104,7 +92,6 @@ function selectByType(type) {
       81, 82, 83, 84, 85
     ]
   } else if (type === 'mixed') {
-    // Холимог: байнгийн болон сүүн шүд хоёулаа
     teeth = [
       ...allTeeth.value,
       51, 52, 53, 54, 55,
@@ -113,7 +100,6 @@ function selectByType(type) {
       81, 82, 83, 84, 85
     ]
   } else if (type === 'additional') {
-    // Нэмэлт шүд (супернумерари)
     teeth = []
   }
 
@@ -122,90 +108,72 @@ function selectByType(type) {
 </script>
 
 <template>
-  <div class="dental-card p-4 md:p-6">
-    <!-- Header with Controls -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-      <h2 class="text-lg font-semibold text-gray-800">Шүдний диаграмм</h2>
+  <div class="dental-card p-3 md:p-3">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2.5">
+      <h2 class="text-base md:text-lg font-semibold text-gray-800">Шүдний диаграмм</h2>
 
       <div class="flex flex-wrap gap-2">
         <button
           v-if="multiSelect"
           type="button"
-          class="px-3 py-1.5 text-xs font-medium bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+          class="px-2.5 py-1 text-xs font-medium bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
           @click="selectAll"
         >
-          Бүгдийг сонгох
+          Бүх шүд
         </button>
         <button
           v-if="selectedTeeth.length > 0"
           type="button"
-          class="px-3 py-1.5 text-xs font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+          class="px-2.5 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
           @click="clearSelection"
         >
-          Цэвэрлэх ({{ selectedTeeth.length }})
+          Сонголт арилгах ({{ selectedTeeth.length }})
         </button>
       </div>
     </div>
 
-    <!-- Tooth Type Filters -->
-    <div class="mb-4 flex flex-wrap gap-2">
-      <button
+    <div class="mb-2.5 flex flex-wrap gap-1">
+      <!-- <button
         type="button"
-        class="px-3 py-1.5 text-xs font-medium bg-gray-50 text-gray-700 rounded hover:bg-gray-100"
+        class="px-2.5 py-1 text-xs font-medium bg-gray-50 text-gray-700 rounded hover:bg-gray-100"
         @click="selectAll"
       >
         Бүгд
       </button>
       <button
         type="button"
-        class="px-3 py-1.5 text-xs font-medium bg-blue-50 text-blue-700 rounded hover:bg-blue-100"
+        class="px-2.5 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded hover:bg-blue-100"
         @click="selectByType('permanent')"
       >
-        Байнгийн
-      </button>
+        Байнгын
+      </button> -->
       <button
         type="button"
-        class="px-3 py-1.5 text-xs font-medium bg-green-50 text-green-700 rounded hover:bg-green-100"
+        class="px-2.5 py-1 text-xs font-medium bg-green-50 text-green-700 rounded hover:bg-green-100"
         @click="selectByType('primary')"
       >
         Сүүн
       </button>
       <button
         type="button"
-        class="px-3 py-1.5 text-xs font-medium bg-purple-50 text-purple-700 rounded hover:bg-purple-100"
+        class="px-2.5 py-1 text-xs font-medium bg-purple-50 text-purple-700 rounded hover:bg-purple-100"
         @click="selectByType('mixed')"
       >
         Холимог
       </button>
       <button
         type="button"
-        class="px-3 py-1.5 text-xs font-medium bg-red-50 text-red-700 rounded hover:bg-red-100"
-        @click="selectByStatus('missing')"
-      >
-        Авхуулсан
-      </button>
-      <button
-        type="button"
-        class="px-3 py-1.5 text-xs font-medium bg-amber-50 text-amber-700 rounded hover:bg-amber-100"
-        @click="selectByStatusNot('missing')"
-      >
-        Аваагүй
-      </button>
-      <button
-        type="button"
-        class="px-3 py-1.5 text-xs font-medium bg-indigo-50 text-indigo-700 rounded hover:bg-indigo-100"
+        class="px-2.5 py-1 text-xs font-medium bg-indigo-50 text-indigo-700 rounded hover:bg-indigo-100"
         @click="selectByType('additional')"
       >
         Нэмэлт
       </button>
     </div>
 
-    <!-- Upper Teeth -->
-    <div class="mb-6 md:mb-8">
-      <div class="text-xs text-gray-500 mb-2 text-center font-medium">Дээд эрүү</div>
-      <div class="flex justify-center gap-1 flex-wrap sm:flex-nowrap">
-        <!-- Upper Right (18-11) -->
-        <div class="flex gap-1">
+    <div class="mb-3 md:mb-4">
+      <div class="text-xs text-gray-500 mb-1 text-center font-medium">Дээд эрүү</div>
+      <div class="flex justify-center gap-0.5 flex-wrap sm:flex-nowrap">
+        <div class="flex gap-0.5">
           <ToothItem
             v-for="tooth in upperRightTeeth"
             :key="tooth"
@@ -216,11 +184,9 @@ function selectByType(type) {
           />
         </div>
 
-        <!-- Midline separator -->
-        <div class="w-0.5 bg-gray-400 mx-1 sm:mx-2 self-stretch"></div>
+        <div class="w-0.5 bg-gray-400 mx-1 sm:mx-1.5 self-stretch"></div>
 
-        <!-- Upper Left (21-28) -->
-        <div class="flex gap-1">
+        <div class="flex gap-0.5">
           <ToothItem
             v-for="tooth in upperLeftTeeth"
             :key="tooth"
@@ -233,16 +199,13 @@ function selectByType(type) {
       </div>
     </div>
 
-    <!-- Jaw separator -->
-    <div class="h-6 md:h-8 flex items-center justify-center my-4">
+    <div class="h-3 md:h-4 flex items-center justify-center my-2.5">
       <div class="w-full h-px bg-gray-300"></div>
     </div>
 
-    <!-- Lower Teeth -->
-    <div class="mt-6 md:mt-8">
-      <div class="flex justify-center gap-1 flex-wrap sm:flex-nowrap">
-        <!-- Lower Right (48-41) -->
-        <div class="flex gap-1">
+    <div class="mt-3 md:mt-4">
+      <div class="flex justify-center gap-0.5 flex-wrap sm:flex-nowrap">
+        <div class="flex gap-0.5">
           <ToothItem
             v-for="tooth in lowerRightTeeth"
             :key="tooth"
@@ -253,11 +216,9 @@ function selectByType(type) {
           />
         </div>
 
-        <!-- Midline separator -->
-        <div class="w-0.5 bg-gray-400 mx-1 sm:mx-2 self-stretch"></div>
+        <div class="w-0.5 bg-gray-400 mx-1 sm:mx-1.5 self-stretch"></div>
 
-        <!-- Lower Left (31-38) -->
-        <div class="flex gap-1">
+        <div class="flex gap-0.5">
           <ToothItem
             v-for="tooth in lowerLeftTeeth"
             :key="tooth"
@@ -268,13 +229,12 @@ function selectByType(type) {
           />
         </div>
       </div>
-      <div class="text-xs text-gray-500 mt-2 text-center font-medium">Доод эрүү</div>
+      <div class="text-xs text-gray-500 mt-1 text-center font-medium">Доод эрүү</div>
     </div>
   </div>
 </template>
 
 <style scoped>
-/* Responsive adjustments */
 @media (max-width: 640px) {
   .dental-card {
     padding: 1rem;
