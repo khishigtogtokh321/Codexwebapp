@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { reactive, computed, ref } from 'vue'
 import TopBar from '@/components/layout/TopBar.vue'
 import SideNav from '@/components/layout/SideNav.vue'
@@ -39,7 +39,7 @@ const filteredToothTreatments = computed(() => treatmentTypes.filter((t) => t.to
 const filteredGeneralTreatments = computed(() => treatmentTypes.filter((t) => !t.toothRequired))
 
 const availableTreatments = computed(() =>
-  state.selectedTeeth.length ? filteredToothTreatments.value : filteredGeneralTreatments.value
+  state.selectedTeeth.length ? filteredToothTreatments.value : filteredGeneralTreatments.value,
 )
 
 const surfaceDisabled = computed(() => state.selectedTeeth.length === 0)
@@ -150,7 +150,6 @@ function handleSearch(query) {
 }
 
 function handleFilterStatus() {
-  // Placeholder: status filter not required for current workflows
 }
 
 function handleDeleteTreatment(treatmentId) {
@@ -209,7 +208,7 @@ function handleNavigate(id) {
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
-        <p class="text-sm font-semibold text-gray-800">Цэс</p>
+        <p class="text-sm font-semibold text-gray-800">???</p>
       </div>
 
       <TopBar :active-patient="activePatient" @patient-selected="handlePatientSelected" />
@@ -231,10 +230,10 @@ function handleNavigate(id) {
             <div class="order-4 md:order-2 md:col-span-1 md:row-span-2 md:max-w-[360px] md:ml-auto w-full">
               <div class="dental-card h-full flex flex-col p-2 md:p-2.5">
                 <div class="pb-1.5 border-b border-gray-200">
-                  <h2 class="text-base md:text-lg font-semibold text-gray-800">Эмчилгээний сонголт</h2>
+                  <h2 class="text-base md:text-lg font-semibold text-gray-800">??????????? ???????</h2>
                   <div v-if="hasSelectedTeeth" class="mt-1">
                     <p class="text-sm font-medium text-gray-700">
-                      Сонгосон шүд: {{ selectedTeethList.length }}
+                      ???????? ???: {{ selectedTeethList.length }}
                     </p>
                     <div class="flex flex-wrap gap-1 mt-0.5">
                       <span
@@ -246,7 +245,7 @@ function handleNavigate(id) {
                       </span>
                     </div>
                   </div>
-                  <p v-else class="text-sm text-amber-600 mt-0.5">Шүд сонгоно уу.</p>
+                  <p v-else class="text-sm text-amber-600 mt-0.5">??? ??????? ??.</p>
                 </div>
 
                 <div class="flex-1 overflow-y-auto pt-1.5 space-y-2 scrollbar-thin">
@@ -263,8 +262,8 @@ function handleNavigate(id) {
                     @change="selectStatus"
                   /> -->
                   <div v-if="!canSubmit" class="text-xs text-amber-600 space-y-1">
-                    <p v-if="selectedTeethList.length === 0">Шүд сонгоно уу.</p>
-                    <p v-else-if="selectedSurfacesList.length === 0">Гадаргуу сонгоно уу.</p>
+                    <p v-if="selectedTeethList.length === 0">??? ??????? ??.</p>
+                    <p v-else-if="selectedSurfacesList.length === 0">???????? ??????? ??.</p>
                   </div>
                 </div>
 
@@ -279,10 +278,10 @@ function handleNavigate(id) {
                     @click="handleAddTreatment"
                   >
                     <span v-if="selectedTeethList.length > 1">
-                      Эмчилгээ нэмэх ({{ selectedTeethList.length }} шүд)
+                      ???????? ????? ({{ selectedTeethList.length }} ???)
                     </span>
                     <span v-else>
-                      Эмчилгээ нэмэх
+                      ???????? ?????
                     </span>
                   </button>
                   <button
@@ -291,12 +290,12 @@ function handleNavigate(id) {
                     class="w-full btn-secondary transition-all duration-200 hover:shadow-md py-1.5"
                     @click="handleCancel"
                   >
-                    Сонголтыг цэвэрлэх
+                    ????????? ????????
                   </button>
 
                   <div v-if="selectedTeethList.length > 0 && !canSubmit" class="text-xs text-amber-600 mt-1 space-y-1">
-                    <p v-if="selectedSurfacesList.length === 0">Гадаргуу сонгоно уу.</p>
-                    <p v-if="selectedTreatmentIds.length === 0">Эмчилгээний төрөл сонгоно уу.</p>
+                    <p v-if="selectedSurfacesList.length === 0">???????? ??????? ??.</p>
+                    <p v-if="selectedTreatmentIds.length === 0">??????????? ????? ??????? ??.</p>
                   </div>
                 </div>
               </div>
@@ -323,7 +322,7 @@ function handleNavigate(id) {
 
           <div class="dental-card p-2.5 md:p-3 space-y-2 md:space-y-2.5">
             <h2 class="text-lg md:text-xl font-semibold text-gray-800">
-              Эмчилгээний түүх
+              ??????????? ????
             </h2>
 
             <HistorySearchBar
