@@ -12,14 +12,14 @@ const props = defineProps({
   },
   placeholder: {
     type: String,
-    default: 'Хайх (нэр, утас, регистр...)',
+    default: 'Өвчтөн хайх (Нэр, РД, Утас...)',
   },
 })
 
 const emit = defineEmits(['search', 'notify', 'settings'])
 const search = ref('')
 
-const breadcrumbText = computed(() => props.breadcrumbs.join(' ← '))
+const breadcrumbText = computed(() => props.breadcrumbs.join(' / '))
 
 function handleSearch() {
   emit('search', search.value)
@@ -28,7 +28,9 @@ function handleSearch() {
 
 <template>
   <header class="w-full border-b border-gray-200 bg-white shadow-sm">
-    <div class="mx-auto flex w-full max-w-screen-2xl flex-col gap-3 px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
+    <div
+      class="mx-auto flex w-full max-w-[1500px] flex-col gap-3 px-4 py-3 lg:flex-row lg:items-center lg:justify-between"
+    >
       <div class="flex flex-wrap items-center gap-3 text-sm">
         <div class="flex items-center gap-2 text-gray-700">
           <span class="font-semibold text-gray-900">{{ breadcrumbText }}</span>
@@ -63,7 +65,7 @@ function handleSearch() {
         <div class="flex items-center gap-2">
           <button
             type="button"
-            class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
+            class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50"
             @click="$emit('notify')"
           >
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
@@ -76,7 +78,7 @@ function handleSearch() {
           </button>
           <button
             type="button"
-            class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
+            class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50"
             @click="$emit('settings')"
           >
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">

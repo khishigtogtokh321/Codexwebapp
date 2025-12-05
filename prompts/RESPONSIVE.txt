@@ -1,0 +1,18 @@
+# MAKE THIS RESPONSIVE (AshidSoft Standard)
+
+TARGET DEVICES:
+- Tablet: 768px–1024px
+- Desktop: 1366×768
+
+REQUIREMENTS:
+- Remove any horizontal scrolling
+- Ensure main content fits within viewport
+- Use grid/flex layout for responsiveness
+- Keep spacing consistent (p-4/p-6, gap-4/gap-6)
+- Ensure action buttons remain visible on top-right
+- Ensure text and components scale smoothly
+- Keep AshidSoft medical theme (blue-white)
+- Do NOT change functionality
+- Do NOT move files or rename components
+
+CODE:

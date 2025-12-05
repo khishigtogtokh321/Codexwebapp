@@ -13,9 +13,8 @@ const props = defineProps({
   appointments: {
     type: Array,
     default: () => [
-      { time: '14:00', name: 'Д. Амар', subtitle: 'Шүдний үзлэг', duration: '30 мин', active: true },
-      { time: '16:00', name: 'Н. Ариунаа', subtitle: 'Консультаци', duration: '45 мин', active: false },
-      { time: '18:30', name: 'Ж. Түмэн', subtitle: 'Шүдний эмчилгээ', duration: '30 мин', active: false },
+      { time: '14:00', name: 'Г. Саран', subtitle: 'Түрүүвэр үзлэг', duration: '30 мин', active: true },
+      { time: '15:30', name: 'Д. Болд', subtitle: 'Шүд авах', duration: '45 мин', active: false },
     ],
   },
 })
@@ -28,18 +27,18 @@ function handleFilter() {
 </script>
 
 <template>
-  <div class="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-5 space-y-4">
+  <div class="w-full max-w-[360px] space-y-3 rounded-2xl border border-gray-200 bg-white px-4 py-4 shadow-sm">
     <div class="flex items-center justify-between">
-      <p class="text-xl font-semibold text-gray-900">{{ title }}</p>
+      <p class="text-lg font-semibold text-gray-900">{{ title }}</p>
       <button
         type="button"
-        class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 px-3 py-1.5 rounded-lg hover:bg-emerald-50"
+        class="rounded-lg px-3 py-1.5 text-sm font-semibold text-emerald-600 transition hover:bg-emerald-50"
         @click="handleFilter"
       >
         {{ filterLabel }}
       </button>
     </div>
-    <div class="space-y-2 max-h-[320px] overflow-y-auto pr-1">
+    <div class="max-h-[280px] space-y-2 overflow-y-auto pr-1">
       <AppointmentRow
         v-for="(appt, index) in appointments"
         :key="appt.time + appt.name + index"

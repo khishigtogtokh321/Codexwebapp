@@ -60,21 +60,21 @@ const isSelected = (day) => `${day.label}` === `${props.selectedDate}` && !day.m
 
 const dayClass = computed(
   () =>
-    'flex items-center justify-center h-10 w-full rounded-xl transition-colors text-sm font-medium border border-transparent',
+    'flex items-center justify-center h-9 w-full rounded-xl transition-colors text-sm font-medium border border-transparent',
 )
 </script>
 
 <template>
-  <div class="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-5 space-y-4">
+  <div class="bg-white rounded-2xl border border-gray-200 shadow-sm px-4 py-4 space-y-3 w-full max-w-[360px] mx-auto">
     <div class="flex items-center justify-between">
-      <p class="text-xl font-semibold text-gray-900">{{ monthLabel }}</p>
+      <p class="text-lg font-semibold text-gray-900">{{ monthLabel }}</p>
       <div class="flex items-center gap-2 text-gray-500">
-        <button class="h-9 w-9 rounded-lg border border-gray-200 hover:bg-gray-50 flex items-center justify-center">
+        <button class="h-8 w-8 rounded-lg border border-gray-200 hover:bg-gray-50 flex items-center justify-center">
           <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 18 9 12l6-6" />
           </svg>
         </button>
-        <button class="h-9 w-9 rounded-lg border border-gray-200 hover:bg-gray-50 flex items-center justify-center">
+        <button class="h-8 w-8 rounded-lg border border-gray-200 hover:bg-gray-50 flex items-center justify-center">
           <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
             <path stroke-linecap="round" stroke-linejoin="round" d="m9 6 6 6-6 6" />
           </svg>
@@ -82,11 +82,11 @@ const dayClass = computed(
       </div>
     </div>
 
-    <div class="grid grid-cols-7 text-center text-xs font-semibold text-gray-500">
+    <div class="grid grid-cols-7 text-center text-[11px] font-semibold text-gray-500">
       <span v-for="day in weekDays" :key="day">{{ day }}</span>
     </div>
 
-    <div class="grid grid-cols-7 gap-2 text-gray-800">
+    <div class="grid grid-cols-7 gap-1.5 text-gray-800">
       <span
         v-for="(day, index) in days"
         :key="`${day.label}-${index}`"

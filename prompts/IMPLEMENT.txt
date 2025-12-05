@@ -1,0 +1,23 @@
+# IMPLEMENT NEW FEATURE (AshidSoft Senior Standard)
+
+FEATURE:
+<юу хийхийг тодорхой бич>
+
+REQUIREMENTS:
+- Follow all AGENT.md rules strictly
+- Use correct directory (views/components/services)
+- Use Tailwind with medical theme
+- Keep text in Mongolian
+- Use <script setup>
+- Use Composition API
+- Do NOT add new libraries
+- Do NOT modify unrelated files
+- Do NOT change backend contract
+
+DELIVERABLE:
+- Full Vue component(s)
+- Any required updates to router (only if necessary)
+- Service code (if required)
+- UI must work on 768px+ and 1366×768
+
+CODE START:

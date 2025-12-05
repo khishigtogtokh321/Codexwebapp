@@ -5,8 +5,8 @@ const props = defineProps({
   plans: {
     type: Array,
     default: () => [
-      { id: 1, date: '2025-11-23', name: 'Шүдний цоорол (CoSe)', status: 'saved', doctor: 'Др. Болд' },
-      { id: 2, date: '2025-11-28', name: 'Үүдэн шүд авах (38)', status: 'saved', doctor: 'Др. Туяа' },
+      { id: 1, date: '2025-11-23', name: 'Сувгийн эмчилгээ (CoSe)', status: 'saved', doctor: 'Др. Ану' },
+      { id: 2, date: '2025-11-28', name: 'Шүд авах (38)', status: 'saved', doctor: 'Др. Төрболд' },
     ],
   },
   loading: {
@@ -22,8 +22,15 @@ const props = defineProps({
 const emit = defineEmits(['add', 'save', 'row-click'])
 
 const statusPillClass = computed(
-  () => 'inline-flex items-center rounded-full bg-amber-50 border border-amber-100 px-3 py-1 text-xs font-semibold text-amber-700',
+  () =>
+    'inline-flex items-center rounded-full bg-amber-50 border border-amber-100 px-3 py-1 text-xs font-semibold text-amber-700',
 )
+
+const statusLabel = (status) => {
+  if (status === 'saved') return 'Хадгалсан'
+  if (status === 'draft') return 'Ноорог'
+  return status || ''
+}
 
 function handleRowClick(plan) {
   emit('row-click', plan)
@@ -31,13 +38,13 @@ function handleRowClick(plan) {
 </script>
 
 <template>
-  <div class="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-5 space-y-4">
+  <div class="space-y-4 rounded-2xl border border-gray-200 bg-white px-6 py-5 shadow-sm">
     <div class="flex flex-wrap items-center justify-between gap-3">
       <h2 class="text-xl font-semibold text-gray-900">Төлөвлөгөө</h2>
       <div v-if="showActions" class="flex items-center gap-2">
         <button
           type="button"
-          class="inline-flex items-center gap-1 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100"
+          class="inline-flex items-center gap-1 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
           @click="$emit('add')"
         >
           <span class="text-base leading-none">+</span>
@@ -65,24 +72,24 @@ function handleRowClick(plan) {
         </thead>
         <tbody class="divide-y divide-gray-100 text-gray-900">
           <tr v-if="loading">
-            <td colspan="4" class="px-4 py-6 text-center text-gray-500">Ачааллаж байна...</td>
+            <td colspan="4" class="px-4 py-6 text-center text-gray-500">Уншиж байна...</td>
+          </tr>
+          <tr v-else-if="plans.length === 0">
+            <td colspan="4" class="px-4 py-6 text-center text-gray-500">Төлөвлөгөө хоосон байна</td>
           </tr>
           <tr
             v-else
             v-for="plan in plans"
             :key="plan.id || plan.name"
-            class="hover:bg-gray-50 cursor-pointer"
+            class="cursor-pointer hover:bg-gray-50"
             @click="handleRowClick(plan)"
           >
-            <td class="px-4 py-3 whitespace-nowrap text-gray-900 font-medium">{{ plan.date }}</td>
-            <td class="px-4 py-3 text-gray-900 font-medium">{{ plan.name }}</td>
+            <td class="whitespace-nowrap px-4 py-3 font-medium text-gray-900">{{ plan.date }}</td>
+            <td class="px-4 py-3 font-medium text-gray-900">{{ plan.name }}</td>
             <td class="px-4 py-3">
-              <span :class="statusPillClass">ХАДГАЛСАН</span>
+              <span :class="statusPillClass">{{ statusLabel(plan.status) }}</span>
             </td>
-            <td class="px-4 py-3 whitespace-nowrap text-gray-900 font-medium">{{ plan.doctor }}</td>
-          </tr>
-          <tr v-if="!loading && plans.length === 0">
-            <td colspan="4" class="px-4 py-6 text-center text-gray-500">Төлөвлөгөө хоосон байна</td>
+            <td class="whitespace-nowrap px-4 py-3 font-medium text-gray-900">{{ plan.doctor }}</td>
           </tr>
         </tbody>
       </table>

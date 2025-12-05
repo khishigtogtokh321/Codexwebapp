@@ -2,11 +2,11 @@
 const props = defineProps({
   title: {
     type: String,
-    default: 'Дахин дуудаx',
+    default: 'Дахин дуудлага',
   },
   count: {
     type: [Number, String],
-    default: 2,
+    default: 1,
   },
   type: {
     type: String,
@@ -20,16 +20,16 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-5 space-y-4">
+  <div class="space-y-4 rounded-2xl border border-gray-200 bg-white px-6 py-5 shadow-sm">
     <div class="flex items-start justify-between">
-      <div>
+      <div class="space-y-1">
         <p class="text-xl font-semibold text-gray-900">{{ title }}</p>
-        <p class="text-sm text-gray-600 mt-1">Бүлэг</p>
+        <p class="text-sm text-gray-600">Төрөл</p>
         <p class="text-sm font-semibold text-gray-900">{{ type }}</p>
       </div>
       <div class="flex flex-col items-end gap-3">
         <span
-          class="inline-flex items-center rounded-full bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 border border-blue-200"
+          class="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700"
         >
           {{ count }}
         </span>
@@ -41,5 +41,6 @@ const props = defineProps({
         </button>
       </div>
     </div>
+    <p class="text-sm text-gray-500">Сүүлд: {{ date }}</p>
   </div>
 </template>

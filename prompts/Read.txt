@@ -1,0 +1,14 @@
+# READ THIS FILE
+Please fully read and understand the following file:
+
+FILE: <path/filename>
+
+Your task:
+- Analyze the structure
+- Understand its purpose
+- Identify components, state, props, emits
+- DO NOT modify anything
+- DO NOT suggest changes
+- Only confirm when finished
+
+

@@ -1,0 +1,26 @@
+# REFACTOR THIS CODE (AshidSoft Senior Standard)
+
+GOAL:
+Refactor the following component according to AGENT.md rules.
+
+REFACTOR REQUIREMENTS:
+- Keep the same functionality (DO NOT change logic)
+- Improve structure
+- Improve readability
+- Improve Tailwind usage
+- Reduce nested divs
+- Apply consistent spacing (p-4/p-6, gap-4/gap-6)
+- Shorten long class lists
+- Split into smaller components if >200 lines
+- Use <script setup>
+- Remove unused imports/variables
+- Keep labels in Mongolian
+
+DO NOT:
+- Rewrite logic
+- Invent API calls
+- Add libraries
+- Change component name
+- Change folder structure
+
+CODE:
