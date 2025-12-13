@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { ref, computed } from 'vue'
 import ToothItem from './ToothItem.vue'
 import { FDI_NOTATION } from '@/utils/toothHelpers'
@@ -20,7 +20,6 @@ const props = defineProps({
 
 const emit = defineEmits(['tooth-select', 'teeth-select', 'select-all', 'clear-selection'])
 
-const toothTypeFilter = ref('all')
 const upperRightTeeth = computed(() => [...FDI_NOTATION.UPPER_RIGHT].reverse())
 const upperLeftTeeth = computed(() => FDI_NOTATION.UPPER_LEFT)
 const lowerRightTeeth = computed(() => [...FDI_NOTATION.LOWER_RIGHT].reverse())
@@ -69,16 +68,6 @@ function clearSelection() {
   emit('clear-selection')
 }
 
-function selectByStatus(status) {
-  const teeth = allTeeth.value.filter((tooth) => getToothStatus(String(tooth)) === status)
-  emit('teeth-select', teeth.map(String))
-}
-
-function selectByStatusNot(status) {
-  const teeth = allTeeth.value.filter((tooth) => getToothStatus(String(tooth)) !== status)
-  emit('teeth-select', teeth.map(String))
-}
-
 function selectByType(type) {
   let teeth = []
 
@@ -108,15 +97,18 @@ function selectByType(type) {
 </script>
 
 <template>
-  <div class="dental-card p-3 md:p-3">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2.5">
-      <h2 class="text-base md:text-lg font-semibold text-gray-800">Шүдний диаграмм</h2>
+  <div class="dental-card p-4 md:p-5 space-y-3">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <h2 class="text-base md:text-lg font-semibold text-gray-900">Шүдний зураглал</h2>
+        <p class="text-xs text-slate-500">Сонгоод үргэлжлүүлнэ үү</p>
+      </div>
 
       <div class="flex flex-wrap gap-2">
         <button
           v-if="multiSelect"
           type="button"
-          class="px-2.5 py-1 text-xs font-medium bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+          class="px-3 py-1.5 text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 rounded-md hover:bg-blue-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
           @click="selectAll"
         >
           Бүх шүд
@@ -124,46 +116,32 @@ function selectByType(type) {
         <button
           v-if="selectedTeeth.length > 0"
           type="button"
-          class="px-2.5 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+          class="px-3 py-1.5 text-xs font-semibold bg-white text-gray-700 border border-gray-200 rounded-md hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
           @click="clearSelection"
         >
-          Сонголт арилгах ({{ selectedTeeth.length }})
+          Сонголт цэвэрлэх ({{ selectedTeeth.length }})
         </button>
       </div>
     </div>
 
-    <div class="mb-2.5 flex flex-wrap gap-1">
-      <!-- <button
-        type="button"
-        class="px-2.5 py-1 text-xs font-medium bg-gray-50 text-gray-700 rounded hover:bg-gray-100"
-        @click="selectAll"
-      >
-        Бүгд
-      </button>
+    <div class="mb-2.5 flex flex-wrap gap-2">
       <button
         type="button"
-        class="px-2.5 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded hover:bg-blue-100"
-        @click="selectByType('permanent')"
-      >
-        Байнгын
-      </button> -->
-      <button
-        type="button"
-        class="px-2.5 py-1 text-xs font-medium bg-green-50 text-green-700 rounded hover:bg-green-100"
+        class="px-3 py-1.5 text-xs font-medium bg-green-50 text-green-700 rounded-lg hover:bg-green-100 border border-green-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
         @click="selectByType('primary')"
       >
         Сүүн
       </button>
       <button
         type="button"
-        class="px-2.5 py-1 text-xs font-medium bg-purple-50 text-purple-700 rounded hover:bg-purple-100"
+        class="px-3 py-1.5 text-xs font-medium bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 border border-purple-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
         @click="selectByType('mixed')"
       >
         Холимог
       </button>
       <button
         type="button"
-        class="px-2.5 py-1 text-xs font-medium bg-indigo-50 text-indigo-700 rounded hover:bg-indigo-100"
+        class="px-3 py-1.5 text-xs font-medium bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 border border-indigo-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
         @click="selectByType('additional')"
       >
         Нэмэлт
@@ -184,7 +162,7 @@ function selectByType(type) {
           />
         </div>
 
-        <div class="w-0.5 bg-gray-400 mx-1 sm:mx-1.5 self-stretch"></div>
+        <div class="w-0.5 bg-gray-300 mx-1 sm:mx-1.5 self-stretch"></div>
 
         <div class="flex gap-0.5">
           <ToothItem
@@ -216,7 +194,7 @@ function selectByType(type) {
           />
         </div>
 
-        <div class="w-0.5 bg-gray-400 mx-1 sm:mx-1.5 self-stretch"></div>
+        <div class="w-0.5 bg-gray-300 mx-1 sm:mx-1.5 self-stretch"></div>
 
         <div class="flex gap-0.5">
           <ToothItem

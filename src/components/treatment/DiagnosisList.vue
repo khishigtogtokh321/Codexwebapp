@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { ref, computed } from 'vue'
 import { diagnoses } from '@/data'
 
@@ -36,18 +36,21 @@ function handleToggle(code) {
 </script>
 
 <template>
-  <div class="space-y-1.5">
-    <label class="block text-sm font-medium text-gray-700">
-      Оношилгоо сонгох
-      <span v-if="selectedDiagnoses.length > 0" class="text-blue-600">({{ selectedDiagnoses.length }} сонгогдсон)</span>
-    </label>
+  <div class="space-y-3">
+    <div class="flex items-center justify-between">
+      <label class="block text-sm font-semibold text-gray-800">
+        3. Онош
+        <span v-if="selectedDiagnoses.length > 0" class="text-blue-600">({{ selectedDiagnoses.length }} сонголт)</span>
+      </label>
+      <span class="text-xs text-slate-500">ICD-10</span>
+    </div>
 
     <div class="relative">
       <input
         v-model="searchQuery"
         type="text"
         placeholder="Онош хайх..."
-        class="input-field pl-8"
+        class="input-field pl-8 text-sm"
         :disabled="disabled"
       />
       <svg
@@ -65,15 +68,17 @@ function handleToggle(code) {
       </svg>
     </div>
 
-    <div class="h-[200px] max-h-[220px] overflow-y-auto border border-gray-300 rounded-lg bg-white scrollbar-thin">
-      <div v-if="filteredDiagnoses.length === 0" class="p-3 text-center text-gray-500 text-sm">Онош олдсонгүй</div>
+    <div
+      class="h-[200px] max-h-[220px] overflow-y-auto border border-gray-300 rounded-lg bg-white scrollbar-thin"
+      :class="disabled ? 'opacity-60 pointer-events-none' : ''"
+    >
+      <div v-if="filteredDiagnoses.length === 0" class="p-3 text-center text-gray-500 text-sm">Үр дүн олдсонгүй</div>
       <label
         v-for="diagnosis in filteredDiagnoses"
         :key="diagnosis.code"
         :class="[
           'flex items-start gap-2.5 p-2.5 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0',
           isSelected(diagnosis.code) ? 'bg-blue-50' : '',
-          disabled ? 'opacity-50 cursor-not-allowed' : '',
         ]"
         @click.prevent="handleToggle(diagnosis.code)"
       >
@@ -95,7 +100,9 @@ function handleToggle(code) {
       </label>
     </div>
 
-    <p v-if="selectedDiagnoses.length > 0" class="text-xs text-gray-500">Сонгосон онош: {{ selectedDiagnoses.join(', ') }}</p>
+    <p v-if="selectedDiagnoses.length > 0" class="text-xs text-gray-500">
+      Сонгосон онош: {{ selectedDiagnoses.join(', ') }}
+    </p>
   </div>
 </template>
 

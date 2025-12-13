@@ -5,6 +5,9 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'Noto Sans', 'Segoe UI', 'Helvetica Neue', 'Arial', 'system-ui', 'sans-serif'],
+      },
       colors: {
         'dental-primary': '#2563EB',
         'dental-success': '#10B981',

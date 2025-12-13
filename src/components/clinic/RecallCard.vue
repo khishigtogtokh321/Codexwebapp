@@ -20,7 +20,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="space-y-4 rounded-2xl border border-gray-200 bg-white px-6 py-5 shadow-sm">
+  <div class="space-y-3 rounded-2xl border border-gray-200 bg-white px-5 py-4 shadow-sm">
     <div class="flex items-start justify-between">
       <div class="space-y-1">
         <p class="text-xl font-semibold text-gray-900">{{ title }}</p>

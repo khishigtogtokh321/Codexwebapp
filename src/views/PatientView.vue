@@ -31,6 +31,7 @@ const state = reactive({
   },
   allergies: ['Пенициллин', 'Лидокаин'],
   complaints: ['Шүд янгинаж өвдөнө', 'Буйл хавдсан'],
+  risks: ['Даралт ихсэх', 'Цус шингэлэгч хэрэглэдэг'],
   plans: [
     { date: '2025-11-23', name: 'Сувгийн эмчилгээ (CoSe)', status: 'saved', doctor: 'Др. Ану' },
     { date: '2025-11-28', name: 'Шүд авах (38)', status: 'saved', doctor: 'Др. Төрболд' },
@@ -114,6 +115,11 @@ const state = reactive({
 })
 
 const showSidebar = ref(false)
+const isDetailOpen = ref(false)
+const isDetailEditing = ref(false)
+const detailItem = ref(null)
+const detailIndex = ref(-1)
+
 const sidebarState = reactive({
   selectedTeeth: [],
   selectedSurfaces: [],
@@ -175,6 +181,59 @@ function handleNavigate(id) {
     closeMobileNav()
   }
 }
+
+function handleOpenDetail(payload) {
+  detailItem.value = payload?.item ? { ...payload.item } : null
+  detailIndex.value = payload?.index ?? -1
+  isDetailEditing.value = false
+  isDetailOpen.value = Boolean(detailItem.value)
+}
+
+function closeDetailModal() {
+  isDetailOpen.value = false
+  isDetailEditing.value = false
+  detailItem.value = null
+  detailIndex.value = -1
+}
+
+function startDetailEdit() {
+  if (!detailItem.value) return
+  isDetailEditing.value = true
+}
+
+function handleDetailField(field, value) {
+  if (!detailItem.value) return
+  detailItem.value = { ...detailItem.value, [field]: value }
+}
+
+function deleteDetail() {
+  if (detailIndex.value < 0) {
+    closeDetailModal()
+    return
+  }
+  state.history.splice(detailIndex.value, 1)
+  closeDetailModal()
+}
+
+function cancelDetailEdit() {
+  if (detailIndex.value < 0) {
+    closeDetailModal()
+    return
+  }
+  detailItem.value = { ...state.history[detailIndex.value] }
+  isDetailEditing.value = false
+}
+
+function saveDetail() {
+  if (!detailItem.value || detailIndex.value < 0) {
+    closeDetailModal()
+    return
+  }
+  const updated = { ...state.history[detailIndex.value], ...detailItem.value }
+  state.history.splice(detailIndex.value, 1, updated)
+  isDetailEditing.value = false
+  isDetailOpen.value = false
+}
 </script>
 
 <template>
@@ -209,23 +268,28 @@ function handleNavigate(id) {
         <TopBar :breadcrumbs="breadcrumbs" card-id="2511002" placeholder="Өвчтөн хайх (Нэр, РД, Утас...)" />
 
         <main class="flex-1 overflow-y-auto">
-          <div class="mx-auto w-full max-w-[1500px] px-4 pb-12 pt-6 lg:px-6">
+          <div class="mx-auto w-full max-w-[1500px] px-4 pb-16 pt-6 lg:px-6 lg:pb-12">
             <div class="grid grid-cols-1 gap-5 xl:grid-cols-12">
-              <div class="flex flex-col gap-5 xl:col-span-3">
+              <div class="flex flex-col gap-4 xl:col-span-3">
                 <PatientProfileCard :patient="state.patient" />
-                <PatientHealthWarnings :allergies="state.allergies" :complaints="state.complaints" />
+                <PatientHealthWarnings
+                  :allergies="state.allergies"
+                  :complaints="state.complaints"
+                  :risks="state.risks"
+                />
               </div>
 
-              <div class="flex flex-col gap-5 xl:col-span-6">
+              <div class="flex flex-col gap-4 xl:col-span-6">
                 <TreatmentPlanTable :plans="state.plans" />
                 <TreatmentHistoryTable
                   :history="state.history"
                   discount-text="-10,000₮"
                   total-text="220,000₮"
+                  @open-detail="handleOpenDetail"
                 />
               </div>
 
-              <div class="flex flex-col gap-5 xl:col-span-3 xl:ml-auto xl:max-w-[360px]">
+              <div class="flex flex-col gap-4 pb-4 xl:col-span-3 xl:ml-auto xl:max-w-[360px]">
                 <RecallCard
                   :title="state.recall.title"
                   :count="state.recall.count"
@@ -244,7 +308,7 @@ function handleNavigate(id) {
 
   <button
     type="button"
-    class="fixed bottom-6 right-6 z-30 inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-300"
+    class="fixed bottom-6 right-6 z-50 inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-300"
     @click="toggleSidebar"
   >
     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -252,6 +316,189 @@ function handleNavigate(id) {
     </svg>
     Эмчилгээ нэмэх
   </button>
+
+  <transition name="fade">
+    <div
+      v-if="isDetailOpen"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+      @click.self="closeDetailModal"
+    >
+      <div class="w-full max-w-3xl rounded-2xl bg-white shadow-2xl">
+        <div class="flex items-start justify-between border-b border-gray-200 px-5 py-4">
+          <div>
+            <p class="text-xs uppercase tracking-wide text-gray-500">Эмчилгээний дэлгэрэнгүй</p>
+            <h3 class="text-lg font-semibold text-gray-900">
+              {{ detailItem?.code || '---' }} · {{ detailItem?.note || 'Тайлбар байхгүй' }}
+            </h3>
+            <p class="mt-1 flex items-center gap-2 text-sm text-gray-600">
+              <span class="rounded-md bg-emerald-50 px-2 py-1 font-semibold text-emerald-700">
+                {{ detailItem?.date || '---- -- --' }}
+              </span>
+              <span v-if="detailItem?.tooth" class="rounded-md bg-blue-50 px-2 py-1 font-semibold text-blue-700">
+                Шүд #{{ detailItem?.tooth }}
+              </span>
+              <span v-if="detailItem?.surface" class="rounded-md bg-sky-50 px-2 py-1 font-semibold text-sky-700">
+                {{ detailItem?.surface }}
+              </span>
+              <span v-if="detailItem?.doctor" class="text-gray-700">{{ detailItem?.doctor }}</span>
+            </p>
+          </div>
+          <button
+            type="button"
+            class="rounded-full p-2 text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            @click="closeDetailModal"
+          >
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="grid gap-4 px-5 py-4 md:grid-cols-2">
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-gray-700">Огноо</label>
+            <input
+              v-if="isDetailEditing"
+              type="date"
+              class="w-full rounded-lg border border-gray-200 bg-white text-sm shadow-sm transition-all duration-150 hover:border-emerald-200 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/60"
+              :value="detailItem?.date"
+              @input="handleDetailField('date', $event.target.value)"
+            />
+            <p v-else class="text-gray-900">{{ detailItem?.date || '-----' }}</p>
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-gray-700">Шүд</label>
+            <input
+              v-if="isDetailEditing"
+              type="text"
+              class="w-full rounded-lg border border-gray-200 bg-white text-sm shadow-sm transition-all duration-150 hover:border-emerald-200 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/60"
+              :value="detailItem?.tooth"
+              @input="handleDetailField('tooth', $event.target.value)"
+            />
+            <p v-else class="text-gray-900">{{ detailItem?.tooth || '—' }}</p>
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-gray-700">Гадаргуу</label>
+            <input
+              v-if="isDetailEditing"
+              type="text"
+              class="w-full rounded-lg border border-gray-200 bg-white text-sm shadow-sm transition-all duration-150 hover:border-emerald-200 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/60"
+              :value="detailItem?.surface"
+              @input="handleDetailField('surface', $event.target.value)"
+            />
+            <p v-else class="text-gray-900">{{ detailItem?.surface || '—' }}</p>
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-gray-700">Онош / Код</label>
+            <input
+              v-if="isDetailEditing"
+              type="text"
+              class="w-full rounded-lg border border-gray-200 bg-white text-sm shadow-sm transition-all duration-150 hover:border-emerald-200 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/60"
+              :value="detailItem?.code"
+              @input="handleDetailField('code', $event.target.value)"
+            />
+            <p v-else class="text-gray-900">{{ detailItem?.code || '—' }}</p>
+          </div>
+
+          <div class="md:col-span-2 space-y-2">
+            <label class="block text-sm font-medium text-gray-700">Тэмдэглэл</label>
+            <textarea
+              v-if="isDetailEditing"
+              rows="3"
+              class="w-full rounded-lg border border-gray-200 bg-white text-sm shadow-sm transition-all duration-150 hover:border-emerald-200 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/60"
+              :value="detailItem?.note"
+              @input="handleDetailField('note', $event.target.value)"
+            ></textarea>
+            <p v-else class="text-gray-900">{{ detailItem?.note || '—' }}</p>
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-gray-700">Үнэ</label>
+            <input
+              v-if="isDetailEditing"
+              type="text"
+              class="w-full rounded-lg border border-gray-200 bg-white text-sm shadow-sm transition-all duration-150 hover:border-emerald-200 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/60"
+              :value="detailItem?.price"
+              @input="handleDetailField('price', $event.target.value)"
+            />
+            <p v-else class="text-gray-900">{{ detailItem?.price || '—' }}</p>
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-gray-700">Хөнгөлөлт</label>
+            <input
+              v-if="isDetailEditing"
+              type="text"
+              class="w-full rounded-lg border border-gray-200 bg-white text-sm shadow-sm transition-all duration-150 hover:border-emerald-200 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/60"
+              :value="detailItem?.discount"
+              @input="handleDetailField('discount', $event.target.value)"
+            />
+            <p v-else class="text-gray-900">{{ detailItem?.discount || '—' }}</p>
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-gray-700">Эмч</label>
+            <input
+              v-if="isDetailEditing"
+              type="text"
+              class="w-full rounded-lg border border-gray-200 bg-white text-sm shadow-sm transition-all duration-150 hover:border-emerald-200 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/60"
+              :value="detailItem?.doctor"
+              @input="handleDetailField('doctor', $event.target.value)"
+            />
+            <p v-else class="text-gray-900">{{ detailItem?.doctor || '—' }}</p>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between border-t border-gray-200 px-5 py-4">
+          <p class="text-sm text-gray-500">Мөрийг давхар дарахад дэлгэрэнгүй нээгдэнэ</p>
+          <div class="flex items-center gap-2">
+            <button
+              v-if="!isDetailEditing"
+              type="button"
+              class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+              @click="closeDetailModal"
+            >
+              Хаах
+            </button>
+            <button
+              v-if="!isDetailEditing"
+              type="button"
+              class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
+              @click="startDetailEdit"
+            >
+              Засах
+            </button>
+            <template v-else>
+              <button
+                type="button"
+                class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                @click="cancelDetailEdit"
+              >
+                Болих
+              </button>
+              <button
+                type="button"
+                class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
+                @click="saveDetail"
+              >
+                Хадгалах
+              </button>
+              <button
+                type="button"
+                class="rounded-lg bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-100"
+                @click="deleteDetail"
+              >
+                Устгах
+              </button>
+            </template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </transition>
 
   <transition name="fade">
     <div

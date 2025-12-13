@@ -9,7 +9,6 @@ const props = defineProps({
       name: 'Б.Төрболд',
       age: 25,
       gender: 'Эр',
-      bloodType: 'O(I) Rh+',
       register: 'УЖ99203405',
       birthDate: '2000-01-01',
       profession: 'Программист',
@@ -26,7 +25,6 @@ const chips = computed(() => {
   return [
     p.age ? `${p.age} нас` : null,
     p.gender || null,
-    p.bloodType || null,
   ].filter(Boolean)
 })
 
@@ -43,23 +41,23 @@ const identityItems = computed(() => {
 /** Холбоо барих хэсгийг илүү compact болгож салгав */
 const contactItems = computed(() => {
   const p = props.patient || {}
+  const phoneValue = [p.phone, p.phoneAlt].filter(Boolean).join(' / ')
   return [
-    { label: 'Утас', value: p.phone, icon: 'phone' },
-    { label: 'Нөөц дугаар', value: p.phoneAlt, icon: 'phone' },
+    { label: 'Утас', value: phoneValue, icon: 'phone' },
     { label: 'Имэйл', value: p.email, icon: 'mail' },
     { label: 'Хаяг', value: p.address, icon: 'location' },
-  ].filter(i => i.value)
+  ].filter((i) => i.value)
 })
 </script>
 
 <template>
   <div class="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
     <!-- ===== Header (centered) ===== -->
-    <div class="px-6 pt-7 pb-4">
+    <div class="px-5 pt-5 pb-3">
       <div class="flex flex-col items-center text-center">
         <div class="relative">
           <div
-            class="flex h-16 w-16 items-center justify-center rounded-full
+            class="flex h-14 w-14 items-center justify-center rounded-full
                    bg-gradient-to-br from-blue-500 to-emerald-500
                    text-xl font-semibold text-white shadow-sm"
           >
@@ -74,11 +72,11 @@ const contactItems = computed(() => {
           </span>
         </div>
 
-        <p class="mt-3 text-lg font-semibold leading-tight text-gray-900">
+        <p class="mt-2 text-lg font-semibold leading-tight text-gray-900">
           {{ patient.name }}
         </p>
 
-        <div class="mt-2 flex flex-wrap justify-center gap-2">
+        <div class="mt-1.5 flex flex-wrap justify-center gap-1.5">
           <span
             v-for="chip in chips"
             :key="chip"
@@ -96,39 +94,34 @@ const contactItems = computed(() => {
     <div class="border-t border-gray-100"></div>
 
     <!-- ===== Identity table-like section ===== -->
-    <div class="px-6 py-4">
-      <div class="space-y-2">
-        <div
-          v-for="(item, idx) in identityItems"
-          :key="item.label"
-          class="flex items-center justify-between gap-4 py-2"
-          :class="idx !== identityItems.length - 1 ? 'border-b border-gray-100' : ''"
-        >
-          <span class="text-xs font-medium text-gray-500">
+    <div class="px-5 py-4">
+      <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+        <template v-for="item in identityItems" :key="item.label">
+          <div class="text-xs font-medium text-gray-500">
             {{ item.label }}
-          </span>
-          <span class="text-sm font-semibold text-gray-900 text-right">
+          </div>
+          <div class="text-right font-semibold text-gray-900">
             {{ item.value }}
-          </span>
-        </div>
+          </div>
+        </template>
       </div>
     </div>
 
     <!-- ===== Contact compact block ===== -->
     <div class="border-t border-gray-100"></div>
 
-    <div class="px-6 py-4">
-      <div class="space-y-3">
+    <div class="px-5 py-4">
+      <div class="space-y-2.5">
         <div
           v-for="item in contactItems"
           :key="item.label"
-          class="flex items-start gap-3"
+          class="flex items-start gap-2"
         >
           <div class="mt-0.5 text-gray-400">
             <!-- phone -->
             <svg
               v-if="item.icon === 'phone'"
-              class="h-4.5 w-4.5"
+              class="h-4 w-4"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -155,7 +148,7 @@ const contactItems = computed(() => {
             <!-- mail -->
             <svg
               v-else-if="item.icon === 'mail'"
-              class="h-4.5 w-4.5"
+              class="h-4 w-4"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -168,7 +161,7 @@ const contactItems = computed(() => {
             <!-- location -->
             <svg
               v-else-if="item.icon === 'location'"
-              class="h-4.5 w-4.5"
+              class="h-4 w-4"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -186,7 +179,7 @@ const contactItems = computed(() => {
           </div>
 
           <div class="min-w-0 flex-1">
-            <p class="text-[10px] uppercase tracking-wide text-gray-500">
+            <p class="text-[11px] uppercase tracking-wide text-gray-500">
               {{ item.label }}
             </p>
             <p class="text-sm font-medium leading-snug text-gray-900 break-words">

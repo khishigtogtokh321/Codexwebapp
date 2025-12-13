@@ -60,12 +60,12 @@ const isSelected = (day) => `${day.label}` === `${props.selectedDate}` && !day.m
 
 const dayClass = computed(
   () =>
-    'flex items-center justify-center h-9 w-full rounded-xl transition-colors text-sm font-medium border border-transparent',
+    'flex items-center justify-center h-8 w-full rounded-xl transition-colors text-sm font-medium border border-transparent',
 )
 </script>
 
 <template>
-  <div class="bg-white rounded-2xl border border-gray-200 shadow-sm px-4 py-4 space-y-3 w-full max-w-[360px] mx-auto">
+  <div class="bg-white rounded-2xl border border-gray-200 shadow-sm px-4 py-3 space-y-2.5 w-full max-w-[360px] mx-auto">
     <div class="flex items-center justify-between">
       <p class="text-lg font-semibold text-gray-900">{{ monthLabel }}</p>
       <div class="flex items-center gap-2 text-gray-500">
@@ -86,7 +86,7 @@ const dayClass = computed(
       <span v-for="day in weekDays" :key="day">{{ day }}</span>
     </div>
 
-    <div class="grid grid-cols-7 gap-1.5 text-gray-800">
+    <div class="grid grid-cols-7 gap-1 text-gray-800">
       <span
         v-for="(day, index) in days"
         :key="`${day.label}-${index}`"

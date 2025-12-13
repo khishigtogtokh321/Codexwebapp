@@ -10,6 +10,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  allowCollapse: {
+    type: Boolean,
+    default: true,
+  },
 })
 
 const emit = defineEmits(['toggle', 'navigate'])
@@ -94,6 +98,7 @@ onBeforeUnmount(() => {
       </div>
 
       <button
+        v-if="props.allowCollapse"
         type="button"
         class="p-1.5 rounded-md hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
         @click="emit('toggle')"

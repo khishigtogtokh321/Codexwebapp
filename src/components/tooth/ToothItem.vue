@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { computed } from 'vue'
 
 const props = defineProps({
@@ -21,7 +21,7 @@ const emit = defineEmits(['click'])
 
 const toothClasses = computed(() => {
   const baseClasses =
-    'group relative w-9 h-9 border-2 rounded-md cursor-pointer transition-all duration-200 ease-out flex flex-col items-center justify-center text-xs p-0.5 hover:shadow-md hover:-translate-y-0.5 hover:scale-105'
+    'group relative w-9 h-9 border-2 rounded-md cursor-pointer transition-all duration-200 ease-out flex flex-col items-center justify-center text-xs p-0.5 hover:shadow-md hover:-translate-y-0.5 hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-blue-500'
 
   const statusClasses = {
     healthy:
@@ -33,7 +33,9 @@ const toothClasses = computed(() => {
     missing: 'bg-gray-100 border-gray-400 opacity-50 cursor-not-allowed hover:scale-100 hover:translate-y-0',
   }
 
-  const selectedClass = props.isSelected ? 'ring-4 ring-blue-500 ring-opacity-60 shadow-2xl scale-110 border-blue-500' : ''
+  const selectedClass = props.isSelected
+    ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-white shadow-xl scale-110 border-blue-500'
+    : ''
 
   return `${baseClasses} ${statusClasses[props.status]} ${selectedClass}`
 })
@@ -43,8 +45,8 @@ const tooltipText = computed(() => {
     healthy: 'Эрүүл',
     treated: 'Эмчилсэн',
     problem: 'Асуудалтай',
-    planned: 'Төлөвлөсөн',
-    missing: 'Байхгүй',
+    planned: 'Төлөвлөгдсөн',
+    missing: 'Алга',
   }
   return `#${props.toothNumber} - ${statusLabels[props.status]}`
 })

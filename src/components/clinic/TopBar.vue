@@ -2,10 +2,10 @@
 import { computed, ref } from 'vue'
 
 const props = defineProps({
-  breadcrumbs: {
-    type: Array,
-    default: () => ['Жагсаалт', 'Эмчилгээний карт'],
-  },
+  // breadcrumbs: {
+  //   type: Array,
+  //   default: () => ['Жагсаалт', 'Эмчилгээний карт'],
+  // },
   cardId: {
     type: String,
     default: '2511002',
@@ -32,9 +32,9 @@ function handleSearch() {
       class="mx-auto flex w-full max-w-[1500px] flex-col gap-3 px-4 py-3 lg:flex-row lg:items-center lg:justify-between"
     >
       <div class="flex flex-wrap items-center gap-3 text-sm">
-        <div class="flex items-center gap-2 text-gray-700">
+        <!-- <div class="flex items-center gap-2 text-gray-700">
           <span class="font-semibold text-gray-900">{{ breadcrumbText }}</span>
-        </div>
+        </div> -->
         <span
           class="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-700"
         >
@@ -62,7 +62,8 @@ function handleSearch() {
             <path stroke-linecap="round" d="M15.5 15.5 19 19" />
           </svg>
         </div>
-        <div class="flex items-center gap-2">
+        
+        <!-- <div class="flex items-center gap-2">
           <button
             type="button"
             class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50"
@@ -90,7 +91,7 @@ function handleSearch() {
               <circle cx="12" cy="12" r="3" />
             </svg>
           </button>
-        </div>
+        </div> -->
       </div>
     </div>
   </header>
