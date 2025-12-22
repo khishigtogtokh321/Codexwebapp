@@ -101,6 +101,140 @@ function handleClick() {
 </template>
 
 <style scoped>
+.tooth-chip {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 0.75rem;
+  width: 2.9rem;
+  height: 2.9rem;
+  min-width: 2.9rem;
+  min-height: 2.9rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 0.8rem;
+  background: #ffffff;
+  color: #0f172a;
+  font-weight: 700;
+  font-size: 0.875rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 160ms ease;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 1px 2px rgba(15, 23, 42, 0.06);
+  transition: background-color 200ms ease, border-color 200ms ease, box-shadow 200ms ease,
+    transform 180ms ease;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 1px 2px rgba(15, 23, 42, 0.06);
+  touch-action: manipulation;
+
+}
+
+.tooth-chip:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 10px 30px -18px rgba(59, 130, 246, 0.35);
+  background: linear-gradient(180deg, #ffffff 0%, #f1f5ff 100%);
+  box-shadow: 0 12px 30px -20px rgba(59, 130, 246, 0.45);
+  transform: translateY(-1px);
+}
+
+.tooth-chip:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+
+.tooth-chip--selected {
+  background: linear-gradient(180deg, #e9f1ff 0%, #e0e7ff 100%);
+  border-color: #2563eb;
+  box-shadow: 0 10px 30px -18px rgba(37, 99, 235, 0.45), 0 0 0 1px rgba(37, 99, 235, 0.1);
+  color: #0f172a;
+
+.tooth-chip:active:not(.tooth-chip--missing) {
+  transform: scale(0.98);
+}
+
+.tooth-chip--selected {
+  background: linear-gradient(180deg, #e9f1ff 0%, #dfe7ff 100%);
+  border-color: #2563eb;
+  box-shadow: 0 14px 34px -18px rgba(37, 99, 235, 0.5), 0 0 0 1px rgba(37, 99, 235, 0.12);
+  color: #0f172a;
+  transform: translateY(-1px);
+
+}
+
+.tooth-chip--missing {
+  border-style: dashed;
+  border-color: #cbd5e1;
+  color: #94a3b8;
+  background: #f8fafc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.tooth-chip--missing:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: #cbd5e1;
+}
+
+.tooth-chip--treated:not(.tooth-chip--selected) {
+  border-color: #60a5fa;
+  background: #f3f7ff;
+}
+
+.tooth-chip--problem:not(.tooth-chip--selected) {
+  border-color: #f87171;
+  background: #fff5f5;
+}
+
+.tooth-chip--planned:not(.tooth-chip--selected) {
+  border-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.tooth-chip__number {
+  transform: translateY(1px);
+}
+
+.tooth-chip__missing {
+  font-weight: 600;
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+
+.tooth-chip__check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 999px;
+  background: #2563eb;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 4px 10px -6px rgba(37, 99, 235, 0.5);
+}
+
+.tooth-chip__status {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: #e2e8f0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.tooth-chip__status--treated {
+  background: #3b82f6;
+}
+
+.tooth-chip__status--problem {
+  background: #ef4444;
+}
 @keyframes wiggle {
   0%, 100% {
     transform: rotate(0deg);
@@ -111,9 +245,10 @@ function handleClick() {
   75% {
     transform: rotate(3deg);
   }
-}
 
-.group:active {
-  animation: wiggle 0.3s ease-in-out;
+  .group:active {
+    animation: wiggle 0.3s ease-in-out;
+  }
+}
 }
 </style>
