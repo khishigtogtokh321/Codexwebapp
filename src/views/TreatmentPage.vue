@@ -1,5 +1,6 @@
 ﻿<script setup>
 import { reactive, computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { reactive, computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import TopBar from '@/components/layout/TopBar.vue'
 import SideNav from '@/components/layout/SideNav.vue'
 import ToothChart from '@/components/tooth/ToothChart.vue'
@@ -26,6 +27,10 @@ const state = reactive({
 const searchQuery = ref('')
 const statusFilter = ref('all')
 const activePatient = ref(patientService.getDefaultPatient())
+const hovered = ref(false)
+const pinned = ref(false)
+const drawerOpen = ref(false)
+const isLgUp = ref(false)
 const hovered = ref(false)
 const pinned = ref(false)
 const drawerOpen = ref(false)
@@ -273,18 +278,28 @@ function handlePatientSelected(patient) {
 
 function toggleSidebar() {
   pinned.value = !pinned.value
+  pinned.value = !pinned.value
 }
 
 function openMobileNav() {
+  drawerOpen.value = true
   drawerOpen.value = true
 }
 
 function closeMobileNav() {
   drawerOpen.value = false
+  drawerOpen.value = false
 }
 
 function handleNavigate(id) {
   window.location.hash = `#${id}`
+  if (drawerOpen.value) {
+    closeMobileNav()
+  }
+}
+
+const handleEsc = (event) => {
+  if (event.key === 'Escape' && drawerOpen.value) {
   if (drawerOpen.value) {
     closeMobileNav()
   }
@@ -330,10 +345,46 @@ watch(
     body.classList.toggle('overflow-hidden', open)
   },
 )
+
+let mediaQuery
+
+const updateBreakpoint = () => {
+  if (typeof window === 'undefined') return
+  if (!mediaQuery) {
+    mediaQuery = window.matchMedia('(min-width: 1024px)')
+  }
+  isLgUp.value = mediaQuery?.matches || false
+  if (mediaQuery?.matches) {
+    drawerOpen.value = false
+  }
+}
+
+onMounted(() => {
+  updateBreakpoint()
+  mediaQuery?.addEventListener('change', updateBreakpoint)
+  window.addEventListener('keydown', handleEsc)
+})
+
+onBeforeUnmount(() => {
+  mediaQuery?.removeEventListener('change', updateBreakpoint)
+  window.removeEventListener('keydown', handleEsc)
+})
+
+watch(
+  () => drawerOpen.value,
+  (open) => {
+    const html = document.documentElement
+    const body = document.body
+    if (!html || !body) return
+    html.classList.toggle('overflow-hidden', open)
+    body.classList.toggle('overflow-hidden', open)
+  },
+)
 </script>
 
 <template>
   <div class="flex flex-col md:flex-row min-h-screen bg-gray-50 overflow-hidden">
+
 
     <aside
       class="relative hidden flex-shrink-0 lg:block"
@@ -371,6 +422,7 @@ watch(
         <button
           type="button"
           class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          aria-label="Open navigation"
           aria-label="Open navigation"
           @click="openMobileNav"
         >
@@ -469,7 +521,16 @@ watch(
       leave-from-class="opacity-100"
       leave-to-class="opacity-0"
     >
+    <Transition
+      enter-active-class="transition-opacity duration-200"
+      leave-active-class="transition-opacity duration-200"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
       <div
+        v-if="drawerOpen"
         v-if="drawerOpen"
         class="fixed inset-0 z-40 bg-black/50 lg:hidden"
         @click="closeMobileNav"
@@ -483,7 +544,18 @@ watch(
       leave-from-class="translate-x-0"
       leave-to-class="-translate-x-full"
     >
+    </Transition>
+    <Transition
+      enter-active-class="transform transition-transform duration-300"
+      leave-active-class="transform transition-transform duration-300"
+      enter-from-class="-translate-x-full"
+      enter-to-class="translate-x-0"
+      leave-from-class="translate-x-0"
+      leave-to-class="-translate-x-full"
+    >
       <div
+        v-if="drawerOpen"
+        class="fixed inset-y-0 left-0 z-50 w-72 max-w-[90vw] bg-gray-900 shadow-2xl transition-transform duration-300 lg:hidden"
         v-if="drawerOpen"
         class="fixed inset-y-0 left-0 z-50 w-72 max-w-[90vw] bg-gray-900 shadow-2xl transition-transform duration-300 lg:hidden"
       >
@@ -495,6 +567,7 @@ watch(
           <button
             type="button"
             class="p-2 rounded-md text-gray-200 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            aria-label="Close navigation"
             aria-label="Close navigation"
             @click="closeMobileNav"
           >
@@ -510,6 +583,7 @@ watch(
           @navigate="handleNavigate"
         />
       </div>
+    </Transition>
     </Transition>
   </div>
 </template>
