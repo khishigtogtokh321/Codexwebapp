@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import TopBar from '@/components/clinic/TopBar.vue'
 import PatientProfileCard from '@/components/clinic/PatientProfileCard.vue'
 import PatientHealthWarnings from '@/components/clinic/PatientHealthWarnings.vue'
@@ -127,9 +127,11 @@ const sidebarState = reactive({
   selectedTreatmentTypes: [],
   treatmentDisabled: false,
 })
-
-const isCollapsed = ref(false)
-const isMobileNavOpen = ref(false)
+const hovered = ref(false)
+const pinned = ref(false)
+const drawerOpen = ref(false)
+const isLgUp = ref(false)
+const desktopExpanded = computed(() => isLgUp.value && (hovered.value || pinned.value))
 
 function toggleSidebar() {
   showSidebar.value = !showSidebar.value
@@ -164,23 +166,64 @@ function handleAddTreatment() {
 }
 
 function toggleNav() {
-  isCollapsed.value = !isCollapsed.value
+  pinned.value = !pinned.value
 }
 
 function openMobileNav() {
-  isMobileNavOpen.value = true
+  drawerOpen.value = true
 }
 
 function closeMobileNav() {
-  isMobileNavOpen.value = false
+  drawerOpen.value = false
 }
 
 function handleNavigate(id) {
   window.location.hash = `#${id}`
-  if (isMobileNavOpen.value) {
+  if (drawerOpen.value) {
     closeMobileNav()
   }
 }
+
+const handleEsc = (event) => {
+  if (event.key === 'Escape' && drawerOpen.value) {
+    closeMobileNav()
+  }
+}
+
+let mediaQuery
+
+const updateBreakpoint = () => {
+  if (typeof window === 'undefined') return
+  if (!mediaQuery) {
+    mediaQuery = window.matchMedia('(min-width: 1024px)')
+  }
+  isLgUp.value = mediaQuery?.matches || false
+  if (mediaQuery?.matches) {
+    drawerOpen.value = false
+  }
+}
+
+onMounted(() => {
+  updateBreakpoint()
+  mediaQuery?.addEventListener('change', updateBreakpoint)
+  window.addEventListener('keydown', handleEsc)
+})
+
+onBeforeUnmount(() => {
+  mediaQuery?.removeEventListener('change', updateBreakpoint)
+  window.removeEventListener('keydown', handleEsc)
+})
+
+watch(
+  () => drawerOpen.value,
+  (open) => {
+    const html = document.documentElement
+    const body = document.body
+    if (!html || !body) return
+    html.classList.toggle('overflow-hidden', open)
+    body.classList.toggle('overflow-hidden', open)
+  },
+)
 
 function handleOpenDetail(payload) {
   detailItem.value = payload?.item ? { ...payload.item } : null
@@ -239,15 +282,24 @@ function saveDetail() {
 <template>
   <div class="flex min-h-screen bg-slate-50">
     <aside
-      class="relative hidden flex-shrink-0 transition-all duration-300 lg:block"
-      :class="isCollapsed ? 'w-20' : 'w-64'"
+      class="relative hidden flex-shrink-0 lg:block"
+      @mouseenter="hovered = true"
+      @mouseleave="hovered = false"
     >
-      <SideNav
-        :is-collapsed="isCollapsed"
-        active-id="patients"
-        @toggle="toggleNav"
-        @navigate="handleNavigate"
-      />
+      <div class="w-24"></div>
+      <div
+        class="absolute inset-y-0 left-0 transition-all duration-300 ease-in-out"
+        :class="desktopExpanded ? 'w-72' : 'w-24'"
+      >
+        <SideNav
+          :is-collapsed="!desktopExpanded"
+          :is-pinned="pinned"
+          active-id="patients"
+          @toggle="toggleNav"
+          @toggle-pin="toggleNav"
+          @navigate="handleNavigate"
+        />
+      </div>
     </aside>
 
     <div class="flex-1 overflow-hidden">
@@ -256,6 +308,7 @@ function saveDetail() {
           <button
             type="button"
             class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            aria-label="Open navigation"
             @click="openMobileNav"
           >
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
@@ -542,17 +595,31 @@ function saveDetail() {
     </aside>
   </transition>
 
-  <transition name="fade">
+  <Transition
+    enter-active-class="transition-opacity duration-200"
+    leave-active-class="transition-opacity duration-200"
+    enter-from-class="opacity-0"
+    enter-to-class="opacity-100"
+    leave-from-class="opacity-100"
+    leave-to-class="opacity-0"
+  >
     <div
-      v-if="isMobileNavOpen"
+      v-if="drawerOpen"
       class="fixed inset-0 z-40 bg-black/50 lg:hidden"
       @click="closeMobileNav"
     ></div>
-  </transition>
-  <transition name="slide">
+  </Transition>
+  <Transition
+    enter-active-class="transform transition-transform duration-300"
+    leave-active-class="transform transition-transform duration-300"
+    enter-from-class="-translate-x-full"
+    enter-to-class="translate-x-0"
+    leave-from-class="translate-x-0"
+    leave-to-class="-translate-x-full"
+  >
     <div
-      v-if="isMobileNavOpen"
-      class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl lg:hidden"
+      v-if="drawerOpen"
+      class="fixed inset-y-0 left-0 z-50 w-72 max-w-[90vw] bg-white shadow-2xl lg:hidden"
     >
       <div class="flex items-center justify-between border-b border-gray-200 px-4 py-3">
         <div class="flex items-center gap-2 text-gray-900 font-semibold">
@@ -562,6 +629,7 @@ function saveDetail() {
         <button
           type="button"
           class="rounded-md p-2 text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          aria-label="Close navigation"
           @click="closeMobileNav"
         >
           <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
@@ -569,7 +637,7 @@ function saveDetail() {
           </svg>
         </button>
       </div>
-      <SideNav :is-collapsed="false" active-id="patients" @toggle="closeMobileNav" @navigate="handleNavigate" />
+      <SideNav :is-collapsed="false" :allow-collapse="false" active-id="patients" @toggle="closeMobileNav" @navigate="handleNavigate" />
     </div>
-  </transition>
+  </Transition>
 </template>
