@@ -37,6 +37,10 @@ const quickAddState = reactive({
 })
 
 const desktopExpanded = computed(() => isLgUp.value && (hovered.value || pinned.value))
+<<<<<<< ours
+=======
+const contentPaddingClass = computed(() => (desktopExpanded.value ? 'lg:pl-72' : 'lg:pl-24'))
+>>>>>>> theirs
 
 const { toothStatuses, updateToothStatusFromTreatment } = useToothStatus(mockToothStatuses)
 
@@ -336,7 +340,10 @@ watch(
       @mouseenter="hovered = true"
       @mouseleave="hovered = false"
     >
+<<<<<<< ours
       <div class="w-24"></div>
+=======
+>>>>>>> theirs
       <div
         class="absolute inset-y-0 left-0 transition-all duration-300 ease-in-out"
         :class="desktopExpanded ? 'w-72' : 'w-24'"
@@ -352,7 +359,14 @@ watch(
       </div>
     </aside>
 
+<<<<<<< ours
     <div class="relative flex flex-1 flex-col overflow-hidden">
+=======
+    <div
+      class="relative flex flex-1 flex-col overflow-hidden transition-[padding-left] duration-200 ease-out"
+      :class="contentPaddingClass"
+    >
+>>>>>>> theirs
       <div class="lg:hidden flex items-center gap-2 px-4 py-3 border-b border-gray-200 bg-white">
         <button
           type="button"

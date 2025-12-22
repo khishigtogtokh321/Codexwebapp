@@ -132,6 +132,10 @@ const pinned = ref(false)
 const drawerOpen = ref(false)
 const isLgUp = ref(false)
 const desktopExpanded = computed(() => isLgUp.value && (hovered.value || pinned.value))
+<<<<<<< ours
+=======
+const contentPaddingClass = computed(() => (desktopExpanded.value ? 'lg:pl-72' : 'lg:pl-24'))
+>>>>>>> theirs
 
 function toggleSidebar() {
   showSidebar.value = !showSidebar.value
@@ -180,16 +184,28 @@ function closeMobileNav() {
 function handleNavigate(id) {
   window.location.hash = `#${id}`
   if (drawerOpen.value) {
+<<<<<<< ours
     closeMobileNav()
   }
 }
 
 const handleEsc = (event) => {
   if (event.key === 'Escape' && drawerOpen.value) {
+=======
+>>>>>>> theirs
     closeMobileNav()
   }
 }
 
+<<<<<<< ours
+=======
+const handleEsc = (event) => {
+  if (event.key === 'Escape' && drawerOpen.value) {
+    closeMobileNav()
+  }
+}
+
+>>>>>>> theirs
 let mediaQuery
 
 const updateBreakpoint = () => {
@@ -286,7 +302,10 @@ function saveDetail() {
       @mouseenter="hovered = true"
       @mouseleave="hovered = false"
     >
+<<<<<<< ours
       <div class="w-24"></div>
+=======
+>>>>>>> theirs
       <div
         class="absolute inset-y-0 left-0 transition-all duration-300 ease-in-out"
         :class="desktopExpanded ? 'w-72' : 'w-24'"
@@ -302,7 +321,10 @@ function saveDetail() {
       </div>
     </aside>
 
-    <div class="flex-1 overflow-hidden">
+    <div
+      class="flex-1 overflow-hidden transition-[padding-left] duration-200 ease-out"
+      :class="contentPaddingClass"
+    >
       <div class="flex flex-col">
         <div class="flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 shadow-sm lg:hidden">
           <button

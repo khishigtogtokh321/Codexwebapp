@@ -88,8 +88,13 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
+<<<<<<< ours
   <div class="relative flex h-full flex-col overflow-hidden rounded-r-2xl bg-gray-900 text-white shadow-xl transition-all duration-300">
     <div class="flex items-center border-b border-gray-800 px-3 py-3 sm:px-4" :class="props.isCollapsed ? 'justify-center' : 'justify-between'">
+=======
+  <div class="relative flex h-full flex-col overflow-visible rounded-r-2xl bg-gray-900 text-white shadow-xl transition-all duration-300">
+    <div class="relative flex items-center border-b border-gray-800 px-3 py-3 sm:px-4" :class="props.isCollapsed ? 'justify-center' : 'justify-between'">
+>>>>>>> theirs
       <div class="flex items-center gap-2">
         <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold">A</div>
         <div v-if="!props.isCollapsed" class="transition-opacity duration-200">
@@ -97,6 +102,37 @@ onBeforeUnmount(() => {
           <p class="text-xs text-gray-400">Dental</p>
         </div>
       </div>
+
+<<<<<<< ours
+      <div v-if="props.allowCollapse" class="flex items-center gap-2" :class="props.isCollapsed ? 'hidden' : ''">
+        <button
+          type="button"
+          class="inline-flex h-9 w-9 items-center justify-center rounded-md text-gray-200 transition hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          :aria-pressed="props.isPinned"
+          aria-label="Toggle pin"
+          @click.stop="emit('toggle-pin')"
+        >
+=======
+      <button
+        v-if="props.allowCollapse"
+        type="button"
+        class="absolute -right-4 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-gray-800 text-gray-200 shadow-lg transition hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 lg:flex"
+        :aria-pressed="props.isPinned"
+        aria-label="Toggle sidebar pin"
+        title="Toggle sidebar pin"
+        @click.stop="emit('toggle-pin')"
+      >
+        <svg
+          class="h-5 w-5 transition-transform duration-200"
+          :class="props.isCollapsed ? '' : 'rotate-180'"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6" />
+        </svg>
+      </button>
 
       <div v-if="props.allowCollapse" class="flex items-center gap-2" :class="props.isCollapsed ? 'hidden' : ''">
         <button
@@ -106,6 +142,7 @@ onBeforeUnmount(() => {
           aria-label="Toggle pin"
           @click.stop="emit('toggle-pin')"
         >
+>>>>>>> theirs
           <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
             <path
               stroke-linecap="round"
