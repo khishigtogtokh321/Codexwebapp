@@ -1,155 +1,76 @@
-# AGENT: Ashidsoft WebApp — Frontend Engineering Assistant
+## Styling rules (Tailwind + CSS tokens)
 
-## 1. Project Overview
-- Name: Ashidsoft WebApp
-- Root: /mnt/d/ashidwebapp
-- Scope: Frontend only (Vue.js SPA)
-- Target: Tablet (doctor workflow)
-- Features: patient list, treatment workflow, appointment schedule, patient detail, doctor profile.
+Define `.card` in `components.css` using tokens:
+- borders, radius, shadow, background
+- state variants like `.card--selected` if needed
 
-## 2. Tech Stack & Rules
-- Vue.js (SPA)
-- TailwindCSS
-- Code → English, UI → Mongolian
-- No backend/DB code
-- Never rename components
-- Never modify API contract
-- Theme = medical blue + white
+Avoid:
+- Extremely long Tailwind class chains for every component
+- Duplicating the same `bg-white border rounded shadow` in many files
 
-## 3. Directory Structure
-```
-resources/js/
-  app.js
-  App.vue
-  router/
-  layouts/
-  views/
-  components/
-  services/
-  store/
-  utils/
-resources/assets/
-resources/css/
-```
-- layouts/: AppLayout.vue, AuthLayout.vue
-- views/app/: page components
-- components/: reusable UI
-- components/emchilgee/: treatment UI blocks
 
-## 4. Coding Conventions
-- Component file: PascalCase.vue
-- Props/vars: camelCase
-- Use <script setup> (Composition API)
-- Avoid repeated Tailwind classes
-- Break long UI into small components
-- Text = Mongolian (UTF-8)
+## Treatment selection UX (required behavior)
 
-### Reactivity
-- Use ref, reactive
-- Complex page state → store
+We support two selection modes:
+- Search by name/code
+- Quick Grid presets (Favorites + Tabs)
 
-## 5. Architecture
-### Layouts
-- AppLayout.vue: sidebar + header + slot
-- AuthLayout.vue: centered login/register layout
-### Views
-- Page-level logic only
-- Data fetch → service layer
-- Compose UI from child components
-### Components
-- Reusable single-responsibility units
-
-## 6. Service Layer (services/)
-Purpose: API and business logic separated from UI.
-Example:
-```
-services/httpClient.js
-services/authService.js
-services/patientService.js
-services/appointmentService.js
-```
-Standard return:
-```js
-{ success: true, data, message?: string }
-{ success: false, error, message?: string }
-```
 Rules:
-- All API calls through services
-- Do not rename endpoints
-- Missing backend method → // TODO: backend endpoint required
+- Quick Grid is NOT a full list. Keep it to **8–16** top actions per category.
+- Quick Grid buttons should display **Code + short name (2 lines)** to reduce mistakes.
+- Selecting an item shows a clear **"Selected"** preview.
+- CTA is **disabled** until valid (tooth/surface constraints met).
+- Provide "Recent" list (last 6) and "Favorites" (top 8–12).
 
-## 7. Store (Pinia)
-```
-useAuthStore()
-usePatientStore()
-useTreatmentStore()
-```
-- Store = global shared state
-- Page-specific small state → inside view
 
-## 8. API Usage Rules
-- No backend code
-- No API mutation
-- Error handling:
-  - Network error → toast/alert
-  - Field error → text-red-500 text-sm under input
+## Responsiveness guidelines
 
-## 9. Restrictions (Critical)
-❌ Rename components  
-❌ Change API endpoints  
-❌ Add backend/DB files  
-❌ Refactor unrelated modules  
-❌ Change global theme  
-✔ Minor UI fixes OK  
-✔ Comments OK  
-✔ ≤20-line local refactor OK  
+- Desktop: sidebar + topbar + main content
+- Tablet landscape: split workspace (fixed left 380–420px, right fill)
+- Tablet portrait: step flow (one task at a time) + sticky bottom action bar
 
-## 10. Approval Rules
-Requires approval:
-- New view file
-- Router change
-- Layout major change
-- Tailwind config/global CSS change
+Do not hardcode pixel values everywhere. Use layout helpers in `layout.css`.
 
-Auto-approved:
-- Spacing adjustments
-- Small UI fixes
-- Comments/cleanup
-- Minor component refactor
 
-## 11. UI/UX Guidelines
-- Doctors need fast, clean, simple UI
-- 1–2 click main workflow rule
-- Critical actions: red + confirmation
-- Forms: label + input aligned, error shown under field
-- Minimal icons
+## Mock data & placeholders
 
-## 12. Task Execution (Codex)
-One command = one feature.
+Use mock data from `src/data/*`:
+- patients
+- treatments
+- diagnosis list
 
-Good:
-- “Implement patient list using patientService.getPatients()”
-- “Integrate ApptVueCal into AppointmentForm”
-- “Refactor LoginPage.vue with Composition API”
+No external API calls unless explicitly requested.
+Images should be optional placeholders (avoid heavy assets).
 
-Bad:
-- “Improve everything”
-- “Rewrite router”
-- “Make UI nicer”
 
-## 13. Example Workflows
-### Patient Detail Page
-- Create views/app/PatientDetailPage.vue
-- Add route
-- Use AppLayout
-- Fetch via patientService.getPatientById(id)
-- UI: basic info + treatment history
+## Output expectations for Codex agent
 
-### Login Page Upgrade
-- Move logic → authService
-- Add loading + error display
+When asked to build a feature:
+- Add/modify components in the correct folder
+- Update store logic in Pinia if required
+- Add/adjust CSS in `tokens.css` / `components.css` / `layout.css` instead of repeating Tailwind
+- Keep UI consistent with touch-first and guardrails
+- Provide runnable code (no missing imports)
 
-### Appointment Calendar
-- Use ApptVueCal.vue
-- Load schedule from appointmentService
-- Tooltip → patient name + time
+
+## PR checklist (self-review)
+
+- [ ] Tap targets are **44–48px** minimum
+- [ ] No hover-only critical actions
+- [ ] Primary CTA is singular and clear
+- [ ] Guardrails exist for required tooth/surface
+- [ ] Tailwind used only for simple utilities
+- [ ] Complex style moved to CSS classes
+- [ ] No long Tailwind class chains (>10) without reason
+- [ ] Store contains business logic; components mostly presentational
+- [ ] Desktop + tablet landscape + portrait considered
+
+
+## What NOT to do
+
+- Do not rewrite the entire design system unless asked.
+- Do not introduce new UI libraries without approval.
+- Do not put large CSS in each component file.
+- Do not over-animate; keep subtle transitions only.
+
+END.

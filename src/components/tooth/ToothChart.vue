@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, computed } from 'vue'
 import ToothItem from './ToothItem.vue'
 import { FDI_NOTATION } from '@/utils/toothHelpers'
@@ -100,8 +100,8 @@ function selectByType(type) {
   <div class="dental-card p-4 md:p-5 space-y-3">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div>
-        <h2 class="text-base md:text-lg font-semibold text-gray-900">Шүдний зураглал</h2>
-        <p class="text-xs text-slate-500">Сонгоод үргэлжлүүлнэ үү</p>
+        <h2 class="text-base md:text-lg font-semibold text-gray-900">1. Шүд сонгох</h2>
+        
       </div>
 
       <div class="flex flex-wrap gap-2">
@@ -124,7 +124,7 @@ function selectByType(type) {
       </div>
     </div>
 
-    <div class="mb-2.5 flex flex-wrap gap-2">
+    <!-- <div class="mb-2.5 flex flex-wrap gap-2">
       <button
         type="button"
         class="px-3 py-1.5 text-xs font-medium bg-green-50 text-green-700 rounded-lg hover:bg-green-100 border border-green-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
@@ -146,7 +146,7 @@ function selectByType(type) {
       >
         Нэмэлт
       </button>
-    </div>
+    </div> -->
 
     <div class="mb-3 md:mb-4">
       <div class="text-xs text-gray-500 mb-1 text-center font-medium">Дээд эрүү</div>

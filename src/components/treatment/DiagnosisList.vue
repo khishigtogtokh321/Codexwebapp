@@ -7,6 +7,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  label: {
+    type: String,
+    default: '3. Онош',
+  },
   disabled: {
     type: Boolean,
     default: false,
@@ -36,10 +40,10 @@ function handleToggle(code) {
 </script>
 
 <template>
-  <div class="space-y-3">
+  ````<div class="space-y-3">
     <div class="flex items-center justify-between">
       <label class="block text-sm font-semibold text-gray-800">
-        3. Онош
+        {{ label }}
         <span v-if="selectedDiagnoses.length > 0" class="text-blue-600">({{ selectedDiagnoses.length }} сонголт)</span>
       </label>
       <span class="text-xs text-slate-500">ICD-10</span>
@@ -50,7 +54,7 @@ function handleToggle(code) {
         v-model="searchQuery"
         type="text"
         placeholder="Онош хайх..."
-        class="input-field pl-8 text-sm"
+        class="input-field h-11 pl-8 text-sm"
         :disabled="disabled"
       />
       <svg
@@ -77,7 +81,7 @@ function handleToggle(code) {
         v-for="diagnosis in filteredDiagnoses"
         :key="diagnosis.code"
         :class="[
-          'flex items-start gap-2.5 p-2.5 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0',
+          'flex items-start gap-2.5 p-3 min-h-[44px] hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0',
           isSelected(diagnosis.code) ? 'bg-blue-50' : '',
         ]"
         @click.prevent="handleToggle(diagnosis.code)"

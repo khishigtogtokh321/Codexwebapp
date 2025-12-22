@@ -4,6 +4,18 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  label: {
+    type: String,
+    default: '2. Гадаргуу сонгох',
+  },
+  compact: {
+    type: Boolean,
+    default: false,
+  },
+  embedded: {
+    type: Boolean,
+    default: false,
+  },
   disabled: {
     type: Boolean,
     default: false,
@@ -24,24 +36,34 @@ function handleToggle(surfaceId) {
 
 function surfaceButtonClass(surfaceId) {
   return [
-    'h-10 w-full text-xs font-semibold rounded-md border transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-blue-500',
+    'h-11 w-full text-xs font-semibold rounded-md border transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-blue-500',
     isSelected(surfaceId) ? 'bg-blue-100 text-blue-700 border-blue-500' : 'bg-gray-50 text-gray-800 border-gray-300',
     props.disabled ? 'opacity-60 cursor-not-allowed' : 'hover:bg-blue-50 hover:border-blue-500',
   ]
+}
+
+function containerClass() {
+  if (props.embedded) return 'space-y-3'
+  return 'w-full max-w-[360px] space-y-3 p-4 bg-white rounded-lg border border-gray-200 shadow-sm'
+}
+
+function gridClass() {
+  return props.compact
+    ? 'grid grid-cols-3 gap-2 w-[120px] sm:w-[140px] mx-auto'
+    : 'grid grid-cols-3 gap-2 w-[150px] sm:w-[170px] mx-auto'
 }
 </script>
 
 <template>
   <div
-    class="w-full max-w-[360px] space-y-3 p-4 bg-white rounded-lg border border-gray-200 shadow-sm"
-    :class="disabled ? 'opacity-90' : ''"
+    :class="[containerClass(), disabled ? 'opacity-90' : '']"
   >
-    <div class="flex items-center justify-between">
-      <label class="text-sm font-semibold text-gray-800">2. Гадаргуу сонгох</label>
-      <span class="text-xs text-slate-500">MOD/BFL</span>
-    </div>
+    <!-- <div class="flex items-center justify-between">
+      <label class="text-sm font-semibold text-gray-800">{{ label }}</label>
 
-    <div class="grid grid-cols-3 gap-2 w-[150px] sm:w-[170px] mx-auto">
+    </div> -->
+
+    <div :class="gridClass()">
       <div></div>
       <button
         type="button"
@@ -93,8 +115,8 @@ function surfaceButtonClass(surfaceId) {
     <p v-if="selectedSurfaces.length > 0" class="text-xs text-blue-700 font-semibold">
       Сонгосон гадаргуу: {{ selectedSurfaces.join(', ') }}
     </p>
-    <p v-else-if="disabled" class="text-xs text-slate-500">Эхлээд шүд сонгоно уу.</p>
-    <p v-else class="text-xs text-gray-500">Гадаргуугаа сонгоно уу.</p>
+    <!-- <p v-else-if="disabled" class="text-xs text-slate-500">Эхлээд шүд сонгоно уу.</p>
+    <p v-else class="text-xs text-gray-500">Гадаргуугаа сонгоно уу.</p> -->
   </div>
 </template>
 
