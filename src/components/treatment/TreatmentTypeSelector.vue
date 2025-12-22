@@ -49,10 +49,7 @@ function isSelected(id) {
 
 <template>
     <div class="flex items-center justify-between">
-      <!-- <label class="text-sm font-semibold text-gray-900 flex items-center gap-2">
-       3. Эмчилгээ сонгох
-      </label> -->
-      
+     
     </div>
 
     <div class="relative">
@@ -124,5 +121,4 @@ function isSelected(id) {
 </template>
 
 <style scoped>
-/* Additional styles if needed */
 </style>
