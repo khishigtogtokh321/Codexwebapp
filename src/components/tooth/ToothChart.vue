@@ -1,5 +1,5 @@
 ﻿<script setup>
-import { ref, computed, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch, nextTick } from 'vue'
 import ToothItem from './ToothItem.vue'
 import { FDI_NOTATION } from '@/utils/toothHelpers'
 
@@ -33,6 +33,31 @@ const allTeeth = computed(() => [
 ])
 
 const lastSelection = ref([])
+const containerRef = ref(null)
+const contentRef = ref(null)
+const scale = ref(1)
+const wrapperHeight = ref('auto')
+let containerObserver
+let contentObserver
+
+function updateScale() {
+  const container = containerRef.value
+  const content = contentRef.value
+
+  if (!container || !content) return
+
+  const previousTransform = content.style.transform
+  content.style.transform = 'none'
+  const { width: naturalWidth, height: naturalHeight } = content.getBoundingClientRect()
+  content.style.transform = previousTransform
+
+  if (!naturalWidth || !naturalHeight) return
+
+  const containerWidth = container.clientWidth
+  const nextScale = Math.min(1, containerWidth / naturalWidth)
+  scale.value = nextScale
+  wrapperHeight.value = `${naturalHeight * nextScale}px`
+}
 
 watch(
   () => props.selectedTeeth,
@@ -46,6 +71,34 @@ watch(
 
 const hasSelection = computed(() => props.selectedTeeth.length > 0)
 const hasUndo = computed(() => lastSelection.value.length > 0)
+
+onMounted(() => {
+  if (containerRef.value) {
+    containerObserver = new ResizeObserver(updateScale)
+    containerObserver.observe(containerRef.value)
+  }
+
+  if (contentRef.value) {
+    contentObserver = new ResizeObserver(updateScale)
+    contentObserver.observe(contentRef.value)
+  }
+
+  nextTick(() => {
+    updateScale()
+  })
+})
+
+onBeforeUnmount(() => {
+  if (containerObserver) {
+    containerObserver.disconnect()
+    containerObserver = null
+  }
+
+  if (contentObserver) {
+    contentObserver.disconnect()
+    contentObserver = null
+  }
+})
 
 function handleToothClick(toothNumber) {
   if (props.multiSelect) {
@@ -100,72 +153,82 @@ function undoSelection() {
         <h2 class="selector-title">1. Шүд сонгох</h2>
     </div>
 
-    <div class="jaw-section">
-      <div class="jaw-label">Дээд эрүү</div>
-      <div class="quadrant-row">
-        <div class="quadrant">
-          <div class="tooth-row tooth-row--reverse">
-            <ToothItem
-              v-for="tooth in upperRightTeeth"
-              :key="tooth"
-              :tooth-number="String(tooth)"
-              :status="getToothStatus(String(tooth))"
-              :is-selected="isSelected(String(tooth))"
-              @click="handleToothClick"
-            />
+    <div class="odontogram-shell" ref="containerRef">
+      <div class="odontogram-wrapper" :style="{ height: wrapperHeight }">
+        <div
+          class="odontogram-content"
+          ref="contentRef"
+          :style="{ transform: `translateX(-50%) scale(${scale})` }"
+        >
+          <div class="jaw-section">
+            <div class="jaw-label">Дээд эрүү</div>
+            <div class="quadrant-row">
+              <div class="quadrant">
+                <div class="tooth-row tooth-row--reverse">
+                  <ToothItem
+                    v-for="tooth in upperRightTeeth"
+                    :key="tooth"
+                    :tooth-number="String(tooth)"
+                    :status="getToothStatus(String(tooth))"
+                    :is-selected="isSelected(String(tooth))"
+                    @click="handleToothClick"
+                  />
+                </div>
+              </div>
+
+              <div class="midline" aria-hidden="true"></div>
+
+              <div class="quadrant">
+                <div class="tooth-row">
+                  <ToothItem
+                    v-for="tooth in upperLeftTeeth"
+                    :key="tooth"
+                    :tooth-number="String(tooth)"
+                    :status="getToothStatus(String(tooth))"
+                    :is-selected="isSelected(String(tooth))"
+                    @click="handleToothClick"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div class="midline" aria-hidden="true"></div>
+          <div class="jaw-divider" aria-hidden="true"></div>
 
-        <div class="quadrant">
-          <div class="tooth-row">
-            <ToothItem
-              v-for="tooth in upperLeftTeeth"
-              :key="tooth"
-              :tooth-number="String(tooth)"
-              :status="getToothStatus(String(tooth))"
-              :is-selected="isSelected(String(tooth))"
-              @click="handleToothClick"
-            />
+          <div class="jaw-section">
+            <div class="quadrant-row">
+              <div class="quadrant">
+                <div class="tooth-row tooth-row--reverse">
+                  <ToothItem
+                    v-for="tooth in lowerRightTeeth"
+                    :key="tooth"
+                    :tooth-number="String(tooth)"
+                    :status="getToothStatus(String(tooth))"
+                    :is-selected="isSelected(String(tooth))"
+                    @click="handleToothClick"
+                  />
+                </div>
+              </div>
+
+              <div class="midline" aria-hidden="true"></div>
+
+              <div class="quadrant">
+                <div class="tooth-row">
+                  <ToothItem
+                    v-for="tooth in lowerLeftTeeth"
+                    :key="tooth"
+                    :tooth-number="String(tooth)"
+                    :status="getToothStatus(String(tooth))"
+                    :is-selected="isSelected(String(tooth))"
+                    @click="handleToothClick"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="jaw-label jaw-label--bottom">Доод эрүү</div>
           </div>
         </div>
       </div>
-    </div>
-
-    <div class="jaw-divider" aria-hidden="true"></div>
-
-    <div class="jaw-section">
-      <div class="quadrant-row">
-        <div class="quadrant">
-          <div class="tooth-row tooth-row--reverse">
-            <ToothItem
-              v-for="tooth in lowerRightTeeth"
-              :key="tooth"
-              :tooth-number="String(tooth)"
-              :status="getToothStatus(String(tooth))"
-              :is-selected="isSelected(String(tooth))"
-              @click="handleToothClick"
-            />
-          </div>
-        </div>
-
-        <div class="midline" aria-hidden="true"></div>
-
-        <div class="quadrant">
-          <div class="tooth-row">
-            <ToothItem
-              v-for="tooth in lowerLeftTeeth"
-              :key="tooth"
-              :tooth-number="String(tooth)"
-              :status="getToothStatus(String(tooth))"
-              :is-selected="isSelected(String(tooth))"
-              @click="handleToothClick"
-            />
-          </div>
-        </div>
-      </div>
-      <div class="jaw-label jaw-label--bottom">Доод эрүү</div>
     </div>
 
     <div class="selector-toolbar">
@@ -218,6 +281,29 @@ function undoSelection() {
   gap: 0.35rem;
 }
 
+.odontogram-shell {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.odontogram-wrapper {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.odontogram-content {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: max-content;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transform-origin: top center;
+}
+
 .selector-count {
   padding: 0.4rem 0.6rem;
   border-radius: 999px;
@@ -236,6 +322,7 @@ function undoSelection() {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  align-items: center;
 }
 
 .jaw-label {
@@ -261,6 +348,7 @@ function undoSelection() {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  align-items: center;
 }
 
 .quadrant-heading {
@@ -363,16 +451,5 @@ function undoSelection() {
     justify-items: start;
   }
 
-  .quadrant-row {
-    grid-template-columns: 1fr;
-  }
-
-  .midline {
-    display: none;
-  }
-
-  .tooth-row {
-    justify-content: center;
-  }
 }
 </style>
