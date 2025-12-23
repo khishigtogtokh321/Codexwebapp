@@ -3,7 +3,7 @@ import { reactive, computed, nextTick, onBeforeUnmount, onMounted, ref, watch } 
 import TopBar from '@/components/layout/TopBar.vue'
 import SideNav from '@/components/layout/SideNav.vue'
 import ToothChart from '@/components/tooth/ToothChart.vue'
-import TreatmentAddStepper from '@/components/treatment/TreatmentAddStepper.vue'
+import RightTreatmentWizard from '@/components/treatment/RightTreatmentWizard.vue'
 import TreatmentQuickAddDrawer from '@/components/treatment/TreatmentQuickAddDrawer.vue'
 import HistorySearchBar from '@/components/history/HistorySearchBar.vue'
 import TreatmentHistoryTable from '@/components/history/TreatmentHistoryTable.vue'
@@ -240,6 +240,22 @@ function handleQuickAdd() {
   closeQuickAdd()
 }
 
+function handleWizardSurfacesUpdate(surfaces) {
+  state.selectedSurfaces = Array.isArray(surfaces) ? surfaces : []
+}
+
+function handleWizardDiagnosisUpdate(diagnosis) {
+  state.selectedDiagnoses = diagnosis?.code ? [diagnosis.code] : []
+}
+
+function handleWizardTreatmentTypesUpdate(types) {
+  state.selectedTreatments = Array.isArray(types) ? types : []
+}
+
+function handleWizardConfirm() {
+  handleAddTreatment()
+}
+
 function handleSearch(query) {
   searchQuery.value = query
 }
@@ -396,17 +412,15 @@ watch(
 
             <div class="lg:col-span-4 lg:pl-1 space-y-3">
               <div class="sticky top-4">
-                <TreatmentAddStepper
-                  :selected-teeth="selectedTeethList"
-                  :selected-surfaces="selectedSurfacesList"
-                  :selected-diagnoses="state.selectedDiagnoses"
-                  :selected-treatments="selectedTreatmentIds"
-                  :treatments="availableTreatments"
-                  @surface-toggle="selectSurface"
-                  @diagnosis-toggle="toggleDiagnosis"
-                  @treatment-toggle="selectTreatment"
-                  @add-treatment="handleAddTreatment"
-                />
+                <div class="flex justify-end">
+                  <RightTreatmentWizard
+                    :selected-teeth="selectedTeethList"
+                    @update:surfaces="handleWizardSurfacesUpdate"
+                    @update:diagnosis="handleWizardDiagnosisUpdate"
+                    @update:treatmentTypes="handleWizardTreatmentTypesUpdate"
+                    @confirm="handleWizardConfirm"
+                  />
+                </div>
               </div>
             </div>
           </div>

@@ -13,14 +13,17 @@ export const treatmentTypes = [
   { id: 'cleaning', label: 'Шүд цэвэрлэгээ', category: 'preventive', toothRequired: true },
   { id: 'scaling', label: 'Усалгаатай цэвэрлэгээ', category: 'preventive', toothRequired: true },
   { id: 'fluoride', label: 'Фтор түрхлэг', category: 'preventive', toothRequired: true },
+  { id: 'prophy-fl', label: 'Prophy/Fl', category: 'preventive', toothRequired: true },
   { id: 'sealant', label: 'Лак/битүүмжлэл', category: 'preventive', toothRequired: true },
 
   // Restorative
   { id: 'filling', label: 'Ломбдолт', category: 'restorative', toothRequired: true },
   { id: 'composite', label: 'Композит ломбо', category: 'restorative', toothRequired: true },
   { id: 'amalgam', label: 'Амальгам ломбо', category: 'restorative', toothRequired: true },
+  { id: 'build-up', label: 'Build up/Pins', category: 'restorative', toothRequired: true },
   { id: 'inlay', label: 'Инлей', category: 'restorative', toothRequired: true },
   { id: 'onlay', label: 'Онлей', category: 'restorative', toothRequired: true },
+  { id: 'inlay-onlay', label: 'Inlay/Onlay', category: 'restorative', toothRequired: true },
 
   // Endodontic
   { id: 'root-canal', label: 'Суваг эмчилгээ', category: 'endodontic', toothRequired: true },
@@ -31,6 +34,8 @@ export const treatmentTypes = [
   // Prosthetic
   { id: 'crown', label: 'Титэм', category: 'prosthetic', toothRequired: true },
   { id: 'bridge', label: 'Гүүрэн протез', category: 'prosthetic', toothRequired: true },
+  { id: 'bridge-abutment', label: 'Bridge Abutment', category: 'prosthetic', toothRequired: true },
+  { id: 'bridge-pontic', label: 'Bridge Pontic', category: 'prosthetic', toothRequired: true },
   { id: 'denture', label: 'Салдаг хиймэл шүд', category: 'prosthetic', toothRequired: true },
   { id: 'partial-denture', label: 'Хэсгийн салдаг хиймэл', category: 'prosthetic', toothRequired: true },
   { id: 'implant', label: 'Имплант', category: 'prosthetic', toothRequired: true },
@@ -46,6 +51,7 @@ export const treatmentTypes = [
   // Periodontal
   { id: 'perio-therapy', label: 'Буйлны эмчилгээ', category: 'periodontal', toothRequired: true },
   { id: 'deep-cleaning', label: 'Гүн цэвэрлэгээ', category: 'periodontal', toothRequired: true },
+  { id: 'period-srp', label: 'Period/SRP', category: 'periodontal', toothRequired: true },
   { id: 'gum-surgery', label: 'Буйлны мэс засал', category: 'periodontal', toothRequired: true },
   { id: 'graft', label: 'Буйл шилжүүлэн суулгалт', category: 'periodontal', toothRequired: true },
 
