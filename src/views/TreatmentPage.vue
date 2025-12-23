@@ -3,10 +3,10 @@ import { reactive, computed, nextTick, onBeforeUnmount, onMounted, ref, watch } 
 import TopBar from '@/components/layout/TopBar.vue'
 import SideNav from '@/components/layout/SideNav.vue'
 import ToothChart from '@/components/tooth/ToothChart.vue'
+import TreatmentAddStepper from '@/components/treatment/TreatmentAddStepper.vue'
 import TreatmentQuickAddDrawer from '@/components/treatment/TreatmentQuickAddDrawer.vue'
 import HistorySearchBar from '@/components/history/HistorySearchBar.vue'
 import TreatmentHistoryTable from '@/components/history/TreatmentHistoryTable.vue'
-import RightTreatmentWizard from '@/components/treatment/RightTreatmentWizard.vue'
 import { treatmentTypes, getTreatmentById } from '@/data/treatmentTypes'
 import { diagnoses, mockToothStatuses } from '@/data'
 import { useToothStatus } from '@/composables/useToothStatus'
@@ -43,11 +43,25 @@ const desktopExpanded = computed(() => isLgUp.value && (hovered.value || pinned.
 const { toothStatuses, updateToothStatusFromTreatment } = useToothStatus(mockToothStatuses)
 
 const selectedTeethList = computed(() => state.selectedTeeth)
+const selectedSurfacesList = computed(() => state.selectedSurfaces)
 const selectedTreatmentIds = computed(() => state.selectedTreatments)
 
 const hasSelectedTeeth = computed(() => selectedTeethList.value.length > 0)
+const hasSelectedTreatments = computed(() => selectedTreatmentIds.value.length > 0)
 
 const availableTreatments = computed(() => treatmentTypes)
+
+const selectedDiagnosisLabels = computed(() => getDiagnosisLabels(state.selectedDiagnoses))
+
+const diagnosisDisabled = computed(() => !hasSelectedTeeth.value)
+const requiresToothSelection = computed(() =>
+  getSelectedTreatments(state.selectedTreatments).some(
+    (treatment) => getTreatmentScope(treatment) === TREATMENT_SCOPE.TOOTH,
+  ),
+)
+const canSubmit = computed(
+  () => hasSelectedTreatments.value && (!requiresToothSelection.value || hasSelectedTeeth.value),
+)
 
 const quickAddRequiresToothSelection = computed(() =>
   getSelectedTreatments(quickAddState.selectedTreatments).some(
@@ -97,16 +111,21 @@ function selectTooth(teeth) {
   }
 }
 
-function handleSurfacesUpdate(surfaces = []) {
-  state.selectedSurfaces = Array.isArray(surfaces) ? surfaces : []
+function selectSurface(surface) {
+  if (!hasSelectedTeeth.value) return
+  if (state.selectedSurfaces.includes(surface)) {
+    state.selectedSurfaces = state.selectedSurfaces.filter((s) => s !== surface)
+  } else {
+    state.selectedSurfaces = [...state.selectedSurfaces, surface]
+  }
 }
 
-function handleDiagnosisUpdate(diagnosis) {
-  state.selectedDiagnoses = diagnosis?.code ? [diagnosis.code] : []
-}
-
-function handleTreatmentTypesUpdate(types = []) {
-  state.selectedTreatments = Array.isArray(types) ? types : []
+function selectTreatment(typeId) {
+  const treatment = getTreatmentById(typeId)
+  if (!treatment) return
+  state.selectedTreatments = state.selectedTreatments.includes(typeId)
+    ? state.selectedTreatments.filter((id) => id !== typeId)
+    : [...state.selectedTreatments, typeId]
 }
 
 function canCommitSelection({ selectedTeeth = [], selectedTreatments = [] }) {
@@ -221,15 +240,6 @@ function handleQuickAdd() {
   closeQuickAdd()
 }
 
-function handleWizardConfirm(payload = {}) {
-  if (!payload?.treatmentTypes?.length) return
-  handleAddTreatment({
-    selectedSurfaces: payload.surfaces ?? state.selectedSurfaces,
-    selectedDiagnoses: payload.diagnosis?.code ? [payload.diagnosis.code] : state.selectedDiagnoses,
-    selectedTreatments: payload.treatmentTypes,
-  })
-}
-
 function handleSearch(query) {
   searchQuery.value = query
 }
@@ -240,6 +250,15 @@ function handleFilterStatus(status) {
 
 function handleDeleteTreatment(treatmentId) {
   state.treatmentLog = state.treatmentLog.filter((t) => t.id !== treatmentId)
+}
+
+function toggleDiagnosis(code) {
+  if (diagnosisDisabled.value) return
+  if (state.selectedDiagnoses.includes(code)) {
+    state.selectedDiagnoses = state.selectedDiagnoses.filter((d) => d !== code)
+  } else {
+    state.selectedDiagnoses = [...state.selectedDiagnoses, code]
+  }
 }
 
 function handleStatusChange(status) {
@@ -377,12 +396,16 @@ watch(
 
             <div class="lg:col-span-4 lg:pl-1 space-y-3">
               <div class="sticky top-4">
-                <RightTreatmentWizard
+                <TreatmentAddStepper
                   :selected-teeth="selectedTeethList"
-                  @update:surfaces="handleSurfacesUpdate"
-                  @update:diagnosis="handleDiagnosisUpdate"
-                  @update:treatmentTypes="handleTreatmentTypesUpdate"
-                  @confirm="handleWizardConfirm"
+                  :selected-surfaces="selectedSurfacesList"
+                  :selected-diagnoses="state.selectedDiagnoses"
+                  :selected-treatments="selectedTreatmentIds"
+                  :treatments="availableTreatments"
+                  @surface-toggle="selectSurface"
+                  @diagnosis-toggle="toggleDiagnosis"
+                  @treatment-toggle="selectTreatment"
+                  @add-treatment="handleAddTreatment"
                 />
               </div>
             </div>
