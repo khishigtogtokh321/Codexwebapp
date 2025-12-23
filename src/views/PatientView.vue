@@ -1,6 +1,5 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
-import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import TopBar from '@/components/clinic/TopBar.vue'
 import PatientProfileCard from '@/components/clinic/PatientProfileCard.vue'
 import PatientHealthWarnings from '@/components/clinic/PatientHealthWarnings.vue'
@@ -133,10 +132,8 @@ const pinned = ref(false)
 const drawerOpen = ref(false)
 const isLgUp = ref(false)
 const desktopExpanded = computed(() => isLgUp.value && (hovered.value || pinned.value))
-<<<<<<< ours
-=======
-const contentPaddingClass = computed(() => (desktopExpanded.value ? 'lg:pl-72' : 'lg:pl-24'))
->>>>>>> theirs
+const drawerTriggerRef = ref(null)
+const drawerCloseRef = ref(null)
 
 function toggleSidebar() {
   showSidebar.value = !showSidebar.value
@@ -172,44 +169,29 @@ function handleAddTreatment() {
 
 function toggleNav() {
   pinned.value = !pinned.value
-  pinned.value = !pinned.value
 }
 
 function openMobileNav() {
   drawerOpen.value = true
-  drawerOpen.value = true
 }
 
 function closeMobileNav() {
-  drawerOpen.value = false
   drawerOpen.value = false
 }
 
 function handleNavigate(id) {
   window.location.hash = `#${id}`
   if (drawerOpen.value) {
-<<<<<<< ours
     closeMobileNav()
   }
 }
 
 const handleEsc = (event) => {
   if (event.key === 'Escape' && drawerOpen.value) {
-=======
->>>>>>> theirs
     closeMobileNav()
   }
 }
 
-<<<<<<< ours
-=======
-const handleEsc = (event) => {
-  if (event.key === 'Escape' && drawerOpen.value) {
-    closeMobileNav()
-  }
-}
-
->>>>>>> theirs
 let mediaQuery
 
 const updateBreakpoint = () => {
@@ -236,12 +218,18 @@ onBeforeUnmount(() => {
 
 watch(
   () => drawerOpen.value,
-  (open) => {
+  async (open) => {
     const html = document.documentElement
     const body = document.body
     if (!html || !body) return
     html.classList.toggle('overflow-hidden', open)
     body.classList.toggle('overflow-hidden', open)
+    if (open) {
+      await nextTick()
+      drawerCloseRef.value?.focus?.()
+    } else if (!isLgUp.value) {
+      drawerTriggerRef.value?.focus?.()
+    }
   },
 )
 
@@ -301,18 +289,13 @@ function saveDetail() {
 
 <template>
   <div class="flex min-h-screen bg-slate-50">
-    <aside
-      class="relative hidden flex-shrink-0 lg:block"
-      @mouseenter="hovered = true"
-      @mouseleave="hovered = false"
-    >
-<<<<<<< ours
+    <aside class="relative z-40 hidden flex-shrink-0 lg:block">
       <div class="w-24"></div>
-=======
->>>>>>> theirs
       <div
         class="absolute inset-y-0 left-0 transition-all duration-300 ease-in-out"
-        :class="desktopExpanded ? 'w-72' : 'w-24'"
+        :class="desktopExpanded ? 'w-48' : 'w-24'"
+        @mouseenter="hovered = true"
+        @mouseleave="hovered = false"
       >
         <SideNav
           :is-collapsed="!desktopExpanded"
@@ -325,20 +308,13 @@ function saveDetail() {
       </div>
     </aside>
 
-    <div
-      class="flex-1 overflow-hidden transition-[padding-left] duration-200 ease-out"
-      :class="contentPaddingClass"
-    >
-    <div
-      class="flex-1 overflow-hidden transition-[padding-left] duration-200 ease-out"
-      :class="contentPaddingClass"
-    >
+    <div class="flex-1 overflow-hidden">
       <div class="flex flex-col">
         <div class="flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 shadow-sm lg:hidden">
           <button
             type="button"
+            ref="drawerTriggerRef"
             class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            aria-label="Open navigation"
             aria-label="Open navigation"
             @click="openMobileNav"
           >
@@ -634,16 +610,7 @@ function saveDetail() {
     leave-from-class="opacity-100"
     leave-to-class="opacity-0"
   >
-  <Transition
-    enter-active-class="transition-opacity duration-200"
-    leave-active-class="transition-opacity duration-200"
-    enter-from-class="opacity-0"
-    enter-to-class="opacity-100"
-    leave-from-class="opacity-100"
-    leave-to-class="opacity-0"
-  >
     <div
-      v-if="drawerOpen"
       v-if="drawerOpen"
       class="fixed inset-0 z-40 bg-black/50 lg:hidden"
       @click="closeMobileNav"
@@ -657,18 +624,7 @@ function saveDetail() {
     leave-from-class="translate-x-0"
     leave-to-class="-translate-x-full"
   >
-  </Transition>
-  <Transition
-    enter-active-class="transform transition-transform duration-300"
-    leave-active-class="transform transition-transform duration-300"
-    enter-from-class="-translate-x-full"
-    enter-to-class="translate-x-0"
-    leave-from-class="translate-x-0"
-    leave-to-class="-translate-x-full"
-  >
     <div
-      v-if="drawerOpen"
-      class="fixed inset-y-0 left-0 z-50 w-72 max-w-[90vw] bg-white shadow-2xl lg:hidden"
       v-if="drawerOpen"
       class="fixed inset-y-0 left-0 z-50 w-72 max-w-[90vw] bg-white shadow-2xl lg:hidden"
     >
@@ -679,8 +635,8 @@ function saveDetail() {
         </div>
         <button
           type="button"
+          ref="drawerCloseRef"
           class="rounded-md p-2 text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-          aria-label="Close navigation"
           aria-label="Close navigation"
           @click="closeMobileNav"
         >
@@ -690,8 +646,6 @@ function saveDetail() {
         </button>
       </div>
       <SideNav :is-collapsed="false" :allow-collapse="false" active-id="patients" @toggle="closeMobileNav" @navigate="handleNavigate" />
-      <SideNav :is-collapsed="false" :allow-collapse="false" active-id="patients" @toggle="closeMobileNav" @navigate="handleNavigate" />
     </div>
-  </Transition>
   </Transition>
 </template>

@@ -177,11 +177,11 @@ function handleAdd() {
               v-for="mode in modeOptions"
               :key="mode.id"
               type="button"
-              class="min-h-[56px] w-full rounded-xl border px-4 py-3 text-left transition"
+              class="min-h-[56px] w-full rounded-xl border px-4 py-3 text-left bg-white text-slate-800 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/25"
               :class="
                 selectedMode === mode.id
-                  ? 'border-blue-200 bg-blue-50 shadow-sm'
-                  : 'border-gray-200 bg-white hover:border-blue-200 hover:bg-blue-50/40'
+                  ? 'border-2 border-blue-600 ring-2 ring-blue-600/15 shadow-none'
+                  : 'border-slate-200 hover:border-slate-400 hover:shadow-sm'
               "
               @click="selectMode(mode.id)"
             >
@@ -191,8 +191,8 @@ function handleAdd() {
                   <p class="text-xs text-slate-500">{{ mode.helper }}</p>
                 </div>
                 <span
-                  class="flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold"
-                  :class="selectedMode === mode.id ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'"
+                  class="flex h-7 w-7 items-center justify-center rounded-full border text-xs font-semibold transition-colors duration-150"
+                  :class="selectedMode === mode.id ? 'border-blue-600 bg-white text-blue-600' : 'border-slate-200 bg-white text-slate-500'"
                 >
                   {{ mode.id === 'general' ? 'G' : 'T' }}
                 </span>

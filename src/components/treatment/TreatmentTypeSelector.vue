@@ -57,7 +57,7 @@ function isSelected(id) {
         v-model="searchQuery"
         type="text"
         placeholder="Эмчилгээ хайх..."
-        class="input-field h-9 pl-8 text-sm"
+        class="input-field h-9 pl-8 text-sm border-slate-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/15 transition-colors duration-150"
         :disabled="disabled"
       />
       <svg
@@ -82,7 +82,7 @@ function isSelected(id) {
     </select>
 
     <div
-      class="h-[200px] overflow-y-auto border border-gray-200 rounded-lg bg-white scrollbar-thin"
+      class="h-[200px] overflow-y-auto border border-slate-200 rounded-lg bg-white scrollbar-thin"
       :class="disabled ? 'opacity-60 pointer-events-none' : ''"
     >
       <div v-if="filteredTreatmentTypes.length === 0" class="p-3 text-center text-gray-500 text-sm">
@@ -94,10 +94,10 @@ function isSelected(id) {
         type="button"
         :disabled="disabled"
         :class="[
-          'w-full text-left px-3 py-3 min-h-[44px] text-sm border-b border-gray-100 last:border-b-0 transition-all duration-150',
+          'w-full text-left px-3 py-3 min-h-[44px] text-sm bg-white border border-slate-200 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/25',
           isSelected(type.id)
-            ? 'bg-blue-600 text-white font-semibold shadow-sm'
-            : 'hover:bg-blue-50 text-gray-800',
+            ? 'bg-white text-slate-900 font-semibold border-2 border-blue-600 ring-2 ring-blue-600/15 shadow-none'
+            : 'text-slate-800 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-900',
           disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer',
         ]"
         @click="handleSelect(type.id)"

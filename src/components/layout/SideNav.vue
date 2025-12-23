@@ -18,13 +18,8 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  isPinned: {
-    type: Boolean,
-    default: false,
-  },
 })
 
-const emit = defineEmits(['toggle', 'navigate', 'toggle-pin'])
 const emit = defineEmits(['toggle', 'navigate', 'toggle-pin'])
 
 const iconPaths = {
@@ -40,10 +35,10 @@ const navItems = [
   { id: 'dashboard', label: 'Самбар', icon: 'dashboard', pathHint: 'dashboard' },
   { id: 'treatments', label: 'Эмчилгээ', icon: 'treatments', pathHint: 'treatment' },
   { id: 'patients', label: 'Өвчтөн', icon: 'patients', pathHint: 'patient' },
-  { id: 'appointments', label: 'Цаглал', icon: 'appointments', pathHint: 'appointment' },
+  { id: 'appointments', label: 'Цаг товлох', icon: 'appointments', pathHint: 'appointment' },
   { id: 'reports', label: 'Тайлан', icon: 'reports', pathHint: 'report' },
   { id: 'settings', label: 'Тохиргоо', icon: 'settings', pathHint: 'setting' },
-]
+] 
 
 const internalActiveId = ref('treatments')
 
@@ -51,9 +46,7 @@ const resolvedActive = computed(() => props.activeId || internalActiveId.value)
 
 const highlightClass = computed(
   () => (id) =>
-    resolvedActive.value === id
-      ? 'bg-blue-600 text-white border-blue-500 font-semibold'
-      : 'text-gray-200 border-transparent hover:bg-gray-800 hover:border-blue-500 hover:text-white',
+    resolvedActive.value === id ? 'side-nav__item--active font-semibold' : '',
 )
 
 const resolveActive = () => {
@@ -93,84 +86,30 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-<<<<<<< ours
-  <div class="relative flex h-full flex-col overflow-hidden rounded-r-2xl bg-gray-900 text-white shadow-xl transition-all duration-300">
-    <div class="flex items-center border-b border-gray-800 px-3 py-3 sm:px-4" :class="props.isCollapsed ? 'justify-center' : 'justify-between'">
-=======
-  <div class="relative flex h-full flex-col overflow-visible rounded-r-2xl bg-gray-900 text-white shadow-xl transition-all duration-300">
-    <div class="relative flex items-center border-b border-gray-800 px-3 py-3 sm:px-4" :class="props.isCollapsed ? 'justify-center' : 'justify-between'">
->>>>>>> theirs
+  <div class="side-nav relative flex h-full flex-col overflow-visible rounded-r-2xl shadow-xl transition-all duration-300">
+    <div class="side-nav__divider relative flex items-center border-b px-3 py-3 sm:px-4" :class="props.isCollapsed ? 'justify-center' : 'justify-between'">
       <div class="flex items-center gap-2">
-        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold">A</div>
+        <div class="flex h-9 w-9 items-center justify-center rounded-lg  text-sm font-bold"> <img src="../../assets/images/ashidsoftrm.png" alt="Logo"></div>
         <div v-if="!props.isCollapsed" class="transition-opacity duration-200">
           <h1 class="text-base font-bold leading-tight">AshidSoft</h1>
-        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold">A</div>
-        <div v-if="!props.isCollapsed" class="transition-opacity duration-200">
-          <h1 class="text-base font-bold leading-tight">AshidSoft</h1>
-          <p class="text-xs text-gray-400">Dental</p>
+          <p class="side-nav__muted text-xs">Dental</p>
         </div>
       </div>
 
-<<<<<<< ours
       <div v-if="props.allowCollapse" class="flex items-center gap-2" :class="props.isCollapsed ? 'hidden' : ''">
         <button
           type="button"
-          class="inline-flex h-9 w-9 items-center justify-center rounded-md text-gray-200 transition hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="side-nav__icon-btn side-nav__focus inline-flex h-9 w-9 items-center justify-center rounded-md transition focus:outline-none"
           :aria-pressed="props.isPinned"
           aria-label="Toggle pin"
           @click.stop="emit('toggle-pin')"
         >
-=======
-      <button
-        v-if="props.allowCollapse"
-        type="button"
-        class="absolute -right-4 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-gray-800 text-gray-200 shadow-lg transition hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 lg:flex"
-        :aria-pressed="props.isPinned"
-        aria-label="Toggle sidebar pin"
-        title="Toggle sidebar pin"
-        @click.stop="emit('toggle-pin')"
-        class="absolute -right-4 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-gray-800 text-gray-200 shadow-lg transition hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 lg:flex"
-        :aria-pressed="props.isPinned"
-        aria-label="Toggle sidebar pin"
-        title="Toggle sidebar pin"
-        @click.stop="emit('toggle-pin')"
-      >
-        <svg
-          class="h-5 w-5 transition-transform duration-200"
-          :class="props.isCollapsed ? '' : 'rotate-180'"
-          class="h-5 w-5 transition-transform duration-200"
-          :class="props.isCollapsed ? '' : 'rotate-180'"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.8"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6" />
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6" />
-        </svg>
-      </button>
-
-      <div v-if="props.allowCollapse" class="flex items-center gap-2" :class="props.isCollapsed ? 'hidden' : ''">
-        <button
-          type="button"
-          class="inline-flex h-9 w-9 items-center justify-center rounded-md text-gray-200 transition hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          :aria-pressed="props.isPinned"
-          aria-label="Toggle pin"
-          @click.stop="emit('toggle-pin')"
-        >
->>>>>>> theirs
-          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="m8.25 10.75 7.5-4.5V6a1.5 1.5 0 0 1 1.5 1.5v5.19a2 2 0 0 1-.59 1.41l-1.27 1.27a1 1 0 0 1-.7.29H12.5l-1.5 3-1-3H8.25"
-            />
-          </svg>
+          
         </button>
 
         <button
           type="button"
-          class="inline-flex h-9 w-9 items-center justify-center rounded-md text-gray-200 transition hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="side-nav__icon-btn side-nav__focus inline-flex h-9 w-9 items-center justify-center rounded-md transition focus:outline-none"
           aria-label="Collapse sidebar"
           @click.stop="emit('toggle')"
         >
@@ -179,22 +118,35 @@ onBeforeUnmount(() => {
           </svg>
         </button>
       </div>
+
+      <button
+        v-if="props.allowCollapse"
+        type="button"
+        class="side-nav__floating-toggle side-nav__focus absolute -right-4 top-1/2 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border shadow-md transition focus:outline-none lg:inline-flex"
+        :aria-label="props.isPinned ? 'Unpin sidebar' : 'Pin sidebar'"
+        :title="props.isPinned ? 'Unpin sidebar' : 'Pin sidebar'"
+        @click.stop="emit('toggle-pin')"
+      >
+        <svg
+          class="h-4 w-4 transition-transform duration-200"
+          :class="props.isCollapsed ? 'rotate-0' : 'rotate-180'"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="m9 5 7 7-7 7" />
+        </svg>
+      </button>
     </div>
 
-    <nav class="flex-1 space-y-1 px-2 py-2 sm:px-3">
     <nav class="flex-1 space-y-1 px-2 py-2 sm:px-3">
       <button
         v-for="item in navItems"
         :key="item.id"
         :title="props.isCollapsed ? item.label : ''"
         :aria-label="item.label"
-        class="group/nav-item relative flex w-full items-center rounded-xl border px-2.5 py-2 text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-0"
-        :class="[
-          props.isCollapsed ? 'flex-col gap-1 text-[11px]' : 'gap-3',
-          props.isCollapsed ? 'px-2 py-3 text-center' : '',
-          highlightClass(item.id),
-        ]"
-        class="group/nav-item relative flex w-full items-center rounded-xl border px-2.5 py-2 text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-0"
+        class="side-nav__item side-nav__focus group/nav-item relative flex w-full items-center rounded-xl px-2.5 py-2 text-left transition-all duration-200 focus:outline-none"
         :class="[
           props.isCollapsed ? 'flex-col gap-1 text-[11px]' : 'gap-3',
           props.isCollapsed ? 'px-2 py-3 text-center' : '',
@@ -203,7 +155,6 @@ onBeforeUnmount(() => {
         @click="handleSelect(item.id)"
       >
         <svg
-          class="h-5 w-5 shrink-0"
           class="h-5 w-5 shrink-0"
           viewBox="0 0 24 24"
           fill="none"
@@ -223,32 +174,20 @@ onBeforeUnmount(() => {
         >
           {{ item.label }}
         </span>
-        <span
-          class="truncate text-sm transition-all duration-200"
-          :class="props.isCollapsed ? 'text-[11px] leading-tight' : ''"
-        >
-          {{ item.label }}
-        </span>
       </button>
     </nav>
 
-    <div class="border-t border-gray-800 px-3 py-3 sm:px-4" :class="props.isCollapsed ? 'text-center' : ''">
-    <div class="border-t border-gray-800 px-3 py-3 sm:px-4" :class="props.isCollapsed ? 'text-center' : ''">
+    <div class="side-nav__divider border-t px-3 py-3 sm:px-4" :class="props.isCollapsed ? 'text-center' : ''">
       <div
-        class="flex items-center rounded-xl px-3 py-2 transition-all hover:bg-gray-800"
-        :class="props.isCollapsed ? 'flex-col gap-1' : 'gap-3'"
-        class="flex items-center rounded-xl px-3 py-2 transition-all hover:bg-gray-800"
+        class="side-nav__hoverable flex items-center rounded-xl px-3 py-2 transition-all"
         :class="props.isCollapsed ? 'flex-col gap-1' : 'gap-3'"
       >
-        <div class="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-sm font-bold">Dr</div>
-        <div v-if="!props.isCollapsed" class="transition-opacity duration-200">
-        <div class="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-sm font-bold">Dr</div>
+        <div class="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">Dr</div>
         <div v-if="!props.isCollapsed" class="transition-opacity duration-200">
           <p class="text-sm font-medium">Dr. D</p>
-          <p class="text-xs text-gray-400">Шүдний эмч</p>
+          <p class="side-nav__muted text-xs">Шүдний эмч</p>
         </div>
-        <span v-else class="text-[11px] text-gray-300">Dr. D</span>
-        <span v-else class="text-[11px] text-gray-300">Dr. D</span>
+        <span v-else class="side-nav__muted text-[11px]">Dr. D</span>
       </div>
     </div>
   </div>

@@ -1,6 +1,5 @@
 ﻿<script setup>
-import { reactive, computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { reactive, computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { reactive, computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import TopBar from '@/components/layout/TopBar.vue'
 import SideNav from '@/components/layout/SideNav.vue'
 import ToothChart from '@/components/tooth/ToothChart.vue'
@@ -31,21 +30,15 @@ const hovered = ref(false)
 const pinned = ref(false)
 const drawerOpen = ref(false)
 const isLgUp = ref(false)
-const hovered = ref(false)
-const pinned = ref(false)
-const drawerOpen = ref(false)
-const isLgUp = ref(false)
 const isQuickAddOpen = ref(false)
+const drawerTriggerRef = ref(null)
+const drawerCloseRef = ref(null)
 
 const quickAddState = reactive({
   selectedTreatments: [],
 })
 
 const desktopExpanded = computed(() => isLgUp.value && (hovered.value || pinned.value))
-<<<<<<< ours
-=======
-const contentPaddingClass = computed(() => (desktopExpanded.value ? 'lg:pl-72' : 'lg:pl-24'))
->>>>>>> theirs
 
 const { toothStatuses, updateToothStatusFromTreatment } = useToothStatus(mockToothStatuses)
 
@@ -278,16 +271,13 @@ function handlePatientSelected(patient) {
 
 function toggleSidebar() {
   pinned.value = !pinned.value
-  pinned.value = !pinned.value
 }
 
 function openMobileNav() {
   drawerOpen.value = true
-  drawerOpen.value = true
 }
 
 function closeMobileNav() {
-  drawerOpen.value = false
   drawerOpen.value = false
 }
 
@@ -300,13 +290,6 @@ function handleNavigate(id) {
 
 const handleEsc = (event) => {
   if (event.key === 'Escape' && drawerOpen.value) {
-  if (drawerOpen.value) {
-    closeMobileNav()
-  }
-}
-
-const handleEsc = (event) => {
-  if (event.key === 'Escape' && drawerOpen.value) {
     closeMobileNav()
   }
 }
@@ -337,47 +320,18 @@ onBeforeUnmount(() => {
 
 watch(
   () => drawerOpen.value,
-  (open) => {
+  async (open) => {
     const html = document.documentElement
     const body = document.body
     if (!html || !body) return
     html.classList.toggle('overflow-hidden', open)
     body.classList.toggle('overflow-hidden', open)
-  },
-)
-
-let mediaQuery
-
-const updateBreakpoint = () => {
-  if (typeof window === 'undefined') return
-  if (!mediaQuery) {
-    mediaQuery = window.matchMedia('(min-width: 1024px)')
-  }
-  isLgUp.value = mediaQuery?.matches || false
-  if (mediaQuery?.matches) {
-    drawerOpen.value = false
-  }
-}
-
-onMounted(() => {
-  updateBreakpoint()
-  mediaQuery?.addEventListener('change', updateBreakpoint)
-  window.addEventListener('keydown', handleEsc)
-})
-
-onBeforeUnmount(() => {
-  mediaQuery?.removeEventListener('change', updateBreakpoint)
-  window.removeEventListener('keydown', handleEsc)
-})
-
-watch(
-  () => drawerOpen.value,
-  (open) => {
-    const html = document.documentElement
-    const body = document.body
-    if (!html || !body) return
-    html.classList.toggle('overflow-hidden', open)
-    body.classList.toggle('overflow-hidden', open)
+    if (open) {
+      await nextTick()
+      drawerCloseRef.value?.focus?.()
+    } else if (!isLgUp.value) {
+      drawerTriggerRef.value?.focus?.()
+    }
   },
 )
 </script>
@@ -385,19 +339,13 @@ watch(
 <template>
   <div class="flex flex-col md:flex-row min-h-screen bg-gray-50 overflow-hidden">
 
-
-    <aside
-      class="relative hidden flex-shrink-0 lg:block"
-      @mouseenter="hovered = true"
-      @mouseleave="hovered = false"
-    >
-<<<<<<< ours
+    <aside class="relative z-40 hidden flex-shrink-0 lg:block">
       <div class="w-24"></div>
-=======
->>>>>>> theirs
       <div
-        class="absolute inset-y-0 left-0 transition-all duration-300 ease-in-out"
-        :class="desktopExpanded ? 'w-72' : 'w-24'"
+        class="absolute top-0 h-full left-0 transition-all duration-300 ease-in-out"
+        :class="desktopExpanded ? 'w-48' : 'w-24'"
+        @mouseenter="hovered = true"
+        @mouseleave="hovered = false"
       >
         <SideNav
           :is-collapsed="!desktopExpanded"
@@ -410,19 +358,12 @@ watch(
       </div>
     </aside>
 
-<<<<<<< ours
     <div class="relative flex flex-1 flex-col overflow-hidden">
-=======
-    <div
-      class="relative flex flex-1 flex-col overflow-hidden transition-[padding-left] duration-200 ease-out"
-      :class="contentPaddingClass"
-    >
->>>>>>> theirs
       <div class="lg:hidden flex items-center gap-2 px-4 py-3 border-b border-gray-200 bg-white">
         <button
           type="button"
+          ref="drawerTriggerRef"
           class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          aria-label="Open navigation"
           aria-label="Open navigation"
           @click="openMobileNav"
         >
@@ -521,16 +462,7 @@ watch(
       leave-from-class="opacity-100"
       leave-to-class="opacity-0"
     >
-    <Transition
-      enter-active-class="transition-opacity duration-200"
-      leave-active-class="transition-opacity duration-200"
-      enter-from-class="opacity-0"
-      enter-to-class="opacity-100"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0"
-    >
       <div
-        v-if="drawerOpen"
         v-if="drawerOpen"
         class="fixed inset-0 z-40 bg-black/50 lg:hidden"
         @click="closeMobileNav"
@@ -544,18 +476,7 @@ watch(
       leave-from-class="translate-x-0"
       leave-to-class="-translate-x-full"
     >
-    </Transition>
-    <Transition
-      enter-active-class="transform transition-transform duration-300"
-      leave-active-class="transform transition-transform duration-300"
-      enter-from-class="-translate-x-full"
-      enter-to-class="translate-x-0"
-      leave-from-class="translate-x-0"
-      leave-to-class="-translate-x-full"
-    >
       <div
-        v-if="drawerOpen"
-        class="fixed inset-y-0 left-0 z-50 w-72 max-w-[90vw] bg-gray-900 shadow-2xl transition-transform duration-300 lg:hidden"
         v-if="drawerOpen"
         class="fixed inset-y-0 left-0 z-50 w-72 max-w-[90vw] bg-gray-900 shadow-2xl transition-transform duration-300 lg:hidden"
       >
@@ -566,8 +487,8 @@ watch(
           </div>
           <button
             type="button"
+            ref="drawerCloseRef"
             class="p-2 rounded-md text-gray-200 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            aria-label="Close navigation"
             aria-label="Close navigation"
             @click="closeMobileNav"
           >
@@ -583,7 +504,6 @@ watch(
           @navigate="handleNavigate"
         />
       </div>
-    </Transition>
     </Transition>
   </div>
 </template>
