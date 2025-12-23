@@ -9,61 +9,73 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update:surfaces', 'update:diagnosis', 'update:treatmentTypes', 'confirm'])
+const emit = defineEmits(['update:surfaces', 'update:diagnosis', 'update:typeId', 'update:code', 'add'])
 
 const step = ref(1)
 const selectedSurfaces = ref([])
 const selectedDiagnosis = ref(null)
 const diagnosisQuery = ref('')
 const showDiagnosisDropdown = ref(false)
-const treatmentTypeQuery = ref('')
-const selectedTreatmentTypes = ref([])
 
-const mockDiagnoses = diagnoses.slice(0, 6)
+const selectedCodes = ref([])
+const showTooltipCode = ref(null)
 
-const treatmentTypeOptions = [
-  { id: 'exam', label: 'Exam', value: 'exam' },
-  { id: 'x-ray', label: 'X-Ray', value: 'xray' },
-  { id: 'prophy-fl', label: 'Prophy/Fl', value: 'cleaning' },
-  { id: 'period-srp', label: 'Period/SRP', value: 'deep-cleaning' },
-  { id: 'composite', label: 'Composite', value: 'composite' },
-  { id: 'amalgam', label: 'Amalgam', value: 'amalgam' },
-  { id: 'crowns', label: 'Crowns', value: 'crown' },
-  { id: 'build-up', label: 'Build up/ Pins', value: 'base' },
-  { id: 'extraction', label: 'Extraction', value: 'extraction' },
-  { id: 'bridge-abutment', label: 'Bridge Abutment', value: 'bridge' },
-  { id: 'bridge-pontic', label: 'Bridge Pontic', value: 'bridge' },
-  { id: 'inlay-onlay', label: 'Inlay Onlay', value: 'inlay' },
-  { id: 'root-canal', label: 'Root Canal', value: 'root-canal' },
-  { id: 'pulp-procedure', label: 'Pulp Procedure', value: 'pulpotomy' },
-  { id: 'denture', label: 'Denture', value: 'denture' },
-  { id: 'partial-denture', label: 'Partial Denture', value: 'partial-denture' },
+const treatmentTypes = [
+  { id: 'root-canal', label: 'Root Canal' },
+  { id: 'extraction', label: 'Extraction' },
+  { id: 'restoration', label: 'Restoration' },
+  { id: 'prosthodontics', label: 'Prosthodontics' },
 ]
 
+const treatmentCodesByType = {
+  'root-canal': [
+    { code: 'D3220', nameMn: 'Моляр шүдний сувгийн эмчилгээ' },
+    { code: 'D3221', nameMn: 'Премоляр сувгийн өргөтгөх ба эмчилгээ' },
+    { code: 'D3222', nameMn: 'Нэг сувгийн тайвшруулах эмчилгээ' },
+  ],
+  extraction: [
+    { code: 'D7140', nameMn: 'Энгийн суудлын суваг авах' },
+    { code: 'D7210', nameMn: 'Мэс заслын хүндрэлийн суваг авах' },
+    { code: 'D7250', nameMn: 'Хатингаршсан үлдэгдэл суваг авах' },
+  ],
+  restoration: [
+    { code: 'D2391', nameMn: 'Нэг гадаргуун композит ломбо' },
+    { code: 'D2392', nameMn: 'Хоёр гадаргуун композит ломбо' },
+    { code: 'D2393', nameMn: 'Гурван гадаргуун композит ломбо' },
+  ],
+  prosthodontics: [
+    { code: 'D2750', nameMn: 'Бүрээс, бүрэн металл' },
+    { code: 'D2751', nameMn: 'Бүрээс, металл-керамик' },
+    { code: 'D2799', nameMn: 'Түр бүрээс хийх' },
+  ],
+}
+
+const currentTypeIndex = ref(0)
 const hasSelectedTeeth = computed(() => props.selectedTeeth?.length > 0)
 
+const currentType = computed(() => treatmentTypes[currentTypeIndex.value])
+const currentCodes = computed(() => treatmentCodesByType[currentType.value.id] || [])
+
+const mockDiagnoses = computed(() => diagnoses.slice(0, 6))
+
 const filteredDiagnoses = computed(() => {
-  if (!diagnosisQuery.value) return mockDiagnoses
-  const query = diagnosisQuery.value.toLowerCase()
-  return mockDiagnoses.filter(
-    (item) => item.code.toLowerCase().includes(query) || item.name.toLowerCase().includes(query),
+  if (!diagnosisQuery.value) return mockDiagnoses.value
+  const q = diagnosisQuery.value.toLowerCase()
+  return mockDiagnoses.value.filter(
+    (item) => item.code.toLowerCase().includes(q) || item.name.toLowerCase().includes(q),
   )
 })
 
-const filteredTreatmentTypes = computed(() => {
-  if (!treatmentTypeQuery.value) return treatmentTypeOptions
-  const query = treatmentTypeQuery.value.toLowerCase()
-  return treatmentTypeOptions.filter((item) => item.label.toLowerCase().includes(query))
-})
-
-const selectedTreatmentValues = computed(() =>
-  selectedTreatmentTypes.value
-    .map((id) => treatmentTypeOptions.find((item) => item.id === id)?.value)
-    .filter(Boolean),
+const canProceed = computed(() => selectedSurfaces.value.length > 0)
+const canAdd = computed(
+  () => hasSelectedTeeth.value && selectedSurfaces.value.length > 0 && selectedCodes.value.length > 0,
 )
 
-const canProceed = computed(() => selectedSurfaces.value.length > 0)
-const canConfirm = computed(() => selectedTreatmentTypes.value.length > 0)
+const selectedCodeObjects = computed(() =>
+  selectedCodes.value
+    .map((code) => currentCodes.value.find((item) => item.code === code))
+    .filter(Boolean),
+)
 
 watch(
   () => props.selectedTeeth,
@@ -71,9 +83,11 @@ watch(
     if (!teeth?.length) {
       selectedSurfaces.value = []
       selectedDiagnosis.value = null
-      selectedTreatmentTypes.value = []
       diagnosisQuery.value = ''
-      treatmentTypeQuery.value = ''
+      showDiagnosisDropdown.value = false
+
+      selectedCodes.value = []
+      currentTypeIndex.value = 0
       step.value = 1
     }
   },
@@ -96,9 +110,19 @@ watch(
 )
 
 watch(
-  () => selectedTreatmentValues.value,
-  (types) => {
-    emit('update:treatmentTypes', types)
+  () => currentType.value?.id,
+  (id) => {
+    emit('update:typeId', id)
+    selectedCodes.value = []
+    showTooltipCode.value = null
+  },
+  { immediate: true },
+)
+
+watch(
+  () => selectedCodes.value,
+  (codes) => {
+    emit('update:code', codes)
   },
   { deep: true },
 )
@@ -123,9 +147,7 @@ function clearDiagnosis() {
 }
 
 function goNext() {
-  if (canProceed.value) {
-    step.value = 2
-  }
+  if (canProceed.value) step.value = 2
 }
 
 function skipSurfaces() {
@@ -137,21 +159,29 @@ function goBack() {
   step.value = 1
 }
 
-function toggleTreatment(id) {
-  if (selectedTreatmentTypes.value.includes(id)) {
-    selectedTreatmentTypes.value = selectedTreatmentTypes.value.filter((item) => item !== id)
+function prevType() {
+  currentTypeIndex.value = (currentTypeIndex.value - 1 + treatmentTypes.length) % treatmentTypes.length
+}
+
+function nextType() {
+  currentTypeIndex.value = (currentTypeIndex.value + 1) % treatmentTypes.length
+}
+
+function toggleCode(code) {
+  if (selectedCodes.value.includes(code)) {
+    selectedCodes.value = selectedCodes.value.filter((item) => item !== code)
   } else {
-    selectedTreatmentTypes.value = [...selectedTreatmentTypes.value, id]
+    selectedCodes.value = [...selectedCodes.value, code]
   }
 }
 
-function handleConfirm() {
-  if (!canConfirm.value) return
-  emit('confirm', {
-    surfaces: selectedSurfaces.value,
-    diagnosis: selectedDiagnosis.value,
-    treatmentTypes: selectedTreatmentValues.value,
-  })
+function toggleTooltip(code) {
+  showTooltipCode.value = showTooltipCode.value === code ? null : code
+}
+
+function handleAdd() {
+  if (!canAdd.value) return
+  emit('add', selectedCodeObjects.value)
 }
 </script>
 
@@ -164,6 +194,7 @@ function handleConfirm() {
       <p class="text-xs font-semibold text-slate-400">{{ step }}/2</p>
     </div>
 
+    <!-- STEP 1 -->
     <div v-if="step === 1" class="space-y-6">
       <div class="flex flex-col items-center gap-4">
         <div class="grid grid-cols-3 gap-2 justify-items-center w-full max-w-[220px]">
@@ -224,8 +255,10 @@ function handleConfirm() {
         <p v-if="!hasSelectedTeeth" class="text-xs text-slate-400">Эхлээд шүд сонгоно уу.</p>
       </div>
 
+      <!-- DIAGNOSIS UI (RESTORED) -->
       <div class="space-y-2">
         <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-400">Эмчилгээний онош</p>
+
         <div class="relative">
           <div
             class="flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2 bg-white cursor-text"
@@ -239,9 +272,14 @@ function handleConfirm() {
               @focus="showDiagnosisDropdown = true"
             />
             <svg class="h-4 w-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd" />
+              <path
+                fill-rule="evenodd"
+                d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+                clip-rule="evenodd"
+              />
             </svg>
           </div>
+
           <div
             v-if="showDiagnosisDropdown"
             class="absolute z-10 mt-2 w-full rounded-xl border border-slate-200 bg-white shadow-md overflow-hidden"
@@ -266,7 +304,10 @@ function handleConfirm() {
               </button>
             </div>
           </div>
-          <p v-if="selectedDiagnosis" class="mt-2 text-xs text-emerald-700">{{ selectedDiagnosis.code }} · {{ selectedDiagnosis.name }}</p>
+
+          <p v-if="selectedDiagnosis" class="mt-2 text-xs text-emerald-700">
+            {{ selectedDiagnosis.code }} · {{ selectedDiagnosis.name }}
+          </p>
         </div>
       </div>
 
@@ -290,52 +331,96 @@ function handleConfirm() {
       </div>
     </div>
 
-    <div v-else class="space-y-4">
-      <div class="flex items-center gap-2">
+    <!-- STEP 2 -->
+    <div v-else class="space-y-6">
+      <div class="flex items-center justify-between">
         <button
           type="button"
           class="h-9 w-9 inline-flex items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:bg-slate-50"
-          @click="goBack"
+          @click="prevType"
         >
           <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path fill-rule="evenodd" d="M12.78 4.22a.75.75 0 010 1.06L8.06 10l4.72 4.72a.75.75 0 11-1.06 1.06l-5.25-5.25a.75.75 0 010-1.06l5.25-5.25a.75.75 0 011.06 0z" clip-rule="evenodd" />
+            <path
+              fill-rule="evenodd"
+              d="M12.78 4.22a.75.75 0 010 1.06L8.06 10l4.72 4.72a.75.75 0 11-1.06 1.06l-5.25-5.25a.75.75 0 010-1.06l5.25-5.25a.75.75 0 011.06 0z"
+              clip-rule="evenodd"
+            />
           </svg>
         </button>
-        <div class="flex-1">
-          <div class="flex items-center rounded-full border border-slate-200 bg-white px-3 py-2">
-            <svg class="h-4 w-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-              <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 103.473 9.8l2.613 2.614a.75.75 0 101.06-1.06l-2.613-2.615A5.5 5.5 0 009 3.5zm-4 5.5a4 4 0 118 0 4 4 0 01-8 0z" clip-rule="evenodd" />
-            </svg>
-            <input
-              v-model="treatmentTypeQuery"
-              type="text"
-              class="w-full bg-transparent text-sm text-slate-700 focus:outline-none px-2"
-              placeholder="эмчилгээний төрлөөр хайна"
-            />
-          </div>
+
+        <div class="px-4 py-2 rounded-full bg-slate-100 text-sm font-semibold text-slate-700">
+          {{ currentType?.label }}
         </div>
+
         <button
           type="button"
-          class="h-9 w-9 inline-flex items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-60"
-          :disabled="!canConfirm"
-          @click="handleConfirm"
+          class="h-9 w-9 inline-flex items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:bg-slate-50"
+          @click="nextType"
         >
           <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path fill-rule="evenodd" d="M7.22 4.22a.75.75 0 011.06 0l5.25 5.25a.75.75 0 010 1.06l-5.25 5.25a.75.75 0 11-1.06-1.06L11.94 10 7.22 5.28a.75.75 0 010-1.06z" clip-rule="evenodd" />
+            <path
+              fill-rule="evenodd"
+              d="M7.22 4.22a.75.75 0 011.06 0l5.25 5.25a.75.75 0 010 1.06l-5.25 5.25a.75.75 0 11-1.06-1.06L11.94 10 7.22 5.28a.75.75 0 010-1.06z"
+              clip-rule="evenodd"
+            />
           </svg>
         </button>
       </div>
 
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+        <div v-for="item in currentCodes" :key="item.code" class="relative group">
+          <button
+            type="button"
+            class="w-full rounded-xl border border-slate-200 bg-white px-3 py-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            :class="selectedCodes.includes(item.code) ? 'bg-blue-50 border-blue-300 ring-1 ring-blue-200' : ''"
+            @click="toggleCode(item.code)"
+          >
+            <span class="block text-center">{{ item.code }}</span>
+          </button>
+
+          <button
+            type="button"
+            class="absolute top-2 right-2 h-6 w-6 inline-flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-400 shadow-sm hover:text-slate-600"
+            @click.stop="toggleTooltip(item.code)"
+            aria-label="Code info"
+          >
+            <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path
+                fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-11.25a.75.75 0 10-1.5 0 .75.75 0 001.5 0zM9.25 9a.75.75 0 000 1.5h.5v3.25a.75.75 0 001.5 0V9.75A.75.75 0 0010.5 9h-1.25z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </button>
+
+          <!-- Tooltip (still your structure; if UX bug persists we'll patch it separately) -->
+          <div
+            class="pointer-events-none absolute z-50 left-1/2 top-full mt-2 -translate-x-1/2
+                   rounded-lg bg-white px-3 py-2 text-xs text-slate-700 shadow-sm border border-slate-100
+                   opacity-0 translate-y-1 transition duration-200 delay-150
+                   group-hover:opacity-100 group-hover:translate-y-0"
+            :class="showTooltipCode === item.code ? '!opacity-100 !translate-y-0' : ''"
+          >
+            <p class="font-semibold">{{ item.code }} — {{ item.nameMn }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 flex gap-4">
         <button
-          v-for="item in filteredTreatmentTypes"
-          :key="item.id"
           type="button"
-          class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-          :class="selectedTreatmentTypes.includes(item.id) ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : ''"
-          @click="toggleTreatment(item.id)"
+          class="flex-1 h-12 rounded-2xl bg-slate-200 text-slate-700 shadow-sm font-semibold hover:bg-slate-300"
+          @click="goBack"
         >
-          {{ item.label }}
+          Буцах
+        </button>
+        <button
+          type="button"
+          class="flex-1 h-12 rounded-2xl bg-blue-600 text-white shadow-sm font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          :disabled="!canAdd"
+          @click="handleAdd"
+        >
+          Нэмэх
         </button>
       </div>
     </div>
