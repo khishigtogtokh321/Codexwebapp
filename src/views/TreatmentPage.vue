@@ -7,18 +7,18 @@ import RightTreatmentWizard from '@/components/treatment/RightTreatmentWizard.vu
 import TreatmentQuickAddDrawer from '@/components/treatment/TreatmentQuickAddDrawer.vue'
 import HistorySearchBar from '@/components/history/HistorySearchBar.vue'
 import TreatmentHistoryTable from '@/components/history/TreatmentHistoryTable.vue'
-import { treatmentTypes, getTreatmentById } from '@/data/treatmentTypes'
-import { diagnoses, mockToothStatuses } from '@/data'
+import { mockToothStatuses } from '@/data'
+import { wizardTreatmentTypes } from '@/data/treatmentWizardOptions'
 import { useToothStatus } from '@/composables/useToothStatus'
 import { formatToothNumber } from '@/utils/toothHelpers'
-import { getTreatmentScope, TREATMENT_SCOPE } from '@/utils/treatmentScope'
 import patientService from '@/services/patientService'
 
 const state = reactive({
   selectedTeeth: [],
   selectedSurfaces: [],
-  selectedTreatments: [],
-  selectedDiagnoses: [],
+  selectedDiagnosis: null,
+  selectedTypeId: '',
+  selectedCode: null,
   selectedStatus: 'planned',
   treatmentLog: [],
 })
@@ -30,50 +30,16 @@ const hovered = ref(false)
 const pinned = ref(false)
 const drawerOpen = ref(false)
 const isLgUp = ref(false)
-const isQuickAddOpen = ref(false)
 const drawerTriggerRef = ref(null)
 const drawerCloseRef = ref(null)
-
-const quickAddState = reactive({
-  selectedTreatments: [],
-})
 
 const desktopExpanded = computed(() => isLgUp.value && (hovered.value || pinned.value))
 
 const { toothStatuses, updateToothStatusFromTreatment } = useToothStatus(mockToothStatuses)
 
 const selectedTeethList = computed(() => state.selectedTeeth)
-const selectedSurfacesList = computed(() => state.selectedSurfaces)
-const selectedTreatmentIds = computed(() => state.selectedTreatments)
-
+const selectedType = computed(() => wizardTreatmentTypes.find((item) => item.id === state.selectedTypeId) || null)
 const hasSelectedTeeth = computed(() => selectedTeethList.value.length > 0)
-const hasSelectedTreatments = computed(() => selectedTreatmentIds.value.length > 0)
-
-const availableTreatments = computed(() => treatmentTypes)
-
-const selectedDiagnosisLabels = computed(() => getDiagnosisLabels(state.selectedDiagnoses))
-
-const diagnosisDisabled = computed(() => !hasSelectedTeeth.value)
-const requiresToothSelection = computed(() =>
-  getSelectedTreatments(state.selectedTreatments).some(
-    (treatment) => getTreatmentScope(treatment) === TREATMENT_SCOPE.TOOTH,
-  ),
-)
-const canSubmit = computed(
-  () => hasSelectedTreatments.value && (!requiresToothSelection.value || hasSelectedTeeth.value),
-)
-
-const quickAddRequiresToothSelection = computed(() =>
-  getSelectedTreatments(quickAddState.selectedTreatments).some(
-    (treatment) => getTreatmentScope(treatment) === TREATMENT_SCOPE.TOOTH,
-  ),
-)
-const quickAddCanSubmit = computed(
-  () =>
-    quickAddState.selectedTreatments.length > 0 &&
-    (!quickAddRequiresToothSelection.value || hasSelectedTeeth.value),
-)
-
 
 const filteredLog = computed(() => {
   let list = state.treatmentLog
@@ -90,15 +56,13 @@ const filteredLog = computed(() => {
   return list
 })
 
-function getDiagnosisLabels(codes) {
-  return codes.map((code) => {
-    const match = diagnoses.find((d) => d.code === code)
-    return match ? `${match.code} · ${match.name}` : code
-  })
+function getDiagnosisLabel(diagnosis) {
+  if (!diagnosis?.code) return ''
+  return `${diagnosis.code} · ${diagnosis.name || ''}`.trim()
 }
 
-function getSelectedTreatments(ids) {
-  return ids.map((id) => getTreatmentById(id)).filter(Boolean)
+function showError(message) {
+  window.alert(message)
 }
 
 function selectTooth(teeth) {
@@ -106,138 +70,8 @@ function selectTooth(teeth) {
   state.selectedTeeth = [...new Set(next)]
   if (!hasSelectedTeeth.value) {
     state.selectedSurfaces = []
-    state.selectedDiagnoses = []
-    state.selectedTreatments = []
+    state.selectedDiagnosis = null
   }
-}
-
-function selectSurface(surface) {
-  if (!hasSelectedTeeth.value) return
-  if (state.selectedSurfaces.includes(surface)) {
-    state.selectedSurfaces = state.selectedSurfaces.filter((s) => s !== surface)
-  } else {
-    state.selectedSurfaces = [...state.selectedSurfaces, surface]
-  }
-}
-
-function selectTreatment(typeId) {
-  const treatment = getTreatmentById(typeId)
-  if (!treatment) return
-  state.selectedTreatments = state.selectedTreatments.includes(typeId)
-    ? state.selectedTreatments.filter((id) => id !== typeId)
-    : [...state.selectedTreatments, typeId]
-}
-
-function canCommitSelection({ selectedTeeth = [], selectedTreatments = [] }) {
-  if (!selectedTreatments.length) return false
-  const requiresTooth = getSelectedTreatments(selectedTreatments).some(
-    (treatment) => getTreatmentScope(treatment) === TREATMENT_SCOPE.TOOTH,
-  )
-  return !requiresTooth || selectedTeeth.length > 0
-}
-
-function commitAddTreatment({
-  selectedTeeth = state.selectedTeeth,
-  selectedSurfaces = state.selectedSurfaces,
-  selectedDiagnoses = state.selectedDiagnoses,
-  selectedTreatments = state.selectedTreatments,
-} = {}) {
-  const treatments = getSelectedTreatments(selectedTreatments)
-  if (!treatments.length) return
-
-  const diagnosisLabels = getDiagnosisLabels(selectedDiagnoses)
-  const surfaceText = selectedSurfaces.join(', ')
-  const toothDiagnosisText = diagnosisLabels.join(', ') || 'Онош сонгоогүй'
-
-  let addedToothTreatment = false
-  let addedGeneralTreatment = false
-
-  treatments.forEach((treatment) => {
-    if (!treatment) return
-    const scope = getTreatmentScope(treatment)
-    if (scope === TREATMENT_SCOPE.GENERAL) {
-      const diagnosisText = diagnosisLabels.join(', ') || treatment.label
-      const entry = {
-        id: crypto.randomUUID(),
-        date: new Date().toISOString(),
-        tooth: '',
-        surface: '',
-        diagnosis: diagnosisText,
-        treatmentType: treatment.label,
-        doctor: '',
-        price: '',
-        status: state.selectedStatus || 'done',
-      }
-      state.treatmentLog.unshift(entry)
-      addedGeneralTreatment = true
-      return
-    }
-
-    if (!selectedTeeth.length) return
-    selectedTeeth.forEach((tooth) => {
-      const entry = {
-        id: crypto.randomUUID(),
-        date: new Date().toISOString(),
-        tooth: formatToothNumber(tooth),
-        surface: surfaceText,
-        diagnosis: toothDiagnosisText,
-        treatmentType: treatment.label || treatment.id,
-        doctor: '',
-        price: '',
-        status: state.selectedStatus || 'done',
-      }
-      state.treatmentLog.unshift(entry)
-      updateToothStatusFromTreatment(entry)
-      addedToothTreatment = true
-    })
-  })
-
-  if (addedToothTreatment) {
-    state.selectedSurfaces = []
-    state.selectedDiagnoses = []
-    state.selectedTreatments = []
-  } else if (addedGeneralTreatment) {
-    state.selectedTreatments = []
-  }
-}
-
-function handleAddTreatment(overrides = {}) {
-  const payload = {
-    selectedTeeth: state.selectedTeeth,
-    selectedSurfaces: state.selectedSurfaces,
-    selectedDiagnoses: state.selectedDiagnoses,
-    selectedTreatments: state.selectedTreatments,
-    ...overrides,
-  }
-  if (!canCommitSelection(payload)) return
-  commitAddTreatment(payload)
-}
-
-function openQuickAdd() {
-  isQuickAddOpen.value = true
-}
-
-function closeQuickAdd() {
-  isQuickAddOpen.value = false
-  quickAddState.selectedTreatments = []
-}
-
-function toggleQuickAddTreatment(typeId) {
-  const treatment = getTreatmentById(typeId)
-  if (!treatment) return
-  quickAddState.selectedTreatments = quickAddState.selectedTreatments.includes(typeId)
-    ? quickAddState.selectedTreatments.filter((id) => id !== typeId)
-    : [...quickAddState.selectedTreatments, typeId]
-}
-
-function handleQuickAdd() {
-  if (!quickAddCanSubmit.value) return
-  handleAddTreatment({
-    selectedTreatments: quickAddState.selectedTreatments,
-    selectedSurfaces: [],
-    selectedDiagnoses: [],
-  })
-  closeQuickAdd()
 }
 
 function handleWizardSurfacesUpdate(surfaces) {
@@ -245,15 +79,70 @@ function handleWizardSurfacesUpdate(surfaces) {
 }
 
 function handleWizardDiagnosisUpdate(diagnosis) {
-  state.selectedDiagnoses = diagnosis?.code ? [diagnosis.code] : []
+  state.selectedDiagnosis = diagnosis || null
 }
 
-function handleWizardTreatmentTypesUpdate(types) {
-  state.selectedTreatments = Array.isArray(types) ? types : []
+function handleWizardTypeUpdate(typeId) {
+  state.selectedTypeId = typeId || ''
+  if (!state.selectedTypeId) {
+    state.selectedCode = null
+  }
 }
 
-function handleWizardConfirm() {
-  handleAddTreatment()
+function handleWizardCodeUpdate(code) {
+  state.selectedCode = code
+}
+
+function handleAddTreatmentFromWizard() {
+  const type = selectedType.value
+  const code = state.selectedCode
+  const payload = {
+    teeth: state.selectedTeeth,
+    surfaces: state.selectedSurfaces,
+    diagnosis: state.selectedDiagnosis,
+    typeId: state.selectedTypeId,
+    code,
+  }
+
+  if (!payload.teeth.length) {
+    showError('Эхлээд шүд сонгоно уу')
+    return
+  }
+
+  if (!payload.code) {
+    showError('Эмчилгээний код сонгоно уу')
+    return
+  }
+
+  if (type?.surfaceRequired && payload.surfaces.length === 0) {
+    showError('Гадаргуу сонгоно уу')
+    return
+  }
+
+  const surfaceText = payload.surfaces.join(', ')
+  const diagnosisText = getDiagnosisLabel(payload.diagnosis) || 'Онош сонгоогүй'
+  const treatmentLabel = `${payload.code.code} · ${type?.label || payload.code.name}`
+
+  payload.teeth.forEach((tooth) => {
+    const entry = {
+      id: crypto.randomUUID(),
+      date: new Date().toISOString(),
+      tooth: formatToothNumber(tooth),
+      surface: surfaceText,
+      diagnosis: diagnosisText,
+      treatmentType: treatmentLabel,
+      doctor: '',
+      price: '',
+      status: state.selectedStatus || 'planned',
+    }
+    state.treatmentLog.unshift(entry)
+    updateToothStatusFromTreatment(entry)
+  })
+
+  state.selectedSurfaces = []
+  state.selectedDiagnosis = null
+  state.selectedTypeId = ''
+  state.selectedCode = null
 }
 
 function handleSearch(query) {
@@ -266,19 +155,6 @@ function handleFilterStatus(status) {
 
 function handleDeleteTreatment(treatmentId) {
   state.treatmentLog = state.treatmentLog.filter((t) => t.id !== treatmentId)
-}
-
-function toggleDiagnosis(code) {
-  if (diagnosisDisabled.value) return
-  if (state.selectedDiagnoses.includes(code)) {
-    state.selectedDiagnoses = state.selectedDiagnoses.filter((d) => d !== code)
-  } else {
-    state.selectedDiagnoses = [...state.selectedDiagnoses, code]
-  }
-}
-
-function handleStatusChange(status) {
-  state.selectedStatus = status
 }
 
 function handlePatientSelected(patient) {
@@ -417,8 +293,7 @@ watch(
                     :selected-teeth="selectedTeethList"
                     @update:surfaces="handleWizardSurfacesUpdate"
                     @update:diagnosis="handleWizardDiagnosisUpdate"
-                    @update:treatmentTypes="handleWizardTreatmentTypesUpdate"
-                    @confirm="handleWizardConfirm"
+                    @confirm="handleAddTreatmentFromWizard"
                   />
                 </div>
               </div>
@@ -453,20 +328,10 @@ watch(
     <button
       type="button"
       class="fixed bottom-6 right-6 z-40 min-h-[48px] inline-flex items-center justify-center gap-2 rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
-      @click="openQuickAdd"
+      @click="handleAddTreatmentFromWizard"
     >
       + Эмчилгээ нэмэх
     </button>
-
-    <TreatmentQuickAddDrawer
-      :open="isQuickAddOpen"
-      :selected-teeth="selectedTeethList"
-      :selected-treatments="quickAddState.selectedTreatments"
-      :treatments="availableTreatments"
-      @close="closeQuickAdd"
-      @treatment-toggle="toggleQuickAddTreatment"
-      @add="handleQuickAdd"
-    />
 
     <Transition
       enter-active-class="transition-opacity duration-200"
