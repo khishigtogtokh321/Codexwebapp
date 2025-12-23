@@ -8,15 +8,93 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update:surfaces', 'update:diagnosis', 'update:treatmentTypes', 'confirm'])
+const emit = defineEmits(['update:surfaces', 'update:diagnosis', 'update:typeId', 'update:code'])
 
-const step = ref(1)
-const selectedSurfaces = ref([])
-const selectedDiagnosis = ref(null)
-const diagnosisQuery = ref('')
-const diagnosisOpen = ref(false)
-const treatmentTypeQuery = ref('')
-const selectedTreatmentTypes = ref([])
+const treatmentTypes = [
+  { id: 'exam', label: 'Exam', surfaceRequired: false },
+  { id: 'xray', label: 'X-Ray', surfaceRequired: false },
+  { id: 'prophy', label: 'Prophy/Fl', surfaceRequired: true },
+  { id: 'perio', label: 'Period/SRP', surfaceRequired: true },
+  { id: 'composite', label: 'Composite', surfaceRequired: true },
+  { id: 'amalgam', label: 'Amalgam', surfaceRequired: true },
+  { id: 'crown', label: 'Crowns', surfaceRequired: true },
+  { id: 'build', label: 'Build up/ Pins', surfaceRequired: true },
+  { id: 'extraction', label: 'Extraction', surfaceRequired: true },
+  { id: 'abutment', label: 'Bridge Abutment', surfaceRequired: true },
+  { id: 'pontic', label: 'Bridge Pontic', surfaceRequired: true },
+  { id: 'inlay', label: 'Inlay Onlay', surfaceRequired: true },
+  { id: 'rct', label: 'Root Canal', surfaceRequired: true },
+  { id: 'pulp', label: 'Pulp Procedure', surfaceRequired: true },
+  { id: 'denture', label: 'Denture', surfaceRequired: true },
+  { id: 'partial', label: 'Partial Denture', surfaceRequired: true },
+]
+
+const treatmentCodesByType = {
+  exam: [
+    { code: 'D0120', name: 'Periodic oral evaluation' },
+    { code: 'D0150', name: 'Comprehensive exam' },
+  ],
+  xray: [
+    { code: 'D0210', name: 'Intraoral complete series' },
+    { code: 'D0220', name: 'Periapical first film' },
+  ],
+  prophy: [
+    { code: 'D1110', name: 'Adult prophylaxis' },
+    { code: 'D1206', name: 'Topical fluoride' },
+  ],
+  perio: [
+    { code: 'D4341', name: 'Periodontal SRP 4+ teeth' },
+    { code: 'D4910', name: 'Perio maintenance' },
+  ],
+  composite: [
+    { code: 'D2391', name: 'Resin-based 1 surface' },
+    { code: 'D2392', name: 'Resin-based 2 surfaces' },
+  ],
+  amalgam: [
+    { code: 'D2140', name: 'Amalgam 1 surface' },
+    { code: 'D2150', name: 'Amalgam 2 surfaces' },
+  ],
+  crown: [
+    { code: 'D2750', name: 'Porcelain fused to high noble' },
+    { code: 'D2950', name: 'Core buildup' },
+  ],
+  build: [
+    { code: 'D2950', name: 'Core buildup with pins' },
+    { code: 'D2954', name: 'Prefabricated post and core' },
+  ],
+  extraction: [
+    { code: 'D7140', name: 'Extraction erupted tooth' },
+    { code: 'D7210', name: 'Surgical removal erupted tooth' },
+  ],
+  abutment: [
+    { code: 'D6740', name: 'Retainer crown porcelain' },
+    { code: 'D6750', name: 'Retainer crown high noble' },
+  ],
+  pontic: [
+    { code: 'D6240', name: 'Pontic porcelain' },
+    { code: 'D6250', name: 'Pontic high noble' },
+  ],
+  inlay: [
+    { code: 'D2650', name: 'Inlay resin 1 surface' },
+    { code: 'D2651', name: 'Inlay resin 2 surfaces' },
+  ],
+  rct: [
+    { code: 'D3310', name: 'Root canal anterior' },
+    { code: 'D3320', name: 'Root canal bicuspid' },
+  ],
+  pulp: [
+    { code: 'D3220', name: 'Therapeutic pulpotomy' },
+    { code: 'D3221', name: 'Pulpal debridement' },
+  ],
+  denture: [
+    { code: 'D5110', name: 'Complete denture maxillary' },
+    { code: 'D5120', name: 'Complete denture mandibular' },
+  ],
+  partial: [
+    { code: 'D5213', name: 'Partial denture maxillary' },
+    { code: 'D5214', name: 'Partial denture mandibular' },
+  ],
+}
 
 const diagnosisOptions = [
   { code: 'DX-01', name: 'Caries incipient' },
@@ -27,29 +105,19 @@ const diagnosisOptions = [
   { code: 'DX-06', name: 'Fracture risk' },
 ]
 
-const treatmentTypeOptions = [
-  { id: 'exam', label: 'Exam' },
-  { id: 'xray', label: 'X-Ray' },
-  { id: 'prophy-fl', label: 'Prophy/Fl' },
-  { id: 'period-srp', label: 'Period/SRP' },
-  { id: 'composite', label: 'Composite' },
-  { id: 'amalgam', label: 'Amalgam' },
-  { id: 'crown', label: 'Crowns' },
-  { id: 'build-up', label: 'Build up/ Pins' },
-  { id: 'extraction', label: 'Extraction' },
-  { id: 'bridge-abutment', label: 'Bridge Abutment' },
-  { id: 'bridge-pontic', label: 'Bridge Pontic' },
-  { id: 'inlay-onlay', label: 'Inlay Onlay' },
-  { id: 'root-canal', label: 'Root Canal' },
-  { id: 'pulpotomy', label: 'Pulp Procedure' },
-  { id: 'denture', label: 'Denture' },
-  { id: 'partial-denture', label: 'Partial Denture' },
-]
+const step = ref(1)
+const selectedSurfaces = ref([])
+const selectedDiagnosis = ref(null)
+const diagnosisQuery = ref('')
+const diagnosisOpen = ref(false)
+const treatmentTypeQuery = ref('')
+const selectedTypeId = ref(null)
+const selectedCode = ref(null)
 
 const surfacesDisabled = computed(() => props.selectedTeeth.length === 0)
 const stepTitle = computed(() => (step.value === 1 ? 'ГАДАРГУУ СОНГОХ' : 'ЭМЧИЛГЭЭ СОНГОХ'))
-const canGoNext = computed(() => selectedSurfaces.value.length > 0)
-const showSkip = computed(() => selectedSurfaces.value.length === 0)
+const canGoNext = computed(() => selectedSurfaces.value.length > 0 && !surfacesDisabled.value)
+const showSkip = computed(() => selectedSurfaces.value.length === 0 && !surfacesDisabled.value)
 const filteredDiagnoses = computed(() => {
   const query = diagnosisQuery.value.trim().toLowerCase()
   if (!query) return diagnosisOptions
@@ -59,11 +127,14 @@ const filteredDiagnoses = computed(() => {
 })
 const filteredTreatmentTypes = computed(() => {
   const query = treatmentTypeQuery.value.trim().toLowerCase()
-  if (!query) return treatmentTypeOptions
-  return treatmentTypeOptions.filter((item) => item.label.toLowerCase().includes(query))
+  if (!query) return treatmentTypes
+  return treatmentTypes.filter((item) => item.label.toLowerCase().includes(query))
 })
-
-const canConfirm = computed(() => selectedTreatmentTypes.value.length > 0)
+const typeIndex = computed(() => filteredTreatmentTypes.value.findIndex((item) => item.id === selectedTypeId.value))
+const selectedType = computed(() =>
+  filteredTreatmentTypes.value.find((item) => item.id === selectedTypeId.value) || filteredTreatmentTypes.value[0],
+)
+const codesForSelectedType = computed(() => (selectedType.value ? treatmentCodesByType[selectedType.value.id] || [] : []))
 
 function toggleSurface(surfaceId) {
   if (surfacesDisabled.value) return
@@ -101,6 +172,7 @@ function goNext() {
 }
 
 function skipSurfaces() {
+  if (surfacesDisabled.value) return
   selectedSurfaces.value = []
   emit('update:surfaces', [])
   step.value = 2
@@ -110,32 +182,60 @@ function goBack() {
   step.value = 1
 }
 
-function toggleTreatment(typeId) {
-  if (selectedTreatmentTypes.value.includes(typeId)) {
-    selectedTreatmentTypes.value = selectedTreatmentTypes.value.filter((id) => id !== typeId)
-  } else {
-    selectedTreatmentTypes.value = [...selectedTreatmentTypes.value, typeId]
-  }
-  emit('update:treatmentTypes', selectedTreatmentTypes.value)
+function setType(typeId) {
+  selectedTypeId.value = typeId
+  emit('update:typeId', selectedTypeId.value)
+  selectCode(null)
 }
 
-function handleConfirm() {
-  if (!canConfirm.value) return
-  emit('confirm', {
-    surfaces: selectedSurfaces.value,
-    diagnosis: selectedDiagnosis.value,
-    treatmentTypes: selectedTreatmentTypes.value,
-  })
+function prevType() {
+  if (!filteredTreatmentTypes.value.length) return
+  const nextIndex = typeIndex.value <= 0 ? filteredTreatmentTypes.value.length - 1 : typeIndex.value - 1
+  setType(filteredTreatmentTypes.value[nextIndex].id)
+}
+
+function nextType() {
+  if (!filteredTreatmentTypes.value.length) return
+  const nextIndex = typeIndex.value >= filteredTreatmentTypes.value.length - 1 ? 0 : typeIndex.value + 1
+  setType(filteredTreatmentTypes.value[nextIndex].id)
+}
+
+function selectTypeFromGrid(typeId) {
+  if (selectedTypeId.value === typeId) {
+    setType(null)
+    return
+  }
+  setType(typeId)
+}
+
+function selectCode(code) {
+  selectedCode.value = code
+  emit('update:code', code)
 }
 
 watch(
   () => props.selectedTeeth.length,
   (count) => {
     if (count === 0) {
+      step.value = 1
       selectedSurfaces.value = []
       emit('update:surfaces', [])
     }
   },
+)
+
+watch(
+  filteredTreatmentTypes,
+  (list) => {
+    if (!list.length) {
+      setType(null)
+      return
+    }
+    if (!list.some((item) => item.id === selectedTypeId.value)) {
+      setType(list[0].id)
+    }
+  },
+  { immediate: true },
 )
 </script>
 
@@ -148,6 +248,8 @@ watch(
       </div>
       <span class="text-xs font-semibold text-slate-500">{{ step }}/2</span>
     </div>
+
+    <p v-if="surfacesDisabled" class="mt-4 text-sm text-amber-600">Эхлээд шүд сонгоно уу.</p>
 
     <div v-if="step === 1" class="mt-5 space-y-6">
       <div class="flex flex-col items-center gap-3">
@@ -240,6 +342,7 @@ watch(
             type="text"
             placeholder="ХАЙХ"
             class="w-full h-10 rounded-full border border-slate-200 px-4 pr-10 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            :disabled="surfacesDisabled"
             @focus="diagnosisOpen = true"
             @input="diagnosisOpen = true"
             @blur="closeDiagnosisDropdown"
@@ -247,6 +350,7 @@ watch(
           <button
             type="button"
             class="absolute inset-y-0 right-2 flex items-center px-2 text-slate-400"
+            :disabled="surfacesDisabled"
             @mousedown.prevent
             @click="diagnosisOpen = !diagnosisOpen"
           >
@@ -289,7 +393,8 @@ watch(
         <button
           v-if="showSkip"
           type="button"
-          class="text-sm font-semibold text-slate-500 hover:text-blue-600"
+          class="text-sm font-semibold text-slate-500 hover:text-blue-600 disabled:opacity-50"
+          :disabled="surfacesDisabled"
           @click="skipSurfaces"
         >
           Алгасах
@@ -307,10 +412,11 @@ watch(
     </div>
 
     <div v-else class="mt-4 space-y-4">
-      <div class="flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
         <button
           type="button"
-          class="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:border-blue-400 hover:text-blue-700"
+          class="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:border-blue-400 hover:text-blue-700 disabled:opacity-50"
+          :disabled="surfacesDisabled"
           @click="goBack"
         >
           <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
@@ -323,18 +429,31 @@ watch(
             type="text"
             placeholder="эмчилгээний төрлөөр хайна"
             class="w-full h-10 rounded-full border border-slate-200 px-4 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            :disabled="surfacesDisabled"
           />
         </div>
-        <button
-          type="button"
-          class="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:border-blue-400 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-          :disabled="!canConfirm"
-          @click="handleConfirm"
-        >
-          <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m9 6 4 4-4 4" />
-          </svg>
-        </button>
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            class="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:border-blue-400 hover:text-blue-700 disabled:opacity-50"
+            :disabled="surfacesDisabled || !filteredTreatmentTypes.length"
+            @click="prevType"
+          >
+            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m11 6-4 4 4 4" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            class="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:border-blue-400 hover:text-blue-700 disabled:opacity-50"
+            :disabled="surfacesDisabled || !filteredTreatmentTypes.length"
+            @click="nextType"
+          >
+            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m9 6 4 4-4 4" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -344,14 +463,52 @@ watch(
           type="button"
           :class="[
             'flex min-h-[44px] items-center justify-center rounded-xl border px-2 text-sm text-slate-700 text-center transition hover:border-blue-400 hover:text-blue-700',
-            selectedTreatmentTypes.includes(item.id)
+            selectedType?.id === item.id
               ? 'border-blue-500 bg-blue-50 text-blue-700'
               : 'border-slate-200 bg-white',
+            surfacesDisabled ? 'opacity-50 cursor-not-allowed' : '',
           ]"
-          @click="toggleTreatment(item.id)"
+          :disabled="surfacesDisabled"
+          @click="selectTypeFromGrid(item.id)"
         >
           <span class="leading-tight">{{ item.label }}</span>
         </button>
+      </div>
+
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <p class="text-[11px] font-semibold tracking-[0.08em] text-slate-400">ЭМЧИЛГЭЭНИЙ КОД</p>
+          <p v-if="selectedType?.label" class="text-xs font-semibold text-slate-500">{{ selectedType.label }}</p>
+        </div>
+        <div v-if="selectedType" class="space-y-3">
+          <div
+            v-if="selectedType.surfaceRequired && selectedSurfaces.length === 0"
+            class="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700"
+          >
+            <span>Гадаргуу сонгоно уу.</span>
+            <button type="button" class="font-semibold underline" @click="goBack">Буцах</button>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button
+              v-for="item in codesForSelectedType"
+              :key="item.code"
+              type="button"
+              :class="[
+                'flex items-center justify-between rounded-xl border px-3 py-2 text-left text-sm text-slate-700 transition hover:border-blue-400 hover:text-blue-700',
+                selectedCode?.code === item.code
+                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  : 'border-slate-200 bg-white',
+                surfacesDisabled ? 'opacity-50 cursor-not-allowed' : '',
+              ]"
+              :disabled="surfacesDisabled"
+              @click="selectCode(item)"
+            >
+              <span class="font-semibold">{{ item.code }}</span>
+              <span class="text-xs text-slate-500">{{ item.name }}</span>
+            </button>
+          </div>
+        </div>
+        <p v-else class="text-sm text-slate-500">Эхлээд эмчилгээний төрлөө сонгоно уу.</p>
       </div>
     </div>
   </section>

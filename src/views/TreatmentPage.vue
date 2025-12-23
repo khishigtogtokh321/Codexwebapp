@@ -4,7 +4,6 @@ import TopBar from '@/components/layout/TopBar.vue'
 import SideNav from '@/components/layout/SideNav.vue'
 import ToothChart from '@/components/tooth/ToothChart.vue'
 import RightTreatmentWizard from '@/components/treatment/RightTreatmentWizard.vue'
-import TreatmentQuickAddDrawer from '@/components/treatment/TreatmentQuickAddDrawer.vue'
 import HistorySearchBar from '@/components/history/HistorySearchBar.vue'
 import TreatmentHistoryTable from '@/components/history/TreatmentHistoryTable.vue'
 import { mockToothStatuses } from '@/data'
@@ -293,7 +292,8 @@ watch(
                     :selected-teeth="selectedTeethList"
                     @update:surfaces="handleWizardSurfacesUpdate"
                     @update:diagnosis="handleWizardDiagnosisUpdate"
-                    @confirm="handleAddTreatmentFromWizard"
+                    @update:type-id="handleWizardTypeUpdate"
+                    @update:code="handleWizardCodeUpdate"
                   />
                 </div>
               </div>
