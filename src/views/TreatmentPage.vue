@@ -360,10 +360,10 @@ watch(
         <div class="p-4 md:p-6 space-y-4">
       
 
-          <div class="grid gap-4 lg:grid-cols-12 items-start">
+          <div class="grid gap-4 lg:grid-cols-12 items-start lg:items-stretch">
             <div class="space-y-4 lg:col-span-8">
               <ToothChart
-                class="h-full"
+                class="fill-height"
                 :selected-teeth="selectedTeethList"
                 :tooth-statuses="toothStatuses"
                 :multi-select="true"
@@ -375,8 +375,8 @@ watch(
 
             </div>
 
-            <div class="lg:col-span-4 lg:pl-1 space-y-3">
-              <div class="sticky top-4">
+            <div class="lg:col-span-4 lg:pl-1 space-y-3 fill-height">
+              <div class="sticky top-4 fill-height">
                 <RightTreatmentWizard
                   :selected-teeth="selectedTeethList"
                   @update:surfaces="handleSurfacesUpdate"
