@@ -97,7 +97,7 @@ function undoSelection() {
 <template>
   <div class="dental-card p-4 md:p-4 space-y-4 tooth-selector">
     <div class="selector-header">
-        <h2 class="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">1. Шүд сонгох</h2>
+        <h1 class="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">1. Шүд сонгох</h1>
     </div>
 
     <div class="jaw-section">
@@ -254,7 +254,7 @@ function undoSelection() {
 
 .quadrant-row {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   gap: 1.25rem;
   align-items: center;
 }
@@ -263,6 +263,7 @@ function undoSelection() {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  min-width: 0;
 }
 
 .quadrant-heading {
@@ -287,14 +288,15 @@ function undoSelection() {
 }
 
 .tooth-row {
-  display: flex;
-  flex-wrap: nowrap;
-  white-space: nowrap;
-  gap: 0.5rem;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: clamp(0.25rem, 1.2vw, 0.5rem);
+  align-items: center;
+  min-width: 0;
 }
 
 .tooth-row--reverse {
-  flex-direction: row-reverse;
+  direction: rtl;
 }
 
 .midline {
@@ -374,7 +376,7 @@ function undoSelection() {
   }
 
   .tooth-row {
-    justify-content: center;
+    width: 100%;
   }
 }
 </style>
