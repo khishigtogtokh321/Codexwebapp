@@ -105,10 +105,6 @@ function handleDiagnosisUpdate(diagnosis) {
   state.selectedDiagnoses = diagnosis?.code ? [diagnosis.code] : []
 }
 
-function handleTreatmentTypesUpdate(types = []) {
-  state.selectedTreatments = Array.isArray(types) ? types : []
-}
-
 function canCommitSelection({ selectedTeeth = [], selectedTreatments = [] }) {
   if (!selectedTreatments.length) return false
   const requiresTooth = getSelectedTreatments(selectedTreatments).some(
@@ -221,12 +217,34 @@ function handleQuickAdd() {
   closeQuickAdd()
 }
 
-function handleWizardConfirm(payload = {}) {
-  if (!payload?.treatmentTypes?.length) return
-  handleAddTreatment({
-    selectedSurfaces: payload.surfaces ?? state.selectedSurfaces,
-    selectedDiagnoses: payload.diagnosis?.code ? [payload.diagnosis.code] : state.selectedDiagnoses,
-    selectedTreatments: payload.treatmentTypes,
+function handleWizardAdd(selectedCodes = []) {
+  if (!Array.isArray(selectedCodes) || selectedCodes.length === 0) return
+  if (!state.selectedTeeth?.length) return
+
+  const diagnosisLabels = getDiagnosisLabels(state.selectedDiagnoses)
+  const diagnosisText = diagnosisLabels.join(', ')
+  const surfaceText = state.selectedSurfaces.join(', ')
+  const status = state.selectedStatus || 'done'
+
+  selectedCodes.forEach((codeItem) => {
+    if (!codeItem) return
+    const treatmentLabel = [codeItem.code, codeItem.nameMn].filter(Boolean).join(' ')
+    const fallbackDiagnosis = codeItem.nameMn || codeItem.code || ''
+    state.selectedTeeth.forEach((tooth) => {
+      const entry = {
+        id: crypto.randomUUID(),
+        date: new Date().toISOString(),
+        tooth: formatToothNumber(tooth),
+        surface: surfaceText,
+        diagnosis: diagnosisText || fallbackDiagnosis,
+        treatmentType: treatmentLabel,
+        doctor: '',
+        price: '',
+        status,
+      }
+      state.treatmentLog.unshift(entry)
+      updateToothStatusFromTreatment(entry)
+    })
   })
 }
 
@@ -381,8 +399,7 @@ watch(
                   :selected-teeth="selectedTeethList"
                   @update:surfaces="handleSurfacesUpdate"
                   @update:diagnosis="handleDiagnosisUpdate"
-                  @update:treatmentTypes="handleTreatmentTypesUpdate"
-                  @confirm="handleWizardConfirm"
+                  @add="handleWizardAdd"
                 />
               </div>
             </div>

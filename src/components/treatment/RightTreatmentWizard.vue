@@ -32,15 +32,29 @@ const treatmentCodesByType = {
     { code: 'D3220', nameMn: 'Моляр шүдний сувгийн эмчилгээ' },
     { code: 'D3221', nameMn: 'Премоляр сувгийн өргөтгөх ба эмчилгээ' },
     { code: 'D3222', nameMn: 'Нэг сувгийн тайвшруулах эмчилгээ' },
+    { code: 'D3222', nameMn: 'Нэг сувгийн тайвшруулах эмчилгээ' },
+    { code: 'D3222', nameMn: 'Нэг сувгийн тайвшруулах эмчилгээ' },
   ],
   extraction: [
     { code: 'D7140', nameMn: 'Энгийн суудлын суваг авах' },
     { code: 'D7210', nameMn: 'Мэс заслын хүндрэлийн суваг авах' },
     { code: 'D7250', nameMn: 'Хатингаршсан үлдэгдэл суваг авах' },
+    { code: 'D7250', nameMn: 'Хатингаршсан үлдэгдэл суваг авах' },
+    { code: 'D7250', nameMn: 'Хатингаршсан үлдэгдэл суваг авах' },
+    { code: 'D7250', nameMn: 'Хатингаршсан үлдэгдэл суваг авах' },
   ],
   restoration: [
     { code: 'D2391', nameMn: 'Нэг гадаргуун композит ломбо' },
     { code: 'D2392', nameMn: 'Хоёр гадаргуун композит ломбо' },
+    { code: 'D2393', nameMn: 'Гурван гадаргуун композит ломбо' },
+    { code: 'D2393', nameMn: 'Гурван гадаргуун композит ломбо' },
+    { code: 'D2393', nameMn: 'Гурван гадаргуун композит ломбо' },
+    { code: 'D2393', nameMn: 'Гурван гадаргуун композит ломбо' },
+    { code: 'D2393', nameMn: 'Гурван гадаргуун композит ломбо' },
+    { code: 'D2393', nameMn: 'Гурван гадаргуун композит ломбо' },
+    { code: 'D2393', nameMn: 'Гурван гадаргуун композит ломбо' },
+    { code: 'D2393', nameMn: 'Гурван гадаргуун композит ломбо' },
+    { code: 'D2393', nameMn: 'Гурван гадаргуун композит ломбо' },
     { code: 'D2393', nameMn: 'Гурван гадаргуун композит ломбо' },
   ],
   prosthodontics: [
@@ -52,12 +66,9 @@ const treatmentCodesByType = {
 
 const currentTypeIndex = ref(0)
 const hasSelectedTeeth = computed(() => props.selectedTeeth?.length > 0)
-
 const currentType = computed(() => treatmentTypes[currentTypeIndex.value])
 const currentCodes = computed(() => treatmentCodesByType[currentType.value.id] || [])
-
 const mockDiagnoses = computed(() => diagnoses.slice(0, 6))
-
 const filteredDiagnoses = computed(() => {
   if (!diagnosisQuery.value) return mockDiagnoses.value
   const q = diagnosisQuery.value.toLowerCase()
@@ -186,7 +197,7 @@ function handleAdd() {
 </script>
 
 <template>
-  <section class="w-full max-w-[420px] bg-white border border-slate-200 rounded-2xl shadow-sm p-5">
+  <section class=" h-[calc(85vh-180px)] relative overflow-hidden w-full max-w-[420px] bg-white border border-slate-200 rounded-2xl shadow-sm p-5">
     <div class="flex items-start justify-between mb-4">
       <p class="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">
         {{ step === 1 ? 'Гадаргуу сонгох' : 'Эмчилгээ сонгох' }}
@@ -252,7 +263,7 @@ function handleAdd() {
           </button>
           <div></div>
         </div>
-        <p v-if="!hasSelectedTeeth" class="text-xs text-slate-400">Эхлээд шүд сонгоно уу.</p>
+  
       </div>
 
       <!-- DIAGNOSIS UI (RESTORED) -->
@@ -332,7 +343,7 @@ function handleAdd() {
     </div>
 
     <!-- STEP 2 -->
-    <div v-else class="space-y-6">
+    <div v-else class="h-full overflow-auto pr-1 pb-[88px] space-y-6">
       <div class="flex items-center justify-between">
         <button
           type="button"
@@ -378,7 +389,7 @@ function handleAdd() {
             <span class="block text-center">{{ item.code }}</span>
           </button>
 
-          <button
+          <!-- <button
             type="button"
             class="absolute top-2 right-2 h-6 w-6 inline-flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-400 shadow-sm hover:text-slate-600"
             @click.stop="toggleTooltip(item.code)"
@@ -391,37 +402,40 @@ function handleAdd() {
                 clip-rule="evenodd"
               />
             </svg>
-          </button>
+          </button> -->
 
-          <!-- Tooltip (still your structure; if UX bug persists we'll patch it separately) -->
           <div
             class="pointer-events-none absolute z-50 left-1/2 top-full mt-2 -translate-x-1/2
-                   rounded-lg bg-white px-3 py-2 text-xs text-slate-700 shadow-sm border border-slate-100
-                   opacity-0 translate-y-1 transition duration-200 delay-150
-                   group-hover:opacity-100 group-hover:translate-y-0"
+                  rounded-md bg-slate-900 text-white px-2 py-1 text-xs font-medium shadow-lg
+                  opacity-0 translate-y-1 transition duration-150 ease-out
+                  group-hover:opacity-100 group-hover:translate-y-0
+                  after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2
+                  after:-top-1 after:border-[6px] after:border-transparent after:border-b-slate-900"
             :class="showTooltipCode === item.code ? '!opacity-100 !translate-y-0' : ''"
           >
-            <p class="font-semibold">{{ item.code }} — {{ item.nameMn }}</p>
+            {{ item.nameMn }}
           </div>
         </div>
       </div>
 
-      <div class="mt-6 flex gap-4">
-        <button
-          type="button"
-          class="flex-1 h-12 rounded-2xl bg-slate-200 text-slate-700 shadow-sm font-semibold hover:bg-slate-300"
-          @click="goBack"
-        >
-          Буцах
-        </button>
-        <button
-          type="button"
-          class="flex-1 h-12 rounded-2xl bg-blue-600 text-white shadow-sm font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          :disabled="!canAdd"
-          @click="handleAdd"
-        >
-          Нэмэх
-        </button>
+      <div class="absolute left-5 right-5 bottom-5 bg-white">
+        <div class="flex gap-4">
+          <button
+            type="button"
+            class="flex-1 h-10 rounded-xl bg-slate-200 text-slate-700 shadow-sm font-semibold hover:bg-slate-300"
+            @click="goBack"
+          >
+            Буцах
+          </button>
+          <button
+            type="button"
+            class="flex-1 h-10 rounded-xl bg-blue-600 text-white shadow-sm font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            :disabled="!canAdd"
+            @click="handleAdd"
+          >
+            Нэмэх
+          </button>
+        </div>
       </div>
     </div>
   </section>

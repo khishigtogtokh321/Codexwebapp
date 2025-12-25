@@ -1,76 +1,171 @@
-## Styling rules (Tailwind + CSS tokens)
+# AGENTS.md — UI Guardrails (Tablet-first Medical System)
 
-Define `.card` in `components.css` using tokens:
-- borders, radius, shadow, background
-- state variants like `.card--selected` if needed
+## Mission
+Generate and modify UI code that is:
+- Touch-first (doctor workflow)
+- Tablet-safe (portrait & landscape)
+- Cross-browser stable
+- Maintainable (Tailwind + CSS tokens, not utility soup)
 
-Avoid:
-- Extremely long Tailwind class chains for every component
-- Duplicating the same `bg-white border rounded shadow` in many files
+Primary users: doctors working on tablets under time pressure.
 
+---
 
-## Treatment selection UX (required behavior)
+## Styling Rules (Tailwind + CSS Tokens)
 
-We support two selection modes:
-- Search by name/code
-- Quick Grid presets (Favorites + Tabs)
+### Card System (REQUIRED)
+Define a reusable `.card` in `components.css` using design tokens:
+- border
+- radius
+- background
+- shadow
+- spacing
+
+Optional state variants:
+- `.card--selected`
+- `.card--disabled`
+
+Example responsibility:
+- Cards must NOT be rebuilt with long Tailwind chains.
+- Use semantic classes instead.
+
+### Avoid
+- Repeating `bg-white border rounded shadow` across components
+- Tailwind class chains longer than **10 utilities**
+- Styling logic embedded in component files when reusable
+
+---
+
+## Treatment Selection UX (REQUIRED BEHAVIOR)
+
+We support **two selection modes**:
+
+### 1) Search (Name / Code)
+- Fast filtering
+- Keyboard + touch safe
+
+### 2) Quick Grid Presets
+- Favorites + Category Tabs
+- NOT a full list
 
 Rules:
-- Quick Grid is NOT a full list. Keep it to **8–16** top actions per category.
-- Quick Grid buttons should display **Code + short name (2 lines)** to reduce mistakes.
-- Selecting an item shows a clear **"Selected"** preview.
-- CTA is **disabled** until valid (tooth/surface constraints met).
-- Provide "Recent" list (last 6) and "Favorites" (top 8–12).
+- **8–16 items max per category**
+- Buttons show **Code + short name (2 lines max)**
+- Large tap targets (≥44px, prefer 56px)
+- Avoid ambiguity and mis-taps
 
+### Selection Feedback
+- Selected item MUST show a clear **"Selected preview"**
+- CTA is **disabled** until:
+  - required tooth selected
+  - surface constraints satisfied
 
-## Responsiveness guidelines
+### Memory Aids
+- Recent list: **last 6**
+- Favorites: **top 8–12**
 
-- Desktop: sidebar + topbar + main content
-- Tablet landscape: split workspace (fixed left 380–420px, right fill)
-- Tablet portrait: step flow (one task at a time) + sticky bottom action bar
+---
 
-Do not hardcode pixel values everywhere. Use layout helpers in `layout.css`.
+## Responsiveness Guidelines (NON-NEGOTIABLE)
 
+### Layout Modes
+- Desktop:
+  - Sidebar + Topbar + Main content
 
-## Mock data & placeholders
+- Tablet Landscape (1024–1279):
+  - Split workspace
+  - Left fixed: **380–420px**
+  - Right: flexible
 
-Use mock data from `src/data/*`:
-- patients
-- treatments
-- diagnosis list
+- Tablet Portrait (768–1023):
+  - Step-based flow
+  - One task at a time
+  - Sticky bottom action bar
+  - NO desktop shrink layouts
 
-No external API calls unless explicitly requested.
-Images should be optional placeholders (avoid heavy assets).
+### Rules
+- Do NOT hardcode pixel values everywhere
+- Use layout helpers from `layout.css`
+- Tablet portrait must feel **action-first**, not informational
 
+---
 
-## Output expectations for Codex agent
+## Cross-Browser Hardening (ALWAYS APPLY)
 
-When asked to build a feature:
-- Add/modify components in the correct folder
-- Update store logic in Pinia if required
-- Add/adjust CSS in `tokens.css` / `components.css` / `layout.css` instead of repeating Tailwind
-- Keep UI consistent with touch-first and guardrails
-- Provide runnable code (no missing imports)
+### Viewport Units
+- DO NOT rely on `100vh`
+- Use `100dvh` for full-height layouts
+- Tailwind: `min-h-[100dvh]`
 
+### Flex / Grid Safety
+- Any flex child that can overflow MUST use `min-w-0`
+- Grid columns use `minmax(0,1fr)`
 
-## PR checklist (self-review)
+### Overflow & Sticky
+- Avoid `position: sticky` inside overflow containers
+- If sticky breaks (Safari), replace with fixed layout
+- No horizontal scroll on tablet portrait
 
-- [ ] Tap targets are **44–48px** minimum
+### Fonts
+- Single global font stack
+- Deterministic sizing
+- Avoid layout shifts caused by fallback fonts
+
+---
+
+## Mock Data & Placeholders
+
+Use mock data from:
+- `src/data/patients`
+- `src/data/treatments`
+- `src/data/diagnosis`
+
+Rules:
+- No external API calls unless explicitly requested
+- Images are optional placeholders
+- Avoid heavy assets
+
+---
+
+## Output Expectations for Codex Agent
+
+When implementing a feature:
+- Add/modify components in correct folders
+- Update Pinia store ONLY for business logic
+- Keep components mostly presentational
+- Move reusable styles to:
+  - `tokens.css`
+  - `components.css`
+  - `layout.css`
+- Do NOT repeat complex Tailwind in components
+- Ensure code is runnable (no missing imports)
+
+---
+
+## PR Checklist (Self-Review REQUIRED)
+
+- [ ] Tap targets ≥ 44–48px
 - [ ] No hover-only critical actions
-- [ ] Primary CTA is singular and clear
-- [ ] Guardrails exist for required tooth/surface
+- [ ] Exactly ONE primary CTA per screen
+- [ ] Guardrails for required tooth/surface exist
 - [ ] Tailwind used only for simple utilities
-- [ ] Complex style moved to CSS classes
-- [ ] No long Tailwind class chains (>10) without reason
-- [ ] Store contains business logic; components mostly presentational
+- [ ] Complex styles moved to CSS classes
+- [ ] No Tailwind chains > 10 utilities without reason
+- [ ] Store contains business logic only
 - [ ] Desktop + tablet landscape + portrait considered
+- [ ] No horizontal scroll on tablet portrait
+- [ ] Safari / iOS Safari behavior considered
 
+---
 
-## What NOT to do
+## What NOT To Do
 
-- Do not rewrite the entire design system unless asked.
-- Do not introduce new UI libraries without approval.
-- Do not put large CSS in each component file.
-- Do not over-animate; keep subtle transitions only.
+- Do NOT rewrite the design system unless explicitly asked
+- Do NOT introduce new UI libraries without approval
+- Do NOT dump large CSS blocks inside component files
+- Do NOT over-animate (subtle transitions only)
+- Do NOT copy desktop UI patterns into tablet portrait
+
+---
 
 END.
