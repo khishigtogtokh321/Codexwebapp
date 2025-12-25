@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import diagnoses from '@/data/diagnoses'
 
 const props = defineProps({
@@ -16,6 +16,9 @@ const selectedSurfaces = ref([])
 const selectedDiagnosis = ref(null)
 const diagnosisQuery = ref('')
 const showDiagnosisDropdown = ref(false)
+const dropdownPlacement = ref('bottom')
+const wizardRef = ref(null)
+const diagnosisTriggerRef = ref(null)
 
 const selectedCodes = ref([])
 const showTooltipCode = ref(null)
@@ -138,6 +141,31 @@ watch(
   { deep: true },
 )
 
+function updateDropdownPlacement() {
+  if (!wizardRef.value || !diagnosisTriggerRef.value) return
+  const containerRect = wizardRef.value.getBoundingClientRect()
+  const triggerRect = diagnosisTriggerRef.value.getBoundingClientRect()
+  const spaceBelow = containerRect.bottom - triggerRect.bottom
+  const spaceAbove = triggerRect.top - containerRect.top
+  const minSpace = 220
+  dropdownPlacement.value =
+    spaceBelow < minSpace && spaceAbove > spaceBelow ? 'top' : 'bottom'
+}
+
+watch(showDiagnosisDropdown, async (open) => {
+  if (!open) return
+  await nextTick()
+  updateDropdownPlacement()
+})
+
+onMounted(() => {
+  window.addEventListener('resize', updateDropdownPlacement)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateDropdownPlacement)
+})
+
 function toggleSurface(id) {
   if (!hasSelectedTeeth.value) return
   if (selectedSurfaces.value.includes(id)) {
@@ -197,10 +225,13 @@ function handleAdd() {
 </script>
 
 <template>
-  <section class=" h-[calc(85vh-180px)] relative overflow-hidden w-full max-w-[420px] bg-white border border-slate-200 rounded-2xl shadow-sm p-5">
+  <section
+    ref="wizardRef"
+    class=" h-[calc(85vh-180px)] relative overflow-visible w-full max-w-[420px] bg-white border border-slate-200 rounded-2xl shadow-sm p-5"
+  >
     <div class="flex items-start justify-between mb-4">
       <p class="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">
-        {{ step === 1 ? 'Гадаргуу сонгох' : 'Эмчилгээ сонгох' }}
+        {{ step === 1 ? '2. Гадаргуу сонгох' : 'Эмчилгээ сонгох' }}
       </p>
       <p class="text-xs font-semibold text-slate-400">{{ step }}/2</p>
     </div>
@@ -210,21 +241,28 @@ function handleAdd() {
       <div class="flex flex-col items-center gap-4">
         <div class="grid grid-cols-3 gap-2 justify-items-center w-full max-w-[220px]">
           <div></div>
-          <button
-            type="button"
-            class="w-14 h-14 rounded-xl border text-sm font-semibold transition bg-white text-slate-500 border-slate-200 hover:bg-slate-50 disabled:opacity-50"
-            :class="selectedSurfaces.includes('B/F') ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : ''"
-            :disabled="!hasSelectedTeeth"
-            @click="toggleSurface('B/F')"
-          >
-            B/F
-          </button>
+                <button
+                  type="button"
+                  class="w-14 h-14 rounded-xl border text-sm font-semibold transition
+                        bg-white text-slate-700 border-slate-200
+                        hover:border-slate-300 hover:bg-slate-50
+                        active:scale-[0.98]
+                        disabled:opacity-50 disabled:cursor-not-allowed"
+                  :class="selectedSurfaces.includes('B/F')
+                    ? 'border-blue-600 bg-blue-50 text-slate-900 ring-2 ring-blue-400 ring-offset-2 ring-offset-white'
+                    : ''"
+                  :disabled="!hasSelectedTeeth"
+                  @click="toggleSurface('B/F')"
+                >
+                  B/F
+                </button>
+
           <div></div>
 
           <button
             type="button"
             class="w-14 h-14 rounded-xl border text-sm font-semibold transition bg-white text-slate-500 border-slate-200 hover:bg-slate-50 disabled:opacity-50"
-            :class="selectedSurfaces.includes('M') ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : ''"
+            :class="selectedSurfaces.includes('M') ? 'bg-emerald-50 border-blue-500 text-emerald-700 ring-2 ring-blue-400 ring-offset-2 ring-offset-white' : ''"
             :disabled="!hasSelectedTeeth"
             @click="toggleSurface('M')"
           >
@@ -234,7 +272,7 @@ function handleAdd() {
           <button
             type="button"
             class="w-14 h-14 rounded-xl border text-sm font-semibold transition bg-white text-slate-500 border-slate-200 hover:bg-slate-50 disabled:opacity-50"
-            :class="selectedSurfaces.includes('O/I') ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : ''"
+            :class="selectedSurfaces.includes('O/I') ? 'bg-emerald-50 border-blue-500 text-emerald-700 ring-2 ring-blue-400 ring-offset-2 ring-offset-white' : ''"
             :disabled="!hasSelectedTeeth"
             @click="toggleSurface('O/I')"
           >
@@ -244,7 +282,7 @@ function handleAdd() {
           <button
             type="button"
             class="w-14 h-14 rounded-xl border text-sm font-semibold transition bg-white text-slate-500 border-slate-200 hover:bg-slate-50 disabled:opacity-50"
-            :class="selectedSurfaces.includes('D') ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : ''"
+            :class="selectedSurfaces.includes('D') ? 'bg-emerald-50 border-blue-500 text-emerald-700 ring-2 ring-blue-400 ring-offset-2 ring-offset-white' : ''"
             :disabled="!hasSelectedTeeth"
             @click="toggleSurface('D')"
           >
@@ -255,7 +293,7 @@ function handleAdd() {
           <button
             type="button"
             class="w-14 h-14 rounded-xl border text-sm font-semibold transition bg-white text-slate-500 border-slate-200 hover:bg-slate-50 disabled:opacity-50"
-            :class="selectedSurfaces.includes('L/P') ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : ''"
+            :class="selectedSurfaces.includes('L/P') ? 'bg-emerald-50 border-blue-500 text-emerald-700 ring-2 ring-blue-400 ring-offset-2 ring-offset-white' : ''"
             :disabled="!hasSelectedTeeth"
             @click="toggleSurface('L/P')"
           >
@@ -272,6 +310,7 @@ function handleAdd() {
 
         <div class="relative">
           <div
+            ref="diagnosisTriggerRef"
             class="flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2 bg-white cursor-text"
             @click="showDiagnosisDropdown = !showDiagnosisDropdown"
           >
@@ -279,7 +318,7 @@ function handleAdd() {
               v-model="diagnosisQuery"
               type="text"
               placeholder="ХАЙХ"
-              class="w-full bg-transparent text-sm text-slate-700 focus:outline-none"
+              class="w-full bg-transparent text-sm text-slate-600 focus:outline-none"
               @focus="showDiagnosisDropdown = true"
             />
             <svg class="h-4 w-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -293,7 +332,8 @@ function handleAdd() {
 
           <div
             v-if="showDiagnosisDropdown"
-            class="absolute z-10 mt-2 w-full rounded-xl border border-slate-200 bg-white shadow-md overflow-hidden"
+            class="absolute left-0 right-0 z-10 w-full rounded-xl border border-slate-200 bg-white shadow-md overflow-hidden"
+            :class="dropdownPlacement === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'"
           >
             <button
               type="button"

@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { formatDate } from '@/utils/formatters'
 
 const props = defineProps({
@@ -11,9 +11,69 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  patient: {
+    type: Object,
+    default: null,
+  },
 })
 
 const emit = defineEmits(['edit', 'delete'])
+
+const isEditOpen = ref(false)
+const editDraft = ref(null)
+
+const statusOptions = [
+  { value: 'planned', label: getStatusLabel('planned') },
+  { value: 'done', label: getStatusLabel('done') },
+]
+
+const patientName = computed(() => {
+  if (!props.patient) return 'Patient'
+  if (props.patient.name) return props.patient.name
+  const name = [props.patient.lastName, props.patient.firstName].filter(Boolean).join(' ').trim()
+  return name || 'Patient'
+})
+
+const patientAgeText = computed(() => {
+  const age = props.patient?.age
+  return Number.isFinite(age) ? `${age}` : '--'
+})
+
+const patientCardText = computed(() => {
+  return props.patient?.register || props.patient?.cardNumber || props.patient?.cardId || props.patient?.id || '--'
+})
+
+const patientTitle = computed(() => `${patientName.value} • Age ${patientAgeText.value} • Card ${patientCardText.value}`)
+
+function normalizeDateInput(value) {
+  if (!value) return ''
+  if (typeof value === 'string' && value.length >= 10 && value[4] === '-' && value[7] === '-') {
+    return value.slice(0, 10)
+  }
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.getTime())) return ''
+  return parsed.toISOString().slice(0, 10)
+}
+
+function openEdit(treatment) {
+  editDraft.value = {
+    ...treatment,
+    date: normalizeDateInput(treatment.date),
+    status: treatment.status || 'planned',
+  }
+  isEditOpen.value = true
+}
+
+function closeEdit() {
+  isEditOpen.value = false
+  editDraft.value = null
+}
+
+function saveEdit() {
+  if (!editDraft.value) return
+  emit('edit', { ...editDraft.value })
+  closeEdit()
+}
 
 function getStatusClass(status) {
   return status === 'done'
@@ -25,13 +85,26 @@ function getStatusLabel(status) {
   return status === 'done' ? 'Хийгдсэн' : 'Төлөвлөсөн'
 }
 
-function handleEdit(treatmentId) {
-  emit('edit', treatmentId)
-}
-
 function handleDelete(treatmentId) {
   emit('delete', treatmentId)
 }
+
+const handleKeydown = (event) => {
+  if (event.key === 'Escape' && isEditOpen.value) closeEdit()
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeydown)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleKeydown)
+  document.body?.classList?.remove('overflow-hidden')
+})
+
+watch(isEditOpen, (open) => {
+  document.body?.classList?.toggle('overflow-hidden', open)
+})
 </script>
 
 <template>
@@ -135,7 +208,7 @@ function handleDelete(treatmentId) {
                 <button
                   type="button"
                   class="px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-white bg-blue-50 hover:bg-blue-600 rounded-lg transition-all duration-200 hover:shadow-md transform hover:scale-105"
-                  @click.stop="handleEdit(treatment.id)"
+                  @click.stop="openEdit(treatment)"
                   title="Засах"
                 >
                   Засах
@@ -166,6 +239,120 @@ function handleDelete(treatmentId) {
       </div>
     </div>
   </div>
+
+  <Transition
+    enter-active-class="transition-opacity duration-200"
+    leave-active-class="transition-opacity duration-150"
+    enter-from-class="opacity-0"
+    enter-to-class="opacity-100"
+    leave-from-class="opacity-100"
+    leave-to-class="opacity-0"
+  >
+    <div
+      v-if="isEditOpen && editDraft"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      @click.self="closeEdit"
+    >
+      <Transition
+        enter-active-class="transition duration-200"
+        leave-active-class="transition duration-150"
+        enter-from-class="opacity-0 scale-95"
+        enter-to-class="opacity-100 scale-100"
+        leave-from-class="opacity-100 scale-100"
+        leave-to-class="opacity-0 scale-95"
+      >
+        <div
+          v-if="isEditOpen"
+          class="w-full max-w-3xl rounded-2xl bg-white shadow-2xl"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div class="flex items-start justify-between border-b border-gray-200 px-5 py-4">
+            <div class="min-w-0">
+              <p class="text-xs uppercase tracking-wide text-gray-500">Edit treatment</p>
+              <h3 class="text-lg font-semibold text-gray-900">
+                {{ patientTitle }}
+              </h3>
+            </div>
+            <button
+              type="button"
+              class="h-10 w-10 rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50"
+              @click="closeEdit"
+              aria-label="Close"
+            >
+              <svg class="h-5 w-5 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <form class="max-h-[80dvh] overflow-y-auto px-5 py-4" @submit.prevent="saveEdit">
+            <div class="grid gap-4 md:grid-cols-2">
+              <div class="space-y-2">
+                <label class="block text-sm font-medium text-gray-700">Date</label>
+                <input v-model="editDraft.date" type="date" class="input-field min-h-[44px] text-sm" />
+              </div>
+
+              <div class="space-y-2">
+                <label class="block text-sm font-medium text-gray-700">Tooth</label>
+                <input v-model="editDraft.tooth" type="text" class="input-field min-h-[44px] text-sm" />
+              </div>
+
+              <div class="space-y-2">
+                <label class="block text-sm font-medium text-gray-700">Surface</label>
+                <input v-model="editDraft.surface" type="text" class="input-field min-h-[44px] text-sm" />
+              </div>
+
+              <div class="space-y-2">
+                <label class="block text-sm font-medium text-gray-700">Status</label>
+                <select v-model="editDraft.status" class="input-field min-h-[44px] text-sm">
+                  <option v-for="option in statusOptions" :key="option.value" :value="option.value">
+                    {{ option.label }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="md:col-span-2 space-y-2">
+                <label class="block text-sm font-medium text-gray-700">Diagnosis</label>
+                <textarea v-model="editDraft.diagnosis" rows="3" class="input-field min-h-[88px] text-sm"></textarea>
+              </div>
+
+              <div class="md:col-span-2 space-y-2">
+                <label class="block text-sm font-medium text-gray-700">Treatment</label>
+                <input v-model="editDraft.treatmentType" type="text" class="input-field min-h-[44px] text-sm" />
+              </div>
+
+              <div class="space-y-2">
+                <label class="block text-sm font-medium text-gray-700">Doctor</label>
+                <input v-model="editDraft.doctor" type="text" class="input-field min-h-[44px] text-sm" />
+              </div>
+
+              <div class="space-y-2">
+                <label class="block text-sm font-medium text-gray-700">Price</label>
+                <input v-model="editDraft.price" type="text" class="input-field min-h-[44px] text-sm" />
+              </div>
+            </div>
+
+            <div class="mt-5 flex flex-wrap justify-end gap-3">
+              <button
+                type="button"
+                class="min-h-[44px] rounded-lg border border-gray-300 px-4 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                @click="closeEdit"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="min-h-[44px] rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700"
+              >
+                Save changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </Transition>
+    </div>
+  </Transition>
 </template>
 
 <style scoped>

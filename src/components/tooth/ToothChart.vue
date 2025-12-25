@@ -95,13 +95,13 @@ function undoSelection() {
 </script>
 
 <template>
-  <div class="dental-card p-4 md:p-5 space-y-5 tooth-selector">
+  <div class="dental-card p-4 md:p-4 space-y-4 tooth-selector">
     <div class="selector-header">
-        <h2 class="selector-title">1. Шүд сонгох</h2>
+        <h2 class="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">1. Шүд сонгох</h2>
     </div>
 
     <div class="jaw-section">
-      <div class="jaw-label">Дээд эрүү</div>
+      <!-- <div class="jaw-label">Дээд эрүү</div> -->
       <div class="quadrant-row">
         <div class="quadrant">
           <div class="tooth-row tooth-row--reverse">
@@ -165,7 +165,7 @@ function undoSelection() {
           </div>
         </div>
       </div>
-      <div class="jaw-label jaw-label--bottom">Доод эрүү</div>
+      <!-- <div class="jaw-label jaw-label--bottom">Доод эрүү</div> -->
     </div>
 
     <div class="selector-toolbar">
@@ -190,7 +190,9 @@ function undoSelection() {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 1.3rem;
+  padding-top: 5px;
+  padding-left: 5px;
 }
 
 .selector-title {
@@ -238,17 +240,17 @@ function undoSelection() {
   gap: 0.75rem;
 }
 
-.jaw-label {
+/* .jaw-label {
   color: #94a3b8;
   font-weight: 600;
   font-size: 0.85rem;
   text-align: center;
   letter-spacing: 0.01em;
-}
+} */
 
-.jaw-label--bottom {
+/* .jaw-label--bottom {
   margin-top: 0.5rem;
-}
+} */
 
 .quadrant-row {
   display: grid;
@@ -311,25 +313,25 @@ function undoSelection() {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: 0.5rem;
   padding-top: 0.75rem;
   border-top: 1px solid #e2e8f0;
 }
 
 .selector-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.2rem;
   flex-wrap: wrap;
 }
 
 .selector-btn {
-  padding: 0.45rem 0.85rem;
+  padding: 0.35rem 0.65rem;
   border-radius: 10px;
   border: 1px solid #e2e8f0;
   background: #ffffff;
   font-weight: 600;
   color: #0f172a;
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   transition: all 140ms ease;
 }
 

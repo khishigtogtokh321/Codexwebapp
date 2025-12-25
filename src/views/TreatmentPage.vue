@@ -124,59 +124,51 @@ function commitAddTreatment({
 
   const diagnosisLabels = getDiagnosisLabels(selectedDiagnoses)
   const surfaceText = selectedSurfaces.join(', ')
-  const toothDiagnosisText = diagnosisLabels.join(', ') || 'Онош сонгоогүй'
+  const toothText = selectedTeeth.map((tooth) => formatToothNumber(tooth)).join(', ')
+  const treatmentText = treatments
+    .map((treatment) => treatment?.label || treatment?.id)
+    .filter(Boolean)
+    .join(', ')
+  const fallbackDiagnosis = treatments
+    .map((treatment) => treatment?.label)
+    .filter(Boolean)
+    .join(', ')
+  const diagnosisText = diagnosisLabels.join(', ') || fallbackDiagnosis || '???? ?????????'
+  const status = state.selectedStatus || 'done'
 
-  let addedToothTreatment = false
-  let addedGeneralTreatment = false
-
-  treatments.forEach((treatment) => {
-    if (!treatment) return
-    const scope = getTreatmentScope(treatment)
-    if (scope === TREATMENT_SCOPE.GENERAL) {
-      const diagnosisText = diagnosisLabels.join(', ') || treatment.label
-      const entry = {
-        id: crypto.randomUUID(),
-        date: new Date().toISOString(),
-        tooth: '',
-        surface: '',
-        diagnosis: diagnosisText,
-        treatmentType: treatment.label,
-        doctor: '',
-        price: '',
-        status: state.selectedStatus || 'done',
-      }
-      state.treatmentLog.unshift(entry)
-      addedGeneralTreatment = true
-      return
-    }
-
-    if (!selectedTeeth.length) return
-    selectedTeeth.forEach((tooth) => {
-      const entry = {
-        id: crypto.randomUUID(),
-        date: new Date().toISOString(),
-        tooth: formatToothNumber(tooth),
-        surface: surfaceText,
-        diagnosis: toothDiagnosisText,
-        treatmentType: treatment.label || treatment.id,
-        doctor: '',
-        price: '',
-        status: state.selectedStatus || 'done',
-      }
-      state.treatmentLog.unshift(entry)
-      updateToothStatusFromTreatment(entry)
-      addedToothTreatment = true
-    })
-  })
-
-  if (addedToothTreatment) {
-    state.selectedSurfaces = []
-    state.selectedDiagnoses = []
-    state.selectedTreatments = []
-  } else if (addedGeneralTreatment) {
-    state.selectedTreatments = []
+  const entry = {
+    id: crypto.randomUUID(),
+    date: new Date().toISOString(),
+    tooth: toothText,
+    surface: surfaceText,
+    diagnosis: diagnosisText,
+    treatmentType: treatmentText,
+    doctor: '',
+    price: '',
+    status,
   }
+
+  state.treatmentLog.unshift(entry)
+
+  if (selectedTeeth.length) {
+    selectedTeeth.forEach((tooth) => {
+      treatments.forEach((treatment) => {
+        if (!treatment) return
+        updateToothStatusFromTreatment({
+          tooth: formatToothNumber(tooth),
+          treatmentType: treatment.label || treatment.id,
+          status,
+        })
+      })
+    })
+  }
+
+  state.selectedSurfaces = []
+  state.selectedDiagnoses = []
+  state.selectedTreatments = []
+  state.selectedTeeth = []
 }
+
 
 function handleAddTreatment(overrides = {}) {
   const payload = {
@@ -222,31 +214,50 @@ function handleWizardAdd(selectedCodes = []) {
   if (!state.selectedTeeth?.length) return
 
   const diagnosisLabels = getDiagnosisLabels(state.selectedDiagnoses)
-  const diagnosisText = diagnosisLabels.join(', ')
   const surfaceText = state.selectedSurfaces.join(', ')
+  const toothText = state.selectedTeeth.map((tooth) => formatToothNumber(tooth)).join(', ')
+  const treatmentText = selectedCodes
+    .map((codeItem) => [codeItem?.code, codeItem?.nameMn].filter(Boolean).join(' '))
+    .filter(Boolean)
+    .join(', ')
+  const fallbackDiagnosis = selectedCodes
+    .map((codeItem) => codeItem?.nameMn || codeItem?.code)
+    .filter(Boolean)
+    .join(', ')
+  const diagnosisText = diagnosisLabels.join(', ') || fallbackDiagnosis || '???? ?????????'
   const status = state.selectedStatus || 'done'
 
-  selectedCodes.forEach((codeItem) => {
-    if (!codeItem) return
-    const treatmentLabel = [codeItem.code, codeItem.nameMn].filter(Boolean).join(' ')
-    const fallbackDiagnosis = codeItem.nameMn || codeItem.code || ''
-    state.selectedTeeth.forEach((tooth) => {
-      const entry = {
-        id: crypto.randomUUID(),
-        date: new Date().toISOString(),
+  const entry = {
+    id: crypto.randomUUID(),
+    date: new Date().toISOString(),
+    tooth: toothText,
+    surface: surfaceText,
+    diagnosis: diagnosisText,
+    treatmentType: treatmentText,
+    doctor: '',
+    price: '',
+    status,
+  }
+
+  state.treatmentLog.unshift(entry)
+
+  state.selectedTeeth.forEach((tooth) => {
+    selectedCodes.forEach((codeItem) => {
+      if (!codeItem) return
+      updateToothStatusFromTreatment({
         tooth: formatToothNumber(tooth),
-        surface: surfaceText,
-        diagnosis: diagnosisText || fallbackDiagnosis,
-        treatmentType: treatmentLabel,
-        doctor: '',
-        price: '',
+        treatmentType: [codeItem.code, codeItem.nameMn].filter(Boolean).join(' '),
         status,
-      }
-      state.treatmentLog.unshift(entry)
-      updateToothStatusFromTreatment(entry)
+      })
     })
   })
+
+  state.selectedSurfaces = []
+  state.selectedDiagnoses = []
+  state.selectedTreatments = []
+  state.selectedTeeth = []
 }
+
 
 function handleSearch(query) {
   searchQuery.value = query
@@ -254,6 +265,24 @@ function handleSearch(query) {
 
 function handleFilterStatus(status) {
   statusFilter.value = status || 'all'
+}
+
+function handleEditTreatment(updated) {
+  if (!updated?.id) return
+  const index = state.treatmentLog.findIndex((t) => t.id === updated.id)
+  if (index === -1) return
+  state.treatmentLog.splice(index, 1, { ...state.treatmentLog[index], ...updated })
+  const teeth = (updated.tooth || '')
+    .split(',')
+    .map((tooth) => tooth.trim())
+    .filter(Boolean)
+  teeth.forEach((tooth) => {
+    updateToothStatusFromTreatment({
+      tooth,
+      treatmentType: updated.treatmentType,
+      status: updated.status,
+    })
+  })
 }
 
 function handleDeleteTreatment(treatmentId) {
@@ -381,7 +410,7 @@ watch(
           <div class="grid gap-4 lg:grid-cols-12 items-start lg:items-stretch">
             <div class="space-y-4 lg:col-span-8">
               <ToothChart
-                class="fill-height"
+                class="h-auto lg:h-auto"
                 :selected-teeth="selectedTeethList"
                 :tooth-statuses="toothStatuses"
                 :multi-select="true"
@@ -421,7 +450,8 @@ watch(
               <TreatmentHistoryTable
                 :treatments="filteredLog"
                 :loading="false"
-                @edit="() => {}"
+                :patient="activePatient"
+                @edit="handleEditTreatment"
                 @delete="handleDeleteTreatment"
               />
             </div>

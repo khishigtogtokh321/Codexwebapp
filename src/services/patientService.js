@@ -1,6 +1,8 @@
 const mockPatients = [
   {
     id: 'P-001',
+    cardNumber: '2024-001',
+    age: 32,
     firstName: 'Анударь',
     lastName: 'Бат-Эрдэнэ',
     phone: '99112233',
@@ -8,6 +10,8 @@ const mockPatients = [
   },
   {
     id: 'P-002',
+    cardNumber: '2024-002',
+    age: 41,
     firstName: 'Мөнх-Эрдэнэ',
     lastName: 'Сарангэрэл',
     phone: '88110022',
@@ -15,6 +19,8 @@ const mockPatients = [
   },
   {
     id: 'P-003',
+    cardNumber: '2024-003',
+    age: 29,
     firstName: 'Сувдмаа',
     lastName: 'Ганчимэг',
     phone: '99003344',
@@ -22,6 +28,8 @@ const mockPatients = [
   },
   {
     id: 'P-004',
+    cardNumber: '2024-004',
+    age: 36,
     firstName: 'Тэмүүлэн',
     lastName: 'Энхжин',
     phone: '95117788',
@@ -29,6 +37,8 @@ const mockPatients = [
   },
   {
     id: 'P-005',
+    cardNumber: '2024-005',
+    age: 24,
     firstName: 'Номин',
     lastName: 'Төрмандах',
     phone: '70112233',
