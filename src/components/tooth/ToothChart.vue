@@ -171,7 +171,22 @@ function undoSelection() {
     <div class="selector-toolbar">
       <div class="selector-actions">
         <button type="button" class="selector-btn" :disabled="!hasSelection" @click="clearSelection">
-          Цэвэрлэх
+          Бүгд
+        </button>
+          <button type="button" class="selector-btn" :disabled="!hasSelection" @click="clearSelection">
+          Байнгийн
+        </button>
+          <button type="button" class="selector-btn" :disabled="!hasSelection" @click="clearSelection">
+          Сүүн
+        </button>
+          <button type="button" class="selector-btn" :disabled="!hasSelection" @click="clearSelection">
+          Холимлог
+        </button>
+          <button type="button" class="selector-btn" :disabled="!hasSelection" @click="clearSelection">
+          Авхуулсан
+        </button>
+          <button type="button" class="selector-btn" :disabled="!hasSelection" @click="clearSelection">
+          Аваагүй
         </button>
       </div>
     </div>

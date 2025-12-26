@@ -1,11 +1,20 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import HistorySearchBar from '@/components/history/HistorySearchBar.vue'
 import { formatDate } from '@/utils/formatters'
 
 const props = defineProps({
   treatments: {
     type: Array,
     default: () => [],
+  },
+  searchQuery: {
+    type: String,
+    default: '',
+  },
+  statusFilter: {
+    type: String,
+    default: 'all',
   },
   loading: {
     type: Boolean,
@@ -17,7 +26,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['edit', 'delete'])
+const emit = defineEmits(['search', 'filter-status', 'edit', 'delete'])
 
 const isEditOpen = ref(false)
 const editDraft = ref(null)
@@ -109,6 +118,14 @@ watch(isEditOpen, (open) => {
 
 <template>
   <div class="dental-card overflow-hidden">
+    <div class="border-b border-gray-200 bg-white px-4 py-4">
+      <HistorySearchBar
+        :search-query="searchQuery"
+        :status-filter="statusFilter"
+        @search="emit('search', $event)"
+        @filter-status="emit('filter-status', $event)"
+      />
+    </div>
     <div class="overflow-x-auto">
       <table class="w-full">
         <thead class="bg-gray-50 border-b border-gray-200">
@@ -168,7 +185,7 @@ watch(isEditOpen, (open) => {
             v-for="(treatment, index) in treatments"
             :key="treatment.id"
             :class="[
-              'transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:shadow-md hover:scale-[1.01] cursor-pointer',
+              'transition-colors duration-150 hover:bg-blue-50 cursor-pointer',
               index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
             ]"
           >

@@ -4,7 +4,6 @@ import TopBar from '@/components/layout/TopBar.vue'
 import SideNav from '@/components/layout/SideNav.vue'
 import ToothChart from '@/components/tooth/ToothChart.vue'
 import TreatmentQuickAddDrawer from '@/components/treatment/TreatmentQuickAddDrawer.vue'
-import HistorySearchBar from '@/components/history/HistorySearchBar.vue'
 import TreatmentHistoryTable from '@/components/history/TreatmentHistoryTable.vue'
 import RightTreatmentWizard from '@/components/treatment/RightTreatmentWizard.vue'
 import { treatmentTypes, getTreatmentById } from '@/data/treatmentTypes'
@@ -439,18 +438,15 @@ watch(
               Эмчилгээний түүх
             </h2>
 
-            <HistorySearchBar
-              :search-query="searchQuery"
-              :status-filter="statusFilter"
-              @search="handleSearch"
-              @filter-status="handleFilterStatus"
-            />
-
             <div class="overflow-x-auto">
               <TreatmentHistoryTable
                 :treatments="filteredLog"
                 :loading="false"
                 :patient="activePatient"
+                :search-query="searchQuery"
+                :status-filter="statusFilter"
+                @search="handleSearch"
+                @filter-status="handleFilterStatus"
                 @edit="handleEditTreatment"
                 @delete="handleDeleteTreatment"
               />
