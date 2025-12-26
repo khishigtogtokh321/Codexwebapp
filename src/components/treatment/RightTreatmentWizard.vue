@@ -227,7 +227,7 @@ function handleAdd() {
 <template>
   <section
     ref="wizardRef"
-    class=" h-[calc(85vh-180px)] relative overflow-visible w-full max-w-[420px] bg-white border border-slate-200 rounded-2xl shadow-sm p-5"
+    class="treatment-wizard card"
   >
     <div class="flex items-start justify-between mb-4">
       <p class="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">
@@ -239,15 +239,11 @@ function handleAdd() {
     <!-- STEP 1 -->
     <div v-if="step === 1" class="space-y-6">
       <div class="flex flex-col items-center gap-4">
-        <div class="grid grid-cols-3 gap-2 justify-items-center w-full max-w-[220px]">
+        <div class="treatment-surface-grid">
           <div></div>
                 <button
                   type="button"
-                  class="w-14 h-14 rounded-xl border text-sm font-semibold transition
-                        bg-white text-slate-700 border-slate-200
-                        hover:border-slate-300 hover:bg-slate-50
-                        active:scale-[0.98]
-                        disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="treatment-surface-button"
                   :class="selectedSurfaces.includes('B/F')
                     ? 'border-blue-600 bg-blue-50 text-slate-900 ring-2 ring-blue-400 ring-offset-2 ring-offset-white'
                     : ''"
@@ -261,7 +257,7 @@ function handleAdd() {
 
           <button
             type="button"
-            class="w-14 h-14 rounded-xl border text-sm font-semibold transition bg-white text-slate-500 border-slate-200 hover:bg-slate-50 disabled:opacity-50"
+            class="treatment-surface-button"
             :class="selectedSurfaces.includes('M') ? 'bg-emerald-50 border-blue-500 text-emerald-700 ring-2 ring-blue-400 ring-offset-2 ring-offset-white' : ''"
             :disabled="!hasSelectedTeeth"
             @click="toggleSurface('M')"
@@ -271,7 +267,7 @@ function handleAdd() {
 
           <button
             type="button"
-            class="w-14 h-14 rounded-xl border text-sm font-semibold transition bg-white text-slate-500 border-slate-200 hover:bg-slate-50 disabled:opacity-50"
+            class="treatment-surface-button"
             :class="selectedSurfaces.includes('O/I') ? 'bg-emerald-50 border-blue-500 text-emerald-700 ring-2 ring-blue-400 ring-offset-2 ring-offset-white' : ''"
             :disabled="!hasSelectedTeeth"
             @click="toggleSurface('O/I')"
@@ -281,7 +277,7 @@ function handleAdd() {
 
           <button
             type="button"
-            class="w-14 h-14 rounded-xl border text-sm font-semibold transition bg-white text-slate-500 border-slate-200 hover:bg-slate-50 disabled:opacity-50"
+            class="treatment-surface-button"
             :class="selectedSurfaces.includes('D') ? 'bg-emerald-50 border-blue-500 text-emerald-700 ring-2 ring-blue-400 ring-offset-2 ring-offset-white' : ''"
             :disabled="!hasSelectedTeeth"
             @click="toggleSurface('D')"
@@ -292,7 +288,7 @@ function handleAdd() {
           <div></div>
           <button
             type="button"
-            class="w-14 h-14 rounded-xl border text-sm font-semibold transition bg-white text-slate-500 border-slate-200 hover:bg-slate-50 disabled:opacity-50"
+            class="treatment-surface-button"
             :class="selectedSurfaces.includes('L/P') ? 'bg-emerald-50 border-blue-500 text-emerald-700 ring-2 ring-blue-400 ring-offset-2 ring-offset-white' : ''"
             :disabled="!hasSelectedTeeth"
             @click="toggleSurface('L/P')"
@@ -311,7 +307,7 @@ function handleAdd() {
         <div class="relative">
           <div
             ref="diagnosisTriggerRef"
-            class="flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2 bg-white cursor-text"
+            class="treatment-diagnosis-trigger"
             @click="showDiagnosisDropdown = !showDiagnosisDropdown"
           >
             <input
@@ -332,7 +328,7 @@ function handleAdd() {
 
           <div
             v-if="showDiagnosisDropdown"
-            class="absolute left-0 right-0 z-10 w-full rounded-xl border border-slate-200 bg-white shadow-md overflow-hidden"
+            class="treatment-diagnosis-dropdown"
             :class="dropdownPlacement === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'"
           >
             <button
@@ -365,7 +361,7 @@ function handleAdd() {
       <div class="flex items-center justify-between gap-2">
         <button
           type="button"
-          class="min-h-[42px] px-4 py-2 rounded-full border border-slate-200 text-sm font-semibold text-slate-600 bg-white hover:bg-slate-50 disabled:opacity-60 disabled:cursor-not-allowed"
+          class="treatment-action-secondary"
           :disabled="!canProceed"
           @click="goNext"
         >
@@ -374,7 +370,7 @@ function handleAdd() {
         <button
           v-if="!canProceed"
           type="button"
-          class="text-xs font-medium text-slate-500 hover:text-slate-700"
+          class="treatment-skip-button"
           @click="skipSurfaces"
         >
           Алгасах
@@ -383,11 +379,11 @@ function handleAdd() {
     </div>
 
     <!-- STEP 2 -->
-    <div v-else class="h-full overflow-auto pr-1 pb-[88px] space-y-6">
+    <div v-else class="treatment-wizard__step-body space-y-6">
       <div class="flex items-center justify-between">
         <button
           type="button"
-          class="h-9 w-9 inline-flex items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:bg-slate-50"
+          class="treatment-icon-button"
           @click="prevType"
         >
           <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -399,13 +395,13 @@ function handleAdd() {
           </svg>
         </button>
 
-        <div class="px-4 py-2 rounded-full bg-slate-100 text-sm font-semibold text-slate-700">
+        <div class="treatment-type-pill min-w-0">
           {{ currentType?.label }}
         </div>
 
         <button
           type="button"
-          class="h-9 w-9 inline-flex items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:bg-slate-50"
+          class="treatment-icon-button"
           @click="nextType"
         >
           <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -422,7 +418,7 @@ function handleAdd() {
         <div v-for="item in currentCodes" :key="item.code" class="relative group">
           <button
             type="button"
-            class="w-full rounded-xl border border-slate-200 bg-white px-3 py-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            class="treatment-code-button"
             :class="selectedCodes.includes(item.code) ? 'bg-blue-50 border-blue-300 ring-1 ring-blue-200' : ''"
             @click="toggleCode(item.code)"
           >
@@ -445,31 +441,26 @@ function handleAdd() {
           </button> -->
 
           <div
-            class="pointer-events-none absolute z-50 left-1/2 top-full mt-2 -translate-x-1/2
-                  rounded-md bg-slate-900 text-white px-2 py-1 text-xs font-medium shadow-lg
-                  opacity-0 translate-y-1 transition duration-150 ease-out
-                  group-hover:opacity-100 group-hover:translate-y-0
-                  after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2
-                  after:-top-1 after:border-[6px] after:border-transparent after:border-b-slate-900"
-            :class="showTooltipCode === item.code ? '!opacity-100 !translate-y-0' : ''"
+            class="treatment-code-tooltip"
+            :class="showTooltipCode === item.code ? 'treatment-code-tooltip--visible' : ''"
           >
             {{ item.nameMn }}
           </div>
         </div>
       </div>
 
-      <div class="absolute left-5 right-5 bottom-5 bg-white">
-        <div class="flex gap-4">
+      <div class="treatment-action-bar">
+        <div class="treatment-action-bar__buttons">
           <button
             type="button"
-            class="flex-1 h-10 rounded-xl bg-slate-200 text-slate-700 shadow-sm font-semibold hover:bg-slate-300"
+            class="treatment-action-button treatment-action-button--secondary"
             @click="goBack"
           >
             Буцах
           </button>
           <button
             type="button"
-            class="flex-1 h-10 rounded-xl bg-blue-600 text-white shadow-sm font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="treatment-action-button treatment-action-button--primary"
             :disabled="!canAdd"
             @click="handleAdd"
           >

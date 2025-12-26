@@ -4,5 +4,6 @@
     --card-border: #e2e8f0;
     --card-radius: 1rem;
     --card-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --card-padding: clamp(0.875rem, 1.8vw, 1.25rem);
   }
 }
