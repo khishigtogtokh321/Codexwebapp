@@ -20,27 +20,21 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="space-y-3 rounded-2xl border border-gray-200 bg-white px-5 py-4 shadow-sm">
-    <div class="flex items-start justify-between">
+  <div class="section-card section-card--dense">
+    <div class="flex items-start justify-between gap-3">
       <div class="space-y-1">
-        <p class="text-xl font-semibold text-gray-900">{{ title }}</p>
-        <p class="text-sm text-gray-600">Төрөл</p>
+        <p class="text-base font-semibold text-gray-900 md:text-lg">{{ title }}</p>
+        <p class="text-xs uppercase tracking-wide text-gray-500">Төрөл</p>
         <p class="text-sm font-semibold text-gray-900">{{ type }}</p>
       </div>
-      <div class="flex flex-col items-end gap-3">
-        <span
-          class="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700"
-        >
-          {{ count }}
-        </span>
-        <button
-          type="button"
-          class="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700"
-        >
-          {{ date }}
-        </button>
+      <div class="flex flex-col items-end gap-2">
+        <span class="pill pill--soft text-xs">{{ count }}</span>
+        <span class="pill pill--muted text-xs">{{ date }}</span>
       </div>
     </div>
-    <p class="text-sm text-gray-500">Сүүлд: {{ date }}</p>
+    <div class="summary-block">
+      <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Сүүлд</p>
+      <p class="text-sm font-semibold text-gray-900">{{ date }}</p>
+    </div>
   </div>
 </template>

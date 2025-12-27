@@ -27,18 +27,14 @@ function handleFilter() {
 </script>
 
 <template>
-  <div class="w-full max-w-[360px] space-y-3 rounded-2xl border border-gray-200 bg-white px-4 py-4 shadow-sm">
+  <div class="section-card section-card--dense">
     <div class="flex items-center justify-between">
       <p class="text-lg font-semibold text-gray-900">{{ title }}</p>
-      <button
-        type="button"
-        class="rounded-lg px-3 py-1.5 text-sm font-semibold text-emerald-600 transition hover:bg-emerald-50"
-        @click="handleFilter"
-      >
+      <button type="button" class="btn btn--ghost px-3 py-1.5 text-sm font-semibold" @click="handleFilter">
         {{ filterLabel }}
       </button>
     </div>
-    <div class="max-h-[280px] space-y-2 overflow-y-auto pr-1">
+    <div class="max-h-[320px] space-y-2 overflow-y-auto pr-1">
       <AppointmentRow
         v-for="(appt, index) in appointments"
         :key="appt.time + appt.name + index"

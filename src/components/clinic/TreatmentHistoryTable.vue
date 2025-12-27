@@ -1,5 +1,7 @@
 <script setup>
 import { computed } from 'vue'
+import InfoRow from './InfoRow.vue'
+import SectionCard from './SectionCard.vue'
 
 const props = defineProps({
   history: {
@@ -59,73 +61,107 @@ const summaryBadges = computed(() => [
 </script>
 
 <template>
-  <div class="space-y-3 rounded-2xl border border-gray-200 bg-white px-5 py-4 shadow-sm">
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <h2 class="text-lg font-semibold text-gray-900">Хийгдсэн эмчилгээ</h2>
+  <SectionCard title="Хийгдсэн эмчилгээ">
+    <template #actions>
       <div class="flex flex-wrap items-center gap-1.5 text-xs font-semibold text-gray-700">
         <span
           v-for="badge in summaryBadges"
           :key="badge.label"
-          class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-[11px] text-gray-800"
+          class="pill pill--muted text-[11px]"
         >
           <span class="text-gray-500">{{ badge.label }}:</span>
           <span class="text-gray-900">{{ badge.value }}</span>
         </span>
       </div>
-    </div>
+    </template>
 
-    <div class="rounded-xl border border-gray-200">
-      <div class="overflow-x-auto">
-        <table class="min-w-[960px] divide-y divide-gray-200 text-sm">
-          <thead class="bg-gray-50 text-gray-600 text-xs font-semibold uppercase tracking-wide">
-            <tr>
-            <th class="px-3 py-2 text-left">Огноо</th>
-            <th class="px-3 py-2 text-left">Шүд</th>
-            <th class="px-3 py-2 text-left">Гадаргуу</th>
-            <th class="px-3 py-2 text-left">Код</th>
-            <th class="px-3 py-2 text-left">Тайлбар / Онош</th>
-            <th class="px-3 py-2 text-right">Үнэ</th>
-            <th class="px-3 py-2 text-right">Хөнгөлөлт</th>
-            <th class="px-3 py-2 text-left">Эмч</th>
-          </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100 text-gray-900">
-            <tr v-if="loading">
-            <td colspan="8" class="px-3 py-5 text-center text-gray-500">Уншиж байна...</td>
-          </tr>
-            <tr v-else-if="history.length === 0">
-            <td colspan="8" class="px-3 py-5 text-center text-gray-500">Түүх хоосон байна</td>
-          </tr>
-            <tr
-              v-else
-              v-for="(item, index) in history"
-              :key="item.id || item.date + item.tooth"
-              class="hover:bg-gray-50 cursor-pointer"
-              @dblclick="emit('open-detail', { item, index })"
-            >
-            <td class="whitespace-nowrap px-3 py-2.5 font-medium text-gray-900">{{ item.date }}</td>
-            <td class="whitespace-nowrap px-3 py-2.5 font-medium text-gray-900">{{ item.tooth }}</td>
-            <td class="whitespace-nowrap px-3 py-2.5 font-medium text-gray-900">{{ item.surface }}</td>
-            <td class="whitespace-nowrap px-3 py-2.5 font-medium text-gray-900">{{ item.code }}</td>
-            <td class="px-3 py-2.5 font-medium text-gray-900">{{ item.note }}</td>
-            <td class="px-3 py-2.5 text-right font-medium text-gray-900">{{ item.price }}</td>
-            <td class="px-3 py-2.5 text-right font-semibold text-red-600">{{ item.discount }}</td>
-            <td class="whitespace-nowrap px-3 py-2.5 font-medium text-gray-900">{{ item.doctor }}</td>
-          </tr>
-          </tbody>
-        </table>
+    <div class="hidden md:block">
+      <div class="table-shell">
+        <div class="table-shell__scroll">
+          <table class="table">
+            <thead>
+              <tr>
+                <th class="text-left">Огноо</th>
+                <th class="text-left">Шүд</th>
+                <th class="text-left">Гадаргуу</th>
+                <th class="text-left">Код</th>
+                <th class="text-left">Тайлбар / Онош</th>
+                <th class="text-right">Үнэ</th>
+                <th class="text-right">Хөнгөлөлт</th>
+                <th class="text-left">Эмч</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="loading">
+                <td colspan="8" class="text-center text-gray-500">Уншиж байна...</td>
+              </tr>
+              <tr v-else-if="history.length === 0">
+                <td colspan="8" class="text-center text-gray-500">Түүх хоосон байна</td>
+              </tr>
+              <tr
+                v-else
+                v-for="(item, index) in history"
+                :key="item.id || item.date + item.tooth"
+                class="cursor-pointer"
+                @dblclick="emit('open-detail', { item, index })"
+              >
+                <td class="whitespace-nowrap font-semibold">{{ item.date }}</td>
+                <td class="whitespace-nowrap font-semibold">{{ item.tooth }}</td>
+                <td class="whitespace-nowrap font-semibold">{{ item.surface }}</td>
+                <td class="whitespace-nowrap font-semibold">{{ item.code }}</td>
+                <td class="font-semibold">{{ item.note }}</td>
+                <td class="text-right font-semibold">{{ item.price }}</td>
+                <td class="text-right font-semibold text-red-600">{{ item.discount }}</td>
+                <td class="whitespace-nowrap font-semibold">{{ item.doctor }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <div class="flex justify-end gap-6 text-sm">
-      <div class="text-right">
-        <p class="text-gray-600">Хөнгөлөлт</p>
-        <p class="font-semibold text-red-600">{{ discountText }}</p>
+    <div class="space-y-2 md:hidden">
+      <div v-if="loading" class="text-center text-gray-500">Уншиж байна...</div>
+      <div v-else-if="history.length === 0" class="text-center text-gray-500">Түүх хоосон байна</div>
+      <div
+        v-else
+        v-for="(item, index) in history"
+        :key="item.id || item.date + item.tooth"
+        class="history-card"
+        @click="emit('open-detail', { item, index })"
+      >
+        <div class="history-card__meta">
+          <span>{{ item.code }}</span>
+          <div class="history-card__chips">
+            <span class="pill pill--muted text-xs">{{ item.date }}</span>
+            <span v-if="item.tooth" class="pill pill--muted text-xs">Шүд #{{ item.tooth }}</span>
+            <span v-if="item.surface" class="pill pill--soft text-xs">{{ item.surface }}</span>
+          </div>
+        </div>
+        <p class="text-sm font-semibold text-gray-900 leading-tight">{{ item.note }}</p>
+        <div class="grid grid-cols-2 gap-2 text-sm">
+          <InfoRow label="Үнэ">
+            <template #default>{{ item.price }}</template>
+          </InfoRow>
+          <InfoRow label="Хөнгөлөлт">
+            <template #default>
+              <span class="text-red-600 font-semibold">{{ item.discount }}</span>
+            </template>
+          </InfoRow>
+          <InfoRow label="Эмч" :value="item.doctor" />
+        </div>
       </div>
-      <div class="text-right">
-        <p class="text-gray-600">Нийт дүн</p>
+    </div>
+
+    <div class="summary-grid">
+      <div class="summary-block">
+        <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Хөнгөлөлт</p>
+        <p class="text-base font-semibold text-red-600">{{ discountText }}</p>
+      </div>
+      <div class="summary-block">
+        <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Нийт дүн</p>
         <p class="text-lg font-semibold text-gray-900">{{ totalText }}</p>
       </div>
     </div>
-  </div>
+  </SectionCard>
 </template>

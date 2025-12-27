@@ -2,7 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import TopBar from '@/components/clinic/TopBar.vue'
 import PatientProfileCard from '@/components/clinic/PatientProfileCard.vue'
-import PatientHealthWarnings from '@/components/clinic/PatientHealthWarnings.vue'
+import PatientContextHeader from '@/components/clinic/PatientContextHeader.vue'
 import TreatmentPlanTable from '@/components/clinic/TreatmentPlanTable.vue'
 import TreatmentHistoryTable from '@/components/clinic/TreatmentHistoryTable.vue'
 import RecallCard from '@/components/clinic/RecallCard.vue'
@@ -288,7 +288,7 @@ function saveDetail() {
 </script>
 
 <template>
-  <div class="flex min-h-screen bg-slate-50">
+  <div class="flex min-h-[100dvh] bg-slate-50">
     <aside class="relative z-40 hidden flex-shrink-0 lg:block">
       <div class="w-24"></div>
       <div
@@ -308,7 +308,7 @@ function saveDetail() {
       </div>
     </aside>
 
-    <div class="flex-1 overflow-hidden">
+    <div class="flex-1 min-w-0">
       <div class="flex flex-col">
         <div class="flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 shadow-sm lg:hidden">
           <button
@@ -327,19 +327,21 @@ function saveDetail() {
 
         <TopBar :breadcrumbs="breadcrumbs" card-id="2511002" placeholder="Өвчтөн хайх (Нэр, РД, Утас...)" />
 
-        <main class="flex-1 overflow-y-auto">
+        <main class="flex-1 bg-slate-50">
           <div class="mx-auto w-full max-w-[1500px] px-4 pb-16 pt-6 lg:px-6 lg:pb-12">
-            <div class="grid grid-cols-1 gap-5 xl:grid-cols-12">
-              <div class="flex flex-col gap-4 xl:col-span-3">
-                <PatientProfileCard :patient="state.patient" />
-                <PatientHealthWarnings
+            <PatientContextHeader :patient="state.patient" card-id="2511002" :allergies="state.allergies" />
+
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-12">
+              <div class="flex flex-col gap-4 md:col-span-12 lg:col-span-3">
+                <PatientProfileCard
+                  :patient="state.patient"
                   :allergies="state.allergies"
                   :complaints="state.complaints"
                   :risks="state.risks"
                 />
               </div>
 
-              <div class="flex flex-col gap-4 xl:col-span-6">
+              <div class="flex flex-col gap-4 md:col-span-7 lg:col-span-6 min-w-0">
                 <TreatmentPlanTable :plans="state.plans" />
                 <TreatmentHistoryTable
                   :history="state.history"
@@ -349,7 +351,7 @@ function saveDetail() {
                 />
               </div>
 
-              <div class="flex flex-col gap-4 pb-4 xl:col-span-3 xl:ml-auto xl:max-w-[360px]">
+              <div class="flex flex-col gap-4 pb-4 md:col-span-5 lg:col-span-3 min-w-0">
                 <RecallCard
                   :title="state.recall.title"
                   :count="state.recall.count"
