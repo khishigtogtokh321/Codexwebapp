@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import diagnoses from '@/data/diagnoses'
 
 const props = defineProps({
@@ -16,7 +16,6 @@ const selectedSurfaces = ref([])
 const selectedDiagnosis = ref(null)
 const diagnosisQuery = ref('')
 const showDiagnosisDropdown = ref(false)
-const dropdownPlacement = ref('bottom')
 const wizardRef = ref(null)
 const diagnosisTriggerRef = ref(null)
 
@@ -141,31 +140,6 @@ watch(
   { deep: true },
 )
 
-function updateDropdownPlacement() {
-  if (!wizardRef.value || !diagnosisTriggerRef.value) return
-  const containerRect = wizardRef.value.getBoundingClientRect()
-  const triggerRect = diagnosisTriggerRef.value.getBoundingClientRect()
-  const spaceBelow = containerRect.bottom - triggerRect.bottom
-  const spaceAbove = triggerRect.top - containerRect.top
-  const minSpace = 220
-  dropdownPlacement.value =
-    spaceBelow < minSpace && spaceAbove > spaceBelow ? 'top' : 'bottom'
-}
-
-watch(showDiagnosisDropdown, async (open) => {
-  if (!open) return
-  await nextTick()
-  updateDropdownPlacement()
-})
-
-onMounted(() => {
-  window.addEventListener('resize', updateDropdownPlacement)
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', updateDropdownPlacement)
-})
-
 function toggleSurface(id) {
   if (!hasSelectedTeeth.value) return
   if (selectedSurfaces.value.includes(id)) {
@@ -227,7 +201,12 @@ function handleAdd() {
 <template>
   <section
     ref="wizardRef"
-    class="treatment-wizard card"
+    :class="[
+      'treatment-wizard',
+      'card',
+      'treatment-wizard--responsive',
+      step === 1 ? 'treatment-wizard--step1' : 'treatment-wizard--step2'
+    ]"
   >
     <div class="flex items-start justify-between mb-4">
       <p class="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">
@@ -237,7 +216,7 @@ function handleAdd() {
     </div>
 
     <!-- STEP 1 -->
-    <div v-if="step === 1" class="space-y-6">
+    <div v-if="step === 1" class="space-y-4">
       <div class="flex flex-col items-center gap-4">
         <div class="treatment-surface-grid">
           <div></div>
@@ -300,86 +279,79 @@ function handleAdd() {
   
       </div>
 
-      <!-- DIAGNOSIS UI (RESTORED) -->
-      <div class="space-y-2">
-        <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-400">Эмчилгээний онош</p>
+      <div class="space-y-3">
+        <!-- DIAGNOSIS UI (RESTORED) -->
+        <div>
+          <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-400">Эмчилгээний онош</p>
 
-        <div class="relative">
-          <div
-            ref="diagnosisTriggerRef"
-            class="treatment-diagnosis-trigger"
-            @click="showDiagnosisDropdown = !showDiagnosisDropdown"
-          >
-            <input
-              v-model="diagnosisQuery"
-              type="text"
-              placeholder="ХАЙХ"
-              class="w-full bg-transparent text-sm text-slate-600 focus:outline-none"
-              @focus="showDiagnosisDropdown = true"
-            />
-            <svg class="h-4 w-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-              <path
-                fill-rule="evenodd"
-                d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
-                clip-rule="evenodd"
-              />
-            </svg>
-          </div>
-
-          <div
-            v-if="showDiagnosisDropdown"
-            class="treatment-diagnosis-dropdown"
-            :class="dropdownPlacement === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'"
-          >
-            <button
-              type="button"
-              class="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-slate-50"
-              @click.stop="clearDiagnosis"
+          <div class="relative">
+            <div
+              ref="diagnosisTriggerRef"
+              class="treatment-diagnosis-trigger"
+              @click="showDiagnosisDropdown = !showDiagnosisDropdown"
             >
-              Алгасах
-            </button>
-            <div class="max-h-48 overflow-y-auto divide-y divide-slate-100">
-              <button
-                v-for="item in filteredDiagnoses"
-                :key="item.code"
-                type="button"
-                class="w-full px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
-                @click.stop="selectDiagnosis(item)"
-              >
-                <p class="font-semibold">{{ item.code }}</p>
-                <p class="text-xs text-slate-500">{{ item.name }}</p>
-              </button>
+              <input
+                v-model="diagnosisQuery"
+                type="text"
+                placeholder="ХАЙХ"
+                class="treatment-input w-full bg-transparent text-slate-600 focus:outline-none"
+                @focus="showDiagnosisDropdown = true"
+              />
+              <svg class="h-4 w-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path
+                  fill-rule="evenodd"
+                  d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+                  clip-rule="evenodd"
+                />
+              </svg>
             </div>
+
+            <div
+              v-if="showDiagnosisDropdown"
+              class="treatment-diagnosis-dropdown treatment-diagnosis-dropdown--bottom"
+            >
+              <button
+                type="button"
+                class="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                @click.stop="clearDiagnosis"
+              >
+                Алгасах
+              </button>
+              <div class="treatment-diagnosis-list divide-y divide-slate-100">
+                <button
+                  v-for="item in filteredDiagnoses"
+                  :key="item.code"
+                  type="button"
+                  class="w-full px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
+                  @click.stop="selectDiagnosis(item)"
+                >
+                  <p class="font-semibold">{{ item.code }}</p>
+                  <p class="text-xs text-slate-500">{{ item.name }}</p>
+                </button>
+              </div>
+            </div>
+
+            <p v-if="selectedDiagnosis" class="mt-2 text-xs text-emerald-700">
+              {{ selectedDiagnosis.code }} · {{ selectedDiagnosis.name }}
+            </p>
           </div>
-
-          <p v-if="selectedDiagnosis" class="mt-2 text-xs text-emerald-700">
-            {{ selectedDiagnosis.code }} · {{ selectedDiagnosis.name }}
-          </p>
         </div>
-      </div>
 
-      <div class="flex items-center justify-between gap-2">
-        <button
-          type="button"
-          class="treatment-action-secondary"
-          :disabled="!canProceed"
-          @click="goNext"
-        >
-          Эмчилгээ сонгох
-        </button>
-        <button
-          v-if="!canProceed"
-          type="button"
-          class="treatment-skip-button"
-          @click="skipSurfaces"
-        >
-          Алгасах
-        </button>
+        <div class="flex items-center justify-between gap-2">
+          <button
+            type="button"
+            class="treatment-action-secondary"
+            :disabled="!canProceed"
+            @click="goNext"
+          >
+            <span class="treatment-hit-visual">Эмчилгээ сонгох</span>
+          </button>
+        </div>
       </div>
     </div>
 
     <!-- STEP 2 -->
-    <div v-else class="treatment-wizard__step-body space-y-6">
+    <div v-else class="treatment-wizard__step-body space-y-4 lg:space-y-4 xl:space-y-6 min-w-0">
       <div class="flex items-center justify-between">
         <button
           type="button"
@@ -414,7 +386,12 @@ function handleAdd() {
         </button>
       </div>
 
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+      <div class="grid gap-3 min-w-0 
+      [grid-template-columns:repeat(auto-fit,minmax(84px, 1fr))]
+      lg:gap-2 lg:[grid-template-columns:repeat(auto-fit,minmax(72px,1fr))]
+      xl:gap-3 xl:[grid-template-columns:repeat(auto-fit,minmax(88px,1fr))]]
+      "
+      >
         <div v-for="item in currentCodes" :key="item.code" class="relative group">
           <button
             type="button"
@@ -456,7 +433,7 @@ function handleAdd() {
             class="treatment-action-button treatment-action-button--secondary"
             @click="goBack"
           >
-            Буцах
+            <span class="treatment-hit-visual">Буцах</span>
           </button>
           <button
             type="button"
@@ -464,7 +441,7 @@ function handleAdd() {
             :disabled="!canAdd"
             @click="handleAdd"
           >
-            Нэмэх
+            <span class="treatment-hit-visual">Нэмэх</span>
           </button>
         </div>
       </div>

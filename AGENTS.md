@@ -1,38 +1,126 @@
 # AGENTS.md — UI Guardrails (Tablet-first Medical System)
 
 ## Mission
-Generate and modify UI code that is:
-- Touch-first (doctor workflow)
-- Tablet-safe (portrait & landscape)
-- Cross-browser stable
-- Maintainable (Tailwind + CSS tokens, not utility soup)
+Generate/modify UI code that is:
+- **Touch-first** (doctor workflow, fast + low error)
+- **Tablet-safe** (portrait & landscape, iPad + Android)
+- **Cross-browser stable** (Safari/iOS included)
+- **Maintainable** (Tailwind for small utilities + CSS tokens/classes, not utility soup)
 
 Primary users: doctors working on tablets under time pressure.
+
+---
+
+## Non-negotiables (Golden Rules)
+1) **No layout breakage** on tablet portrait (768–1023):  
+   - no horizontal scroll  
+   - no clipped CTAs  
+   - no “desktop shrink” layouts  
+2) **Tap targets ≥ 44px** (prefer 48–56px for critical actions).  
+3) **Scroll is intentional**: only the intended area scrolls (never accidental whole-card scroll).  
+4) **Safari/iOS must work**: avoid patterns known to break on iOS (vh, sticky+overflow, min-height+100%).
 
 ---
 
 ## Styling Rules (Tailwind + CSS Tokens)
 
 ### Card System (REQUIRED)
-Define a reusable `.card` in `components.css` using design tokens:
-- border
-- radius
-- background
-- shadow
-- spacing
+Define reusable `.card` in `components.css` using tokens:
+- border, radius, bg, shadow, spacing
+- optional variants:
+  - `.card--selected`
+  - `.card--disabled`
+  - `.card--dense`
 
-Optional state variants:
-- `.card--selected`
-- `.card--disabled`
-
-Example responsibility:
-- Cards must NOT be rebuilt with long Tailwind chains.
-- Use semantic classes instead.
+**Rule:** Cards must **NOT** be rebuilt with long Tailwind chains. Use semantic classes.
 
 ### Avoid
-- Repeating `bg-white border rounded shadow` across components
-- Tailwind class chains longer than **10 utilities**
-- Styling logic embedded in component files when reusable
+- repeating `bg-white border rounded shadow` across components
+- Tailwind chains longer than **10 utilities**
+- large style logic inside Vue SFC when reusable
+
+### Preferred Pattern
+- Tailwind = layout glue (grid/flex/gap), small utilities
+- CSS classes = component styling + repeated patterns
+- CSS variables (tokens) = sizing & consistency
+
+---
+
+## Cross-Browser Hardening (ALWAYS APPLY)
+
+### Viewport Units (iOS-safe)
+- DO NOT rely on `100vh` alone.
+- Use `100dvh` with fallback:
+  - CSS: `max-height: 90vh; max-height: 90dvh;`
+  - Tailwind: add both if needed via custom CSS or arbitrary values.
+
+### Flex/Grid Safety (prevents overflow bugs)
+- Any flex/grid child that can overflow MUST have:
+  - `min-w-0` (for horizontal)
+  - `min-h-0` (for vertical scroll containers)
+- Grid columns must use `minmax(0,1fr)` (or Tailwind equivalent).
+
+### Overflow & Sticky
+- Avoid `position: sticky` inside containers with `overflow: auto/hidden`.
+- If sticky breaks on Safari: use a fixed footer/action bar layout instead.
+
+### Height + 100% Trap (IMPORTANT)
+**Never combine these without a fixed parent height:**
+- parent uses `min-height`
+- child uses `height: 100%`
+
+This breaks vertical centering and sizing on iOS Safari.
+
+**Fix patterns:**
+- use `height` (fixed) instead of `min-height` when child needs `height:100%`, OR
+- remove `height:100%` and center with flex + padding.
+
+### Fonts & Line-height (Safari rendering)
+- Use a single global font stack.
+- Avoid `line-height: 1` on pills/buttons for Mongolian text; prefer `1.1–1.2` to prevent baseline “lifting” on iPad.
+
+---
+
+## Layout Modes (REQUIRED)
+
+### Desktop
+- Sidebar + Topbar + Main content
+
+### Tablet Landscape (1024–1279)
+- Split workspace
+- Left fixed: **380–420px**
+- Right: flexible
+- **No cramped desktop shrink**: prioritize readability + tap space
+
+### Tablet Portrait (768–1023)
+- Step-based flow (one task at a time)
+- Sticky/fixed bottom action bar
+- Avoid multi-column dense layouts
+- No horizontal scroll, ever
+
+### Rules
+- Do NOT hardcode pixel values everywhere
+- Use layout helpers from `layout.css`
+- Prefer `clamp()`/tokens for sizes
+
+---
+
+## Sizing & Tokens (CSS Variables)
+
+### Clamp Rules
+Use `clamp(MIN, PREFERRED, MAX)` for responsive sizing.
+- MIN: touch-safe minimum (≥ 44px for critical controls)
+- PREFERRED: container-aware sizing (`cqw`) or viewport (`dvh`)
+- MAX: prevent oversized UI on large screens
+
+### Container Query Units (cqw)
+If using `cqw`, ensure the parent has:
+- `container-type: inline-size;`
+
+### Variable Safety (NO undefined vars)
+Any `var(--x)` used inside `clamp()` MUST exist or have fallback:
+- ✅ `var(--tw-touch, 2.75rem)`
+- ❌ `var(--tw-visual)` (undefined) — causes invalid clamp and unpredictable sizing.
 
 ---
 
@@ -40,85 +128,75 @@ Example responsibility:
 
 We support **two selection modes**:
 
-### 1) Search (Name / Code)
+### 1) Search (Name/Code)
 - Fast filtering
 - Keyboard + touch safe
+- Clear empty state
+- Debounce is optional; keep it responsive
 
 ### 2) Quick Grid Presets
-- Favorites + Category Tabs
-- NOT a full list
+- Favorites + Category tabs
+- NOT full list
 
 Rules:
 - **8–16 items max per category**
-- Buttons show **Code + short name (2 lines max)**
-- Large tap targets (≥44px, prefer 56px)
-- Avoid ambiguity and mis-taps
+- Each button shows **Code + short name (2 lines max)**
+- Tap targets ≥ 44px (prefer 56px for primary flows)
+- Prevent mis-taps: spacing and clear selected state
 
 ### Selection Feedback
-- Selected item MUST show a clear **"Selected preview"**
-- CTA is **disabled** until:
-  - required tooth selected
+- Selected item MUST show a clear **Selected Preview** (code + name)
+- Primary CTA disabled until:
+  - tooth selected (required)
   - surface constraints satisfied
+  - at least 1 code selected (if required)
 
 ### Memory Aids
-- Recent list: **last 6**
-- Favorites: **top 8–12**
+- Recent list: last **6**
+- Favorites: top **8–12**
 
 ---
 
-## Responsiveness Guidelines (NON-NEGOTIABLE)
+## Wizard / Step Panels (Hard Rules)
 
-### Layout Modes
-- Desktop:
-  - Sidebar + Topbar + Main content
+### Step 1 vs Step 2 Height Strategy
+- **Step 1 (selection/inputs):** height should be **content-driven**.
+  - Avoid forcing height via `aspect-ratio` (creates empty space).
+- **Step 2 (grid lists):** allow a **fixed panel height** and make ONLY the list/grid scroll.
 
-- Tablet Landscape (1024–1279):
-  - Split workspace
-  - Left fixed: **380–420px**
-  - Right: flexible
+### Scroll Strategy (Only one scroll area)
+When you need header + footer fixed, and content scrolls:
+- Panel: `display:flex; flex-direction:column; overflow:hidden;`
+- Body: `flex:1; min-h-0; overflow:hidden;`
+- Scroll area (grid/list): `flex:1; min-h-0; overflow:auto;`
+- Bottom action bar: fixed/absolute within panel, avoid fighting the scroll.
 
-- Tablet Portrait (768–1023):
-  - Step-based flow
-  - One task at a time
-  - Sticky bottom action bar
-  - NO desktop shrink layouts
-
-### Rules
-- Do NOT hardcode pixel values everywhere
-- Use layout helpers from `layout.css`
-- Tablet portrait must feel **action-first**, not informational
+**Never** make the whole panel body scroll if footer is absolute—use padding on scroll area.
 
 ---
 
-## Cross-Browser Hardening (ALWAYS APPLY)
+## Controls (Buttons/Inputs) — Touch & Centering
 
-### Viewport Units
-- DO NOT rely on `100vh`
-- Use `100dvh` for full-height layouts
-- Tailwind: `min-h-[100dvh]`
+### Tap Target Rule
+- Primary/secondary buttons: min height ≥ 44px
+- Prefer 48–56px for high-frequency actions
 
-### Flex / Grid Safety
-- Any flex child that can overflow MUST use `min-w-0`
-- Grid columns use `minmax(0,1fr)`
+### Vertical Centering Rule (iOS-safe)
+Prefer:
+- button uses `height: var(--control-h)` and no `height:100%` dependency
+- center text with flex
+- use `line-height: 1.1–1.2` for Mongolian text
 
-### Overflow & Sticky
-- Avoid `position: sticky` inside overflow containers
-- If sticky breaks (Safari), replace with fixed layout
-- No horizontal scroll on tablet portrait
-
-### Fonts
-- Single global font stack
-- Deterministic sizing
-- Avoid layout shifts caused by fallback fonts
+Avoid:
+- parent `min-height` + child `height:100%`
 
 ---
 
 ## Mock Data & Placeholders
-
 Use mock data from:
 - `src/data/patients`
 - `src/data/treatments`
-- `src/data/diagnosis`
+- `src/data/diagnoses`
 
 Rules:
 - No external API calls unless explicitly requested
@@ -139,12 +217,25 @@ When implementing a feature:
   - `layout.css`
 - Do NOT repeat complex Tailwind in components
 - Ensure code is runnable (no missing imports)
+- When using `clamp()` + `var()` ensure variables exist or have fallbacks
+
+---
+
+## Tablet Test Matrix (Minimum)
+Must visually sanity-check these:
+- **iPad Mini / iPad (Safari)**
+  - 768×1024 (portrait)
+  - 1024×768 (landscape)
+  - Split view ~ 507×768 (portrait/landscape)
+- **Android tablet (Chrome)**
+  - 800×1280
+  - 1280×800
+- Check: no horizontal scroll, CTAs visible, scroll areas correct, text not clipped.
 
 ---
 
 ## PR Checklist (Self-Review REQUIRED)
-
-- [ ] Tap targets ≥ 44–48px
+- [ ] Tap targets ≥ 44–48px (prefer 56px for primary)
 - [ ] No hover-only critical actions
 - [ ] Exactly ONE primary CTA per screen
 - [ ] Guardrails for required tooth/surface exist
@@ -155,16 +246,18 @@ When implementing a feature:
 - [ ] Desktop + tablet landscape + portrait considered
 - [ ] No horizontal scroll on tablet portrait
 - [ ] Safari / iOS Safari behavior considered
+- [ ] No undefined CSS vars inside clamp()
+- [ ] No `min-height` + `height:100%` trap in controls
 
 ---
 
 ## What NOT To Do
-
 - Do NOT rewrite the design system unless explicitly asked
 - Do NOT introduce new UI libraries without approval
 - Do NOT dump large CSS blocks inside component files
 - Do NOT over-animate (subtle transitions only)
 - Do NOT copy desktop UI patterns into tablet portrait
+- Do NOT force panel heights using `aspect-ratio` on content-driven steps
 
 ---
 

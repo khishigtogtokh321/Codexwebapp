@@ -312,29 +312,102 @@
     padding: 0.9rem 1rem;
     background: #f8fafc;
   }
-
   .treatment-wizard {
+    container-type: inline-size;
+    --tw-hit: 2.75rem;
+    --tw-touch: 2.35rem;
     --treatment-wizard-width: clamp(18rem, 42vw, 26.25rem);
     --treatment-wizard-height: clamp(22rem, 62dvh, 34rem);
-    --treatment-surface-size: clamp(2.75rem, 6vw, 3.5rem);
-    --treatment-surface-font: clamp(0.75rem, 1.3vw, 0.875rem);
-    --treatment-surface-grid-width: clamp(10rem, 32vw, 13.75rem);
-    --treatment-control-height: clamp(2.75rem, 5vw, 3rem);
-    --treatment-control-padding-x: clamp(0.75rem, 2vw, 1rem);
-    --treatment-control-padding-y: clamp(0.5rem, 1.4vw, 0.75rem);
-    --treatment-code-padding-x: clamp(0.65rem, 1.6vw, 0.875rem);
-    --treatment-code-padding-y: clamp(0.75rem, 2vw, 1rem);
-    --treatment-code-font: clamp(0.75rem, 1.6vw, 0.875rem);
-    --treatment-action-offset: clamp(0.75rem, 2vw, 1.25rem);
-    --treatment-action-gap: clamp(0.5rem, 2vw, 1rem);
-    --treatment-pill-padding-x: clamp(0.75rem, 2vw, 1rem);
-    --treatment-pill-padding-y: clamp(0.35rem, 1vw, 0.5rem);
+    --treatment-surface-size: clamp(var(--tw-touch), 13cqw, 3.5rem);
+    --treatment-surface-font: clamp(0.75rem, 2.4cqw, 0.875rem);
+    --treatment-surface-grid-width: clamp(10rem, 32cqw, 13.75rem);
+    --treatment-control-height: clamp(var(--tw-touch), 9cqw, 3.3rem);
+    --treatment-control-padding-x: clamp(0.6rem, 4.2cqw, 1rem);
+    --treatment-control-padding-y: clamp(0.45rem, 3cqw, 0.75rem);
+    --treatment-control-font: clamp(0.75rem, 2.2cqw, 0.9rem);
+    --treatment-diagnosis-height: clamp(2rem, 7cqw, 3rem);
+    --treatment-diagnosis-padding-y: clamp(0.25rem, 2cqw, 0.6rem);
+    --treatment-diagnosis-max-height: clamp(3rem, 28dvh, 12rem);
+    --treatment-code-padding-x: clamp(0.6rem, 3.6cqw, 0.9rem);
+    --treatment-code-padding-y: clamp(0.55rem, 3.2cqw, 0.85rem);
+    --treatment-code-font: clamp(0.72rem, 2.1cqw, 0.88rem);
+    --treatment-action-offset: clamp(0.6rem, 3cqw, 1.25rem);
+    --treatment-action-gap: clamp(0.4rem, 2.6cqw, 1rem);
+    --treatment-pill-padding-x: clamp(0.6rem, 3.6cqw, 1rem);
+    --treatment-pill-padding-y: clamp(0.3rem, 2.2cqw, 0.5rem);
+    --treatment-hit-padding: max(0px, calc((var(--tw-hit) - var(--treatment-control-height)) / 2));
+    --treatment-hit-padding: min(
+        0.25rem,
+        max(0px, calc((var(--tw-hit) - var(--treatment-control-height)) / 2))
+      );
     width: 100%;
     max-width: var(--treatment-wizard-width);
-    height: var(--treatment-wizard-height);
+    height: auto;
+    max-height: 90dvh;
+    aspect-ratio: 1 / 0.88;
     position: relative;
     overflow: visible;
   }
+
+  @supports not (width: 1cqw) {
+    .treatment-wizard {
+      --treatment-surface-size: clamp(var(--tw-touch), 6vw, 3.5rem);
+      --treatment-surface-font: clamp(0.75rem, 1.3vw, 0.875rem);
+      --treatment-surface-grid-width: clamp(10rem, 32vw, 13.75rem);
+      --treatment-control-height: clamp(var(--tw-touch), 5vw, 3rem);
+      --treatment-control-padding-x: clamp(0.6rem, 2vw, 1rem);
+      --treatment-control-padding-y: clamp(0.45rem, 1.4vw, 0.75rem);
+      --treatment-control-font: clamp(0.75rem, 1.6vw, 0.9rem);
+      --treatment-diagnosis-height: clamp(2.75rem, 3.5vw, 3rem);
+      --treatment-diagnosis-padding-y: clamp(0.35rem, 1.2vw, 0.6rem);
+      --treatment-code-padding-x: clamp(0.6rem, 1.6vw, 0.9rem);
+      --treatment-code-padding-y: clamp(0.55rem, 1.4vw, 0.85rem);
+      --treatment-code-font: clamp(0.72rem, 1.6vw, 0.88rem);
+      --treatment-action-offset: clamp(0.6rem, 2vw, 1.25rem);
+      --treatment-action-gap: clamp(0.4rem, 2vw, 1rem);
+      --treatment-pill-padding-x: clamp(0.6rem, 2vw, 1rem);
+      --treatment-pill-padding-y: clamp(0.3rem, 1vw, 0.5rem);
+      --treatment-hit-padding: clamp(0.2rem, 0.8vw, 0.25rem);
+    }
+  }
+
+  @supports not (aspect-ratio: 1 / 1) {
+    .treatment-wizard {
+      height: var(--treatment-wizard-height);
+    }
+  }
+
+  @container (max-width: 360px) {
+    .treatment-wizard {
+      aspect-ratio: 1 / 1.18;
+    }
+  }
+ 
+
+  @container (min-width: 480px) {
+    .treatment-wizard {
+      aspect-ratio: 1 / 1.18;
+    }
+  }
+
+  @media (max-width: 1279px) {
+    .treatment-wizard--responsive {
+      --treatment-wizard-width: clamp(18rem, 30vw, 22rem);
+      --treatment-wizard-height: clamp(20rem, 52dvh, 28rem);
+    }
+  }
+
+  .treatment-wizard--step1{
+    overflow: visible; /* dropdown тасрахгүй */
+  }
+
+  .treatment-wizard--step2{
+    overflow: hidden;  /* STEP2 дотор scroll-оо зөв удирдана */
+    display: flex;
+    flex-direction: column;
+  }
+    
+
 
   .treatment-surface-grid {
     display: grid;
@@ -377,15 +450,29 @@
   .treatment-diagnosis-trigger {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.3rem;
     border-radius: 999px;
     border: 1px solid #e2e8f0;
-    padding: var(--treatment-control-padding-y) var(--treatment-control-padding-x);
+    padding: var(--treatment-diagnosis-padding-y) var(--treatment-control-padding-x);
     background: #ffffff;
     cursor: text;
-    min-height: var(--treatment-control-height);
+    min-height: var(--treatment-diagnosis-height);
+    font-size: var(--treatment-control-font);
   }
 
+  .treatment-input {
+    font-size: var(--treatment-control-font);
+  }
+
+  .treatment-hit-visual{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    height:100%;
+    padding: 0 var(--treatment-control-padding-x);
+    line-height: 1.1; 
+  }
   .treatment-diagnosis-dropdown {
     position: absolute;
     left: 0;
@@ -399,27 +486,47 @@
     overflow: hidden;
   }
 
+  .treatment-diagnosis-dropdown--bottom {
+    top: 100%;
+    margin-top: 0.5rem;
+  }
+
+  .treatment-diagnosis-dropdown--top {
+    bottom: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .treatment-diagnosis-list {
+    max-height: var(--treatment-diagnosis-max-height);
+    overflow-y: auto;
+  }
+
   .treatment-action-secondary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-height: var(--treatment-control-height);
-    padding: var(--treatment-control-padding-y) var(--treatment-control-padding-x);
-    border-radius: 999px;
-    border: 1px solid #e2e8f0;
-    background: #ffffff;
-    color: #475569;
-    font-size: clamp(0.75rem, 1.2vw, 0.875rem);
-    font-weight: 600;
-    transition: background-color 150ms ease;
+    padding: var(--treatment-hit-padding);
+    border: none;
+    background: transparent;
   }
 
-  .treatment-action-secondary:hover {
+  .treatment-action-secondary .treatment-hit-visual {
+    background: #ffffff;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+  }
+
+  .treatment-action-secondary:hover .treatment-hit-visual {
     background: #f8fafc;
   }
 
-  .treatment-action-secondary:disabled {
+  .treatment-action-secondary:disabled .treatment-hit-visual {
     opacity: 0.6;
+  }
+
+  .treatment-action-secondary:disabled {
     cursor: not-allowed;
   }
 
@@ -428,7 +535,7 @@
     padding: 0 var(--treatment-control-padding-x);
     display: inline-flex;
     align-items: center;
-    font-size: clamp(0.6875rem, 1.1vw, 0.75rem);
+    font-size: var(--treatment-control-font);
     font-weight: 500;
     color: #64748b;
   }
@@ -442,6 +549,13 @@
     overflow: auto;
     padding-right: 0.25rem;
     padding-bottom: calc(var(--treatment-control-height) + (var(--treatment-action-offset) * 2));
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .treatment-wizard__step-body::-webkit-scrollbar {
+    width: 0;
+    height: 0;
   }
 
   .treatment-icon-button {
@@ -465,12 +579,13 @@
     border-radius: 999px;
     background: #f1f5f9;
     color: #334155;
-    font-size: clamp(0.75rem, 1.2vw, 0.875rem);
+    font-size: var(--treatment-control-font);
     font-weight: 600;
   }
 
   .treatment-code-button {
     width: 100%;
+    min-height: var(--treatment-control-height);
     border-radius: 0.75rem;
     border: 1px solid #e2e8f0;
     background: #ffffff;
@@ -539,34 +654,61 @@
     justify-content: center;
     flex: 1;
     min-height: var(--treatment-control-height);
-    border-radius: 0.75rem;
-    padding: 0 var(--treatment-control-padding-x);
-    font-weight: 600;
-    font-size: clamp(0.75rem, 1.2vw, 0.875rem);
-    transition: background-color 150ms ease;
+    padding: var(--treatment-hit-padding);
+    border: none;
+    background: transparent;
+  }
+
+  .treatment-action-button .treatment-hit-visual {
     box-shadow: var(--card-shadow);
   }
 
-  .treatment-action-button--secondary {
+  .treatment-action-button--secondary .treatment-hit-visual {
     background: #e2e8f0;
     color: #334155;
   }
 
-  .treatment-action-button--secondary:hover {
+  .treatment-action-button--secondary:hover .treatment-hit-visual {
     background: #cbd5e1;
   }
 
-  .treatment-action-button--primary {
+  .treatment-action-button--primary .treatment-hit-visual {
     background: #2563eb;
     color: #ffffff;
   }
 
-  .treatment-action-button--primary:hover {
+  .treatment-action-button--primary:hover .treatment-hit-visual {
     background: #1d4ed8;
   }
 
-  .treatment-action-button:disabled {
+  .treatment-action-button:disabled .treatment-hit-visual {
     opacity: 0.5;
+  }
+
+  .treatment-action-button:disabled {
     cursor: not-allowed;
   }
+
+  .treatment-wizard--step1 .treatment-action-secondary,
+  .treatment-wizard--step1 .treatment-skip-button,
+  .treatment-wizard--step2 .treatment-action-button {
+    --treatment-control-height: 2.30rem;
+    --treatment-control-padding-x: 1.25rem;
+    --treatment-control-font: 0.95rem;
+    --treatment-hit-padding: 0.25rem;
+  }
+
+  @media (min-width: 1138px) {
+    .treatment-wizard--step1 .treatment-action-secondary,
+    .treatment-wizard--step1 .treatment-skip-button,
+    .treatment-wizard--step2 .treatment-action-button {
+      --treatment-control-height: 3.25rem;
+    }
+  }
+
+  .treatment-wizard--step1 .treatment-action-secondary .treatment-hit-visual,
+  .treatment-wizard--step2 .treatment-action-button .treatment-hit-visual {
+    padding: 6px var(--treatment-control-padding-x);
+  }
+
 }
