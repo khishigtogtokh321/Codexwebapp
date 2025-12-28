@@ -1,18 +1,16 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import TopBar from '@/components/clinic/TopBar.vue'
-import PatientProfileCard from '@/components/clinic/PatientProfileCard.vue'
 import PatientContextHeader from '@/components/clinic/PatientContextHeader.vue'
 import TreatmentPlanTable from '@/components/clinic/TreatmentPlanTable.vue'
-import TreatmentHistoryTable from '@/components/clinic/TreatmentHistoryTable.vue'
 import RecallCard from '@/components/clinic/RecallCard.vue'
 import CalendarCard from '@/components/clinic/CalendarCard.vue'
-import TodayScheduleCard from '@/components/clinic/TodayScheduleCard.vue'
 import TreatmentSidebar from '@/components/treatment/TreatmentSidebar.vue'
 import SideNav from '@/components/layout/SideNav.vue'
 import { treatmentTypes } from '@/data/treatmentTypes'
 
 const breadcrumbs = ['Жагсаалт', 'Эмчилгээний карт']
+const cardId = '2511002'
 
 const state = reactive({
   patient: {
@@ -108,10 +106,57 @@ const state = reactive({
     { label: '5', muted: true },
     { label: '6', muted: true },
   ],
-  appointments: [
-    { time: '14:00', name: 'Г. Саран', subtitle: 'Түрүүвэр үзлэг', duration: '30 мин', active: true },
-    { time: '15:30', name: 'Д. Болд', subtitle: 'Шүд авах', duration: '45 мин' },
-  ],
+})
+
+const patientIdentity = computed(() => {
+  const p = state.patient || {}
+  return [
+    { label: 'Регистр', value: p.register || '—' },
+    { label: 'Төрсөн огноо', value: p.birthDate || '—' },
+    { label: 'Мэргэжил', value: p.profession || '—' },
+    { label: 'Цусны бүлэг', value: p.bloodType || '—' },
+  ]
+})
+
+const patientContacts = computed(() => {
+  const p = state.patient || {}
+  const phoneValue = [p.phone, p.phoneAlt].filter(Boolean).join(' / ')
+  return [
+    { label: 'Утас', value: phoneValue || '—' },
+    { label: 'Имэйл', value: p.email || '—' },
+    { label: 'Хаяг', value: p.address || '—' },
+  ]
+})
+
+const alertChips = computed(() => state.allergies || [])
+const alertNotes = computed(() => {
+  const notes = []
+  if (state.complaints?.length) {
+    notes.push(...state.complaints)
+  }
+  if (state.risks?.length) {
+    notes.push(...state.risks)
+  }
+  return notes
+})
+const alertCount = computed(() => alertChips.value.length)
+
+const plansForDisplay = computed(() =>
+  (state.plans || []).map((plan, index) => ({
+    ...plan,
+    title: plan.title || plan.name || '—',
+    id: plan.id || index,
+  })),
+)
+
+const historySummary = computed(() => {
+  const dates = (state.history || []).map((item) => item.date).filter(Boolean)
+  const lastDate = dates.length ? dates.sort().slice(-1)[0] : '—'
+  return [
+    { label: 'Нийт дүн', value: '220,000₮' },
+    { label: 'Хөнгөлөлт', value: '-10,000₮' },
+    { label: 'Сүүлийн эмчилгээ', value: lastDate },
+  ]
 })
 
 const showSidebar = ref(false)
@@ -325,33 +370,150 @@ function saveDetail() {
           <p class="text-base font-semibold text-gray-900">Эмчилгээний карт</p>
         </div>
 
-        <TopBar :breadcrumbs="breadcrumbs" card-id="2511002" placeholder="Өвчтөн хайх (Нэр, РД, Утас...)" />
+        <TopBar :breadcrumbs="breadcrumbs" :card-id="cardId" placeholder="Өвчтөн хайх (Нэр, РД, Утас...)" />
 
         <main class="flex-1 bg-slate-50">
           <div class="mx-auto w-full max-w-[1500px] px-4 pb-16 pt-6 lg:px-6 lg:pb-12">
-            <PatientContextHeader :patient="state.patient" card-id="2511002" :allergies="state.allergies" />
+            <PatientContextHeader :patient="state.patient" :card-id="cardId" :allergies="state.allergies" />
 
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-12">
-              <div class="flex flex-col gap-4 md:col-span-12 lg:col-span-3">
-                <PatientProfileCard
-                  :patient="state.patient"
-                  :allergies="state.allergies"
-                  :complaints="state.complaints"
-                  :risks="state.risks"
-                />
+            <div class="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-12 xl:gap-6">
+              <section class="section-card min-w-0 lg:col-span-4">
+                <header class="flex items-start justify-between gap-3">
+                  <div class="space-y-1">
+                    <h3 class="text-xl font-semibold leading-tight text-gray-900 md:text-2xl">
+                      {{ state.patient.name || '—' }}
+                    </h3>
+                    <p class="text-sm text-gray-500">Картын дугаар: {{ cardId }}</p>
+                  </div>
+                  <div class="flex flex-wrap items-center justify-end gap-1.5">
+                    <span v-if="state.patient.age" class="pill pill--soft text-xs md:text-sm">{{ state.patient.age }} нас</span>
+                    <span v-if="state.patient.gender" class="pill pill--muted text-xs md:text-sm">{{ state.patient.gender }}</span>
+                  </div>
+                </header>
+
+                <div class="grid gap-3 sm:grid-cols-2">
+                  <div
+                    v-for="item in patientIdentity"
+                    :key="item.label"
+                    class="info-row rounded-lg border border-slate-100 bg-white/60 px-3 py-2.5 shadow-sm shadow-slate-100"
+                  >
+                    <p class="info-row__label">{{ item.label }}</p>
+                    <p class="info-row__value">{{ item.value }}</p>
+                  </div>
+                </div>
+
+                <div class="grid gap-3 sm:grid-cols-2">
+                  <div
+                    v-for="item in patientContacts"
+                    :key="item.label"
+                    class="info-row rounded-lg border border-slate-100 bg-white/60 px-3 py-2.5 shadow-sm shadow-slate-100"
+                  >
+                    <p class="info-row__label">{{ item.label }}</p>
+                    <p class="info-row__value">{{ item.value }}</p>
+                  </div>
+                </div>
+
+                <div class="rounded-xl border border-rose-100 bg-rose-50/80 p-4">
+                  <div class="flex items-center justify-between gap-2">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-rose-700">Эрүүл мэндийн анхааруулга</p>
+                    <span class="pill pill--alert text-xs">{{ alertCount }}</span>
+                  </div>
+                  <div class="mt-3 flex flex-wrap gap-1.5">
+                    <span
+                      v-for="(alert, index) in alertChips"
+                      :key="alert + index"
+                      class="pill pill--badge text-xs"
+                    >
+                      {{ alert }}
+                    </span>
+                    <span v-if="!alertChips.length" class="text-sm font-semibold text-gray-700">Мэдээлэл байхгүй</span>
+                  </div>
+                  <div v-if="alertNotes.length" class="mt-3 space-y-1.5">
+                    <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-600">Тэмдэглэл</p>
+                    <ul class="space-y-1.5 text-sm text-gray-800">
+                      <li v-for="(note, index) in alertNotes" :key="note + index" class="flex items-start gap-2">
+                        <span class="mt-1 h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                        <span class="leading-tight">{{ note }}</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </section>
+
+              <div class="flex min-w-0 flex-col gap-4 lg:col-span-8 xl:col-span-5">
+                <TreatmentPlanTable :plans="plansForDisplay" />
+
+                <section class="section-card">
+                  <header class="section-card__header">
+                    <div class="section-card__titles">
+                      <p class="section-card__title">Хийсэн эмчилгээ</p>
+                    </div>
+                  </header>
+
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <span
+                      v-for="badge in historySummary"
+                      :key="badge.label"
+                      class="pill pill--muted text-xs"
+                    >
+                      <span class="text-gray-500">{{ badge.label }}:</span>
+                      <span class="text-gray-900">{{ badge.value }}</span>
+                    </span>
+                  </div>
+
+                  <div class="table-shell">
+                    <div class="table-shell__scroll">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th class="text-left">Огноо</th>
+                            <th class="text-left">Шүд</th>
+                            <th class="text-left">Гадаргуу</th>
+                            <th class="text-left">Код</th>
+                            <th class="text-left">Тайлбар / Онош</th>
+                            <th class="text-right">Үнэ</th>
+                            <th class="text-right">Хөнгөлөлт</th>
+                          </tr>
+                        </thead>
+                        <tbody v-if="state.history.length">
+                          <tr
+                            v-for="(item, index) in state.history"
+                            :key="item.id || item.date + item.tooth"
+                            class="cursor-pointer"
+                            @dblclick="handleOpenDetail({ item, index })"
+                          >
+                            <td class="whitespace-nowrap font-semibold">{{ item.date || '—' }}</td>
+                            <td class="whitespace-nowrap font-semibold">{{ item.tooth || '—' }}</td>
+                            <td class="whitespace-nowrap font-semibold">{{ item.surface || '—' }}</td>
+                            <td class="whitespace-nowrap font-semibold">{{ item.code || '—' }}</td>
+                            <td class="font-semibold">{{ item.note || '—' }}</td>
+                            <td class="text-right font-semibold">{{ item.price || '—' }}</td>
+                            <td class="text-right font-semibold text-red-600">{{ item.discount || '—' }}</td>
+                          </tr>
+                        </tbody>
+                        <tbody v-else>
+                          <tr>
+                            <td colspan="7">
+                              <div class="flex flex-col items-center justify-center gap-3 py-10">
+                                <p class="text-sm font-semibold text-gray-700">Одоогоор түүх алга</p>
+                                <button
+                                  type="button"
+                                  class="btn btn--primary h-11 justify-center px-4"
+                                  @click="toggleSidebar"
+                                >
+                                  Эмчилгээ нэмэх
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </section>
               </div>
 
-              <div class="flex flex-col gap-4 md:col-span-7 lg:col-span-6 min-w-0">
-                <TreatmentPlanTable :plans="state.plans" />
-                <TreatmentHistoryTable
-                  :history="state.history"
-                  discount-text="-10,000₮"
-                  total-text="220,000₮"
-                  @open-detail="handleOpenDetail"
-                />
-              </div>
-
-              <div class="flex flex-col gap-4 pb-4 md:col-span-5 lg:col-span-3 min-w-0">
+              <div class="flex min-w-0 flex-col gap-4 lg:col-span-12 xl:col-span-3">
                 <RecallCard
                   :title="state.recall.title"
                   :count="state.recall.count"
@@ -359,7 +521,11 @@ function saveDetail() {
                   :date="state.recall.date"
                 />
                 <CalendarCard month-label="December 2025" selected-date="1" :days="state.calendarDays" />
-                <TodayScheduleCard :appointments="state.appointments" />
+                <div class="section-card section-card--dense">
+                  <button type="button" class="btn btn--primary h-12 w-full justify-center" @click="toggleSidebar">
+                    + Эмчилгээ нэмэх
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -367,17 +533,6 @@ function saveDetail() {
       </div>
     </div>
   </div>
-
-  <button
-    type="button"
-    class="fixed bottom-6 right-6 z-50 inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-300"
-    @click="toggleSidebar"
-  >
-    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m-7-7h14" />
-    </svg>
-    Эмчилгээ нэмэх
-  </button>
 
   <transition name="fade">
     <div
