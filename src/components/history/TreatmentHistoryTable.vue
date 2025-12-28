@@ -117,54 +117,41 @@ watch(isEditOpen, (open) => {
 </script>
 
 <template>
-  <div class="dental-card overflow-hidden">
-    <div class="border-b border-gray-200 bg-white px-4 py-4">
-      <HistorySearchBar
-        :search-query="searchQuery"
-        :status-filter="statusFilter"
-        @search="emit('search', $event)"
-        @filter-status="emit('filter-status', $event)"
-      />
+  <div class="dental-card history-grid">
+    <div class="history-grid__toolbar">
+      <div class="history-toolbar">
+        <h2 class="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">Эмчилгээний түүх</h2>
+        <div class="history-toolbar__controls">
+          <HistorySearchBar
+            :search-query="searchQuery"
+            :status-filter="statusFilter"
+            @search="emit('search', $event)"
+            @filter-status="emit('filter-status', $event)"
+          />
+        </div>
+      </div>
     </div>
-    <div class="overflow-x-auto">
-      <table class="w-full">
-        <thead class="bg-gray-50 border-b border-gray-200">
+    <div class="history-grid__table-shell">
+      <table class="history-grid__table">
+        <thead>
           <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-              Огноо
-            </th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-              Шүд
-            </th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-              Гадаргуу
-            </th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-              Оношлогоо
-            </th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-              Эмчилгээ
-            </th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-              Эмч
-            </th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-              Үнэ
-            </th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-              Төлөв
-            </th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-              Үйлдэл
-            </th>
+            <th>Огноо</th>
+            <th>Шүд</th>
+            <th>Гадаргуу</th>
+            <th>Оношлогоо</th>
+            <th>Эмчилгээ</th>
+            <th>Эмч</th>
+            <th class="history-grid__cell--number">Үнэ</th>
+            <th>Төлөв</th>
+            <th>Үйлдэл</th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody>
           <!-- Loading State -->
-          <tr v-if="loading">
-            <td colspan="9" class="px-4 py-8 text-center text-gray-500">
-              <div class="flex items-center justify-center gap-2">
-                <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <tr v-if="loading" class="history-grid__row">
+            <td colspan="9" class="history-grid__cell history-grid__cell--muted">
+              <div class="history-grid__loading">
+                <svg class="history-grid__spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
@@ -174,82 +161,83 @@ watch(isEditOpen, (open) => {
           </tr>
 
           <!-- Empty State -->
-          <tr v-else-if="treatments.length === 0">
-            <td colspan="9" class="px-4 py-8 text-center text-gray-500">
+          <tr v-else-if="treatments.length === 0" class="history-grid__row">
+            <td colspan="9" class="history-grid__cell history-grid__cell--muted">
               Эмчилгээний түүх олдсонгүй
             </td>
           </tr>
 
           <!-- Treatment Rows -->
-          <tr
-            v-for="(treatment, index) in treatments"
-            :key="treatment.id"
-            :class="[
-              'transition-colors duration-150 hover:bg-blue-50 cursor-pointer',
-              index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
-            ]"
-          >
-            <td class="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">
-              {{ formatDate(treatment.date) }}
-            </td>
-            <td class="px-4 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">
-              {{ treatment.tooth }}
-            </td>
-            <td class="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">
-              {{ treatment.surface }}
-            </td>
-            <td class="px-4 py-3 text-sm text-gray-700">
-              <div class="max-w-xs truncate" :title="treatment.diagnosis">
-                {{ treatment.diagnosis }}
-              </div>
-            </td>
-            <td class="px-4 py-3 text-sm text-gray-700">
-              {{ treatment.treatmentType }}
-            </td>
-            <td class="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">
-              {{ treatment.doctor }}
-            </td>
-            <td class="px-4 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">
-              {{ treatment.price }}
-            </td>
-            <td class="px-4 py-3 text-sm whitespace-nowrap">
-              <span
-                :class="getStatusClass(treatment.status)"
-                class="px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm"
-              >
-                {{ getStatusLabel(treatment.status) }}
-              </span>
-            </td>
-            <td class="px-4 py-3 text-sm whitespace-nowrap">
-              <div class="flex items-center gap-2">
-                <button
-                  type="button"
-                  class="px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-white bg-blue-50 hover:bg-blue-600 rounded-lg transition-all duration-200 hover:shadow-md transform hover:scale-105"
-                  @click.stop="openEdit(treatment)"
-                  title="Засах"
+          <template v-else>
+            <tr
+              v-for="(treatment, index) in treatments"
+              :key="treatment.id"
+              :class="['history-grid__row', index % 2 === 0 ? 'is-even' : 'is-odd']"
+            >
+              <td class="history-grid__cell history-grid__cell--date">
+                {{ formatDate(treatment.date) }}
+              </td>
+              <td class="history-grid__cell history-grid__cell--code">
+                {{ treatment.tooth }}
+              </td>
+              <td class="history-grid__cell">
+                {{ treatment.surface }}
+              </td>
+              <td class="history-grid__cell">
+                <span class="history-grid__ellipsis" :title="treatment.diagnosis">
+                  {{ treatment.diagnosis }}
+                </span>
+              </td>
+              <td class="history-grid__cell">
+                <span class="history-grid__ellipsis" :title="treatment.treatmentType">
+                  {{ treatment.treatmentType }}
+                </span>
+              </td>
+              <td class="history-grid__cell">
+                {{ treatment.doctor }}
+              </td>
+              <td class="history-grid__cell history-grid__cell--number">
+                {{ treatment.price }}
+              </td>
+              <td class="history-grid__cell">
+                <span
+                  :class="getStatusClass(treatment.status)"
+                  class="history-grid__status"
                 >
-                  Засах
-                </button>
-                <button
-                  type="button"
-                  class="px-3 py-1.5 text-xs font-medium text-red-600 hover:text-white bg-red-50 hover:bg-red-600 rounded-lg transition-all duration-200 hover:shadow-md transform hover:scale-105"
-                  @click.stop="handleDelete(treatment.id)"
-                  title="Устгах"
-                >
-                  Устгах
-                </button>
-              </div>
-            </td>
-          </tr>
+                  {{ getStatusLabel(treatment.status) }}
+                </span>
+              </td>
+              <td class="history-grid__cell history-grid__cell--actions">
+                <div class="history-grid__actions">
+                  <button
+                    type="button"
+                    class="history-grid__action-btn history-grid__action-btn--edit"
+                    @click.stop="openEdit(treatment)"
+                    title="Засах"
+                  >
+                    Засах
+                  </button>
+                  <button
+                    type="button"
+                    class="history-grid__action-btn history-grid__action-btn--delete"
+                    @click.stop="handleDelete(treatment.id)"
+                    title="Устгах"
+                  >
+                    Устгах
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </template>
         </tbody>
       </table>
     </div>
 
     <!-- Table Footer with Summary -->
-    <div v-if="treatments.length > 0" class="px-4 py-3 bg-gray-50 border-t border-gray-200 text-sm text-gray-600">
-      <div class="flex justify-between items-center">
+    <div v-if="treatments.length > 0" class="history-grid__footer">
+      <div class="history-grid__footer-meta">
         <span>Total: {{ treatments.length }} treatment(s)</span>
-        <span class="font-medium">
+        <span class="history-grid__footer-strong">
           Completed: {{ treatments.filter((t) => t.status === 'done').length }} |
           Planned: {{ treatments.filter((t) => t.status === 'planned').length }}
         </span>

@@ -40,18 +40,18 @@ function handleClear() {
 </script>
 
 <template>
-  <div class="flex flex-col gap-3 md:flex-row md:items-center">
+  <div class="history-search">
     <!-- Search Input -->
-    <div class="flex-1 relative">
+    <div class="history-search__input">
       <input
         v-model="localSearchQuery"
         type="text"
         placeholder="Шүд, оношлогоо, эмчээр хайх..."
-        class="input-field min-h-[48px] pl-10 text-sm md:text-[15px]"
+        class="history-search__field"
         @input="handleSearchInput"
       />
       <svg
-        class="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
+        class="history-search__icon"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -66,10 +66,10 @@ function handleClear() {
     </div>
 
     <!-- Status Filter -->
-    <div class="flex-shrink-0 md:min-w-[190px]">
+    <div class="history-search__select-wrap">
       <select
         v-model="localStatusFilter"
-        class="input-field min-h-[48px] text-sm md:text-[15px]"
+        class="history-search__select"
         @change="handleStatusFilter"
       >
         <option value="all">Бүх төлөв</option>
@@ -82,7 +82,7 @@ function handleClear() {
     <button
       v-if="localSearchQuery || localStatusFilter !== 'all'"
       type="button"
-      class="btn-secondary min-h-[48px] px-4"
+      class="history-search__clear"
       @click="handleClear"
     >
       Цэвэрлэх

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import diagnoses from '@/data/diagnoses'
 
 const props = defineProps({
@@ -18,6 +18,10 @@ const diagnosisQuery = ref('')
 const showDiagnosisDropdown = ref(false)
 const wizardRef = ref(null)
 const diagnosisTriggerRef = ref(null)
+const diagnosisDropdownRef = ref(null)
+const dropdownStyles = ref({ top: '0px', left: '0px', width: '0px' })
+const dropdownPlacement = ref('bottom')
+let dropdownRafId = null
 
 const selectedCodes = ref([])
 const showTooltipCode = ref(null)
@@ -139,6 +143,76 @@ watch(
   },
   { deep: true },
 )
+
+const updateDropdownPosition = () => {
+  if (!showDiagnosisDropdown.value || !diagnosisTriggerRef.value || typeof window === 'undefined') return
+  const rect = diagnosisTriggerRef.value.getBoundingClientRect()
+  const viewportWidth = window.innerWidth || document.documentElement.clientWidth
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight
+  const gap = 8
+  const minWidth = 220
+  let width = Math.max(rect.width, minWidth)
+  width = Math.min(width, viewportWidth - gap * 2)
+  let left = rect.left
+  if (left + width > viewportWidth - gap) {
+    left = Math.max(gap, viewportWidth - width - gap)
+  }
+  const dropdownHeight = diagnosisDropdownRef.value?.offsetHeight || 0
+  const spaceBelow = viewportHeight - rect.bottom - gap
+  const spaceAbove = rect.top - gap
+  const openUp = dropdownHeight > 0 && spaceBelow < dropdownHeight && spaceAbove > spaceBelow
+  const top = openUp ? Math.max(gap, rect.top - dropdownHeight - gap) : rect.bottom + gap
+
+  dropdownPlacement.value = openUp ? 'top' : 'bottom'
+  dropdownStyles.value = {
+    top: `${top}px`,
+    left: `${left}px`,
+    width: `${width}px`,
+  }
+}
+
+const scheduleDropdownUpdate = () => {
+  if (typeof window === 'undefined') return
+  if (dropdownRafId) cancelAnimationFrame(dropdownRafId)
+  dropdownRafId = requestAnimationFrame(updateDropdownPosition)
+}
+
+const addDropdownListeners = () => {
+  if (typeof window === 'undefined') return
+  window.addEventListener('resize', scheduleDropdownUpdate)
+  window.addEventListener('scroll', scheduleDropdownUpdate, true)
+}
+
+const removeDropdownListeners = () => {
+  if (typeof window === 'undefined') return
+  window.removeEventListener('resize', scheduleDropdownUpdate)
+  window.removeEventListener('scroll', scheduleDropdownUpdate, true)
+}
+
+watch(
+  () => showDiagnosisDropdown.value,
+  async (open) => {
+    if (open) {
+      await nextTick()
+      scheduleDropdownUpdate()
+      addDropdownListeners()
+    } else {
+      removeDropdownListeners()
+    }
+  },
+)
+
+watch(
+  () => diagnosisQuery.value,
+  () => {
+    if (showDiagnosisDropdown.value) scheduleDropdownUpdate()
+  },
+)
+
+onBeforeUnmount(() => {
+  removeDropdownListeners()
+  if (dropdownRafId) cancelAnimationFrame(dropdownRafId)
+})
 
 function toggleSurface(id) {
   if (!hasSelectedTeeth.value) return
@@ -306,30 +380,37 @@ function handleAdd() {
               </svg>
             </div>
 
-            <div
-              v-if="showDiagnosisDropdown"
-              class="treatment-diagnosis-dropdown treatment-diagnosis-dropdown--bottom"
-            >
-              <button
-                type="button"
-                class="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-slate-50"
-                @click.stop="clearDiagnosis"
+            <Teleport to="body">
+              <div
+                v-if="showDiagnosisDropdown"
+                ref="diagnosisDropdownRef"
+                class="treatment-diagnosis-dropdown"
+                :class="dropdownPlacement === 'top'
+                  ? 'treatment-diagnosis-dropdown--top'
+                  : 'treatment-diagnosis-dropdown--bottom'"
+                :style="dropdownStyles"
               >
-                Алгасах
-              </button>
-              <div class="treatment-diagnosis-list divide-y divide-slate-100">
                 <button
-                  v-for="item in filteredDiagnoses"
-                  :key="item.code"
                   type="button"
-                  class="w-full px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
-                  @click.stop="selectDiagnosis(item)"
+                  class="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                  @click.stop="clearDiagnosis"
                 >
-                  <p class="font-semibold">{{ item.code }}</p>
-                  <p class="text-xs text-slate-500">{{ item.name }}</p>
+                  Алгасах
                 </button>
+                <div class="treatment-diagnosis-list divide-y divide-slate-100">
+                  <button
+                    v-for="item in filteredDiagnoses"
+                    :key="item.code"
+                    type="button"
+                    class="w-full px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
+                    @click.stop="selectDiagnosis(item)"
+                  >
+                    <p class="font-semibold">{{ item.code }}</p>
+                    <p class="text-xs text-slate-500">{{ item.name }}</p>
+                  </button>
+                </div>
               </div>
-            </div>
+            </Teleport>
 
             <p v-if="selectedDiagnosis" class="mt-2 text-xs text-emerald-700">
               {{ selectedDiagnosis.code }} · {{ selectedDiagnosis.name }}

@@ -434,10 +434,6 @@ watch(
           </div>
 
           <div class="dental-card p-4 md:p-5 space-y-3">
-            <h2 class="text-lg md:text-xl font-semibold text-gray-900">
-              Эмчилгээний түүх
-            </h2>
-
             <div class="overflow-x-auto">
               <TreatmentHistoryTable
                 :treatments="filteredLog"
