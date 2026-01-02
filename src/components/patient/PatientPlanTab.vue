@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref } from 'vue'
+import { onBeforeUnmount, reactive, ref } from 'vue'
 
 defineProps({
     isPortrait: {
@@ -42,6 +42,9 @@ const statusClass = (status) => {
 
 const showEditModal = ref(false)
 const activePlanId = ref(null)
+const showUndo = ref(false)
+const undoState = ref(null)
+let undoTimer
 const editForm = reactive({
     date: '',
     title: '',
@@ -77,13 +80,47 @@ const handleSave = () => {
 }
 
 const handleDelete = () => {
-    planItems.value = planItems.value.filter((plan) => plan.id !== activePlanId.value)
+    const index = planItems.value.findIndex((plan) => plan.id === activePlanId.value)
+    if (index === -1) {
+        closeEdit()
+        return
+    }
+    const [removed] = planItems.value.splice(index, 1)
+    undoState.value = { item: removed, index }
+    showUndo.value = true
+    if (undoTimer) clearTimeout(undoTimer)
+    undoTimer = setTimeout(() => {
+        showUndo.value = false
+        undoState.value = null
+    }, 6000)
     closeEdit()
 }
+
+const handleUndo = () => {
+    if (!undoState.value) return
+    const insertIndex = Math.min(Math.max(undoState.value.index, 0), planItems.value.length)
+    planItems.value.splice(insertIndex, 0, undoState.value.item)
+    showUndo.value = false
+    undoState.value = null
+    if (undoTimer) clearTimeout(undoTimer)
+}
+
+onBeforeUnmount(() => {
+    if (undoTimer) clearTimeout(undoTimer)
+})
 </script>
 
 <template>
     <div :class="['flex min-h-0 min-w-0 flex-col gap-4', isPortrait ? '' : 'flex-1']">
+        <div v-if="showUndo" class="ui-toast">
+            <div class="ui-toast__text">
+                <span class="ui-toast__label">Төлөвлөгөө устгагдлаа</span>
+                <span class="ui-toast__title">{{ undoState.item.title }}</span>
+            </div>
+            <div class="ui-toast__actions">
+                <button type="button" class="ui-btn ui-btn--ghost" @click="handleUndo">Буцаах</button>
+            </div>
+        </div>
         <div :class="['ui-table-shell', 'ui-table-shell--shadowed', isPortrait ? '' : 'min-h-0 flex-1']">
             <div v-if="!isPortrait" class="ui-table-header plan-table-grid">
                 <div class="min-w-0">Огноо</div>

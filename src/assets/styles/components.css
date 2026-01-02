@@ -807,6 +807,44 @@
     box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
   }
 
+  .ui-toast {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 0.75rem 1rem;
+    background: #ffffff;
+    box-shadow: 0 10px 26px -24px rgba(15, 23, 42, 0.35);
+  }
+
+  .ui-toast__text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+
+  .ui-toast__label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .ui-toast__title {
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .ui-toast__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
   .ui-modal {
     position: fixed;
     inset: 0;
