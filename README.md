@@ -10,19 +10,7 @@ A modern, clean web application for dental treatment management built with Vue 3
 - **Treatment History**: Comprehensive table with search and filter capabilities
 - **Responsive Design**: Optimized for 1080p+ clinic monitors
 
-## 🏗️ Project Structure
 
-```
-├── TreatmentPage.vue          # Main page component
-├── components/
-│   ├── SideNav.vue           # Left navigation sidebar
-│   ├── PatientHeader.vue     # Patient information header
-│   ├── ToothChart.vue        # Interactive tooth chart
-│   ├── ToothItem.vue         # Individual tooth component
-│   ├── TreatmentSidebar.vue  # Treatment options sidebar
-│   └── TreatmentHistoryTable.vue  # Treatment history table
-└── index.html                # Demo file with inline components
-```
 
 ## 🚀 Quick Start
 
