@@ -16,24 +16,11 @@ const drawerCloseRef = ref(null)
 
 const patients = ref([])
 const loading = ref(true)
-const searchTerm = ref('')
 let loadTimeout
 
 const skeletonRows = computed(() => Array.from({ length: 8 }, (_, index) => index))
 const totalCount = computed(() => patients.value.length || 0)
-const emptyState = computed(() => !loading.value && filteredPatients.value.length === 0)
-
-const normalizeValue = (value = '') => value.toString().toLowerCase()
-
-const filteredPatients = computed(() => {
-  const term = normalizeValue(searchTerm.value).trim()
-  if (!term) return patients.value
-  return patients.value.filter((patient) =>
-    [patient.name, patient.phone, patient.rd, patient.cardNo, patient.id].some((field) =>
-      normalizeValue(field).includes(term),
-    ),
-  )
-})
+const emptyState = computed(() => !loading.value && patients.value.length === 0)
 
 function normalizePatient(patient, index = 0) {
   const id = patient.id || patient.cardNo || patient.cardNumber || patient.patientId || `P-${index + 1}`
@@ -157,10 +144,6 @@ function goToPatient(patient) {
   window.location.hash = `#patient?pid=${encodeURIComponent(patient.id)}`
 }
 
-function resetSearch() {
-  searchTerm.value = ''
-}
-
 const handleEsc = (event) => {
   if (event.key === 'Escape' && drawerOpen.value) {
     closeMobileNav()
@@ -253,35 +236,16 @@ watch(
 
         <main class="flex-1 bg-slate-50">
           <div class="mx-auto w-full max-w-[1500px] px-4 pb-16 pt-6 lg:px-6 lg:pb-12">
-            <div class="flex flex-col gap-4 lg:gap-5">
-              <div class="ui-toolbar">
-                <div class="ui-toolbar__titles">
+            <div class="flex flex-col gap-2 lg:gap-3">
+              <div class="patient-header-flat">
+                <div class="patient-header-flat__title">
                   <span class="patient-thumb h-[2.5rem] w-[2.5rem] text-base">Ө</span>
-                  <div class="min-w-0">
-                    <p class="ui-toolbar__title">Өвчтөнүүд</p>
-                    <p class="text-sm font-semibold text-gray-500">Харилцагчийн бүртгэл</p>
+                  <div>
+                    <p class="text-base font-semibold text-gray-900">Өвчтөнүүд</p>
+                    <p class="text-xs font-semibold text-gray-500">Нийт: {{ totalCount }}</p>
                   </div>
                 </div>
                 <div class="flex flex-1 flex-wrap items-center justify-end gap-2 sm:gap-3">
-                  <span class="ui-toolbar__meta">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l3.5 3.5" />
-                    </svg>
-                    {{ filteredPatients.length }} / {{ totalCount }}
-                  </span>
-                  <label class="ui-input w-full sm:max-w-[360px] lg:max-w-[420px]">
-                    <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0a7.5 7.5 0 10-10.61-10.6 7.5 7.5 0 0010.6 10.6z" />
-                    </svg>
-                    <input
-                      v-model="searchTerm"
-                      type="search"
-                      inputmode="search"
-                      autocomplete="off"
-                      class="ui-input__field"
-                      placeholder="Нэр, утас, регистр, картын дугаараар хайх"
-                    />
-                  </label>
                   <button type="button" class="ui-btn ui-btn--ghost" aria-label="Filters (placeholder)">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M7 12h10M10 17h4" />
@@ -291,19 +255,10 @@ watch(
                   <button type="button" class="ui-btn ui-btn--primary" aria-label="Add patient">
                     + Өвчтөн нэмэх
                   </button>
-                  <button
-                    v-if="searchTerm"
-                    type="button"
-                    class="ui-btn ui-btn--ghost"
-                    aria-label="Clear search"
-                    @click="resetSearch"
-                  >
-                    Цэвэрлэх
-                  </button>
                 </div>
               </div>
 
-              <div class="card patient-list-panel">
+              <div class="patient-list-shell">
                 <div v-if="loading" class="space-y-3">
                   <div v-for="row in skeletonRows" :key="row" class="patient-card">
                     <div class="patient-card__row">
@@ -323,10 +278,7 @@ watch(
 
                 <div v-else-if="emptyState" class="patient-empty">
                   <p class="text-lg font-semibold text-gray-800">Илэрц олдсонгүй</p>
-                  <p class="text-sm text-gray-500">Хайлт болон шүүлтүүрээ өөрчилж дахин оролдоно уу.</p>
-                  <button type="button" class="ui-btn ui-btn--ghost" @click="resetSearch">
-                    Цэвэрлэх
-                  </button>
+                  <!-- <p class="text-sm text-gray-500">Хайлт болон шүүлтүүрээ өөрчилж дахин оролдоно уу.</p> -->
                 </div>
 
                 <template v-else>
@@ -345,7 +297,7 @@ watch(
                           </thead>
                           <tbody>
                             <tr
-                              v-for="patient in filteredPatients"
+                              v-for="patient in patients"
                               :key="patient.id"
                               class="patient-row"
                               role="button"
@@ -381,7 +333,7 @@ watch(
 
                   <div class="space-y-3 lg:hidden">
                     <button
-                      v-for="patient in filteredPatients"
+                      v-for="patient in patients"
                       :key="patient.id"
                       type="button"
                       class="patient-card"

@@ -16,6 +16,7 @@ function goBack() {
 </script>
 
 <template>
+    
   <div class="flex min-h-[100dvh] items-center justify-center bg-slate-50 px-4 py-10">
     <div class="card w-full max-w-2xl space-y-4">
       <div class="flex items-start justify-between gap-3">

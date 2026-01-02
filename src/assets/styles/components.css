@@ -506,13 +506,6 @@
     flex-wrap: wrap;
   }
 
-  .history-toolbar__title {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #0f172a;
-    margin: 0;
-    line-height: 1.3;
-  }
 
   .history-toolbar__controls {
     display: flex;
@@ -814,9 +807,6 @@
     text-overflow: ellipsis;
   }
 
-  .ui-row__meta--muted {
-    color: #94a3b8;
-  }
 
   .ui-row__meta--error {
     color: #b91c1c;
@@ -1064,19 +1054,6 @@
     cursor: not-allowed;
   }
 
-  .treatment-skip-button {
-    min-height: var(--treatment-control-height);
-    padding: 0 var(--treatment-control-padding-x);
-    display: inline-flex;
-    align-items: center;
-    font-size: var(--treatment-control-font);
-    font-weight: 500;
-    color: #64748b;
-  }
-
-  .treatment-skip-button:hover {
-    color: #334155;
-  }
 
   .treatment-wizard__step-body {
     height: 100%;
@@ -1224,7 +1201,6 @@
   }
 
   .treatment-wizard--step1 .treatment-action-secondary,
-  .treatment-wizard--step1 .treatment-skip-button,
   .treatment-wizard--step2 .treatment-action-button {
     --treatment-control-height: 2.30rem;
     --treatment-control-padding-x: 1.25rem;
@@ -1234,7 +1210,6 @@
 
   @media (min-width: 1138px) {
     .treatment-wizard--step1 .treatment-action-secondary,
-    .treatment-wizard--step1 .treatment-skip-button,
     .treatment-wizard--step2 .treatment-action-button {
       --treatment-control-height: 3.25rem;
     }
@@ -1289,39 +1264,6 @@
     font-size: 0.9rem;
   }
 
-  .ui-input {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.55rem;
-    width: 100%;
-    min-height: 46px;
-    padding: 0.6rem 0.85rem;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
-    transition: border-color 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
-  }
-
-  .ui-input:focus-within {
-    border-color: #22c55e;
-    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
-    background: #ffffff;
-  }
-
-  .ui-input__field {
-    width: 100%;
-    border: none;
-    background: transparent;
-    font-size: 0.95rem;
-    color: #0f172a;
-    outline: none;
-    min-width: 0;
-  }
-
-  .ui-input__field::placeholder {
-    color: #94a3b8;
-  }
 
   .ui-btn {
     display: inline-flex;
@@ -1366,12 +1308,34 @@
     min-height: clamp(22rem, 60vh, 36rem);
   }
 
+  /* .patient-list-shell {
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: #ffffff;
+    padding: 0.5rem 0.75rem;
+  } */
+
+  .patient-header-flat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.5rem 0.25rem;
+    flex-wrap: wrap;
+  }
+
+  .patient-header-flat__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
   .patient-table-shell {
     border: 1px solid #e2e8f0;
-    border-radius: 16px;
+    border-radius: 14px;
     background: #ffffff;
     overflow: hidden;
-    box-shadow: 0 10px 30px -28px rgba(15, 23, 42, 0.35);
+    box-shadow: none;
   }
 
   .patient-table__scroll {
@@ -1412,11 +1376,17 @@
   .patient-row {
     cursor: pointer;
     min-height: 56px;
-    transition: background-color 120ms ease;
+    transition: background-color 120ms ease, border-color 120ms ease;
   }
 
-  .patient-row:hover {
-    background: #f8fafc;
+  .patient-row:active {
+    background: #f1f5f9;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .patient-row:hover {
+      background: #f8fafc;
+    }
   }
 
   .patient-meta {
@@ -1445,11 +1415,12 @@
     font-weight: 700;
     color: #0f172a;
     line-height: 1.2;
+    font-size: 0.92rem;
   }
 
   .patient-subtext {
     color: #64748b;
-    font-size: 0.9rem;
+    font-size: 0.82rem;
     line-height: 1.2;
   }
 
@@ -1470,18 +1441,22 @@
   .patient-card {
     width: 100%;
     border: 1px solid #e2e8f0;
-    border-radius: 16px;
+    border-radius: 14px;
     background: #ffffff;
     padding: 0.9rem 1rem;
-    box-shadow: 0 12px 26px -24px rgba(15, 23, 42, 0.55);
-    transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+    box-shadow: none;
+    transition: border-color 150ms ease, background-color 150ms ease;
     text-align: left;
   }
 
-  .patient-card:hover {
-    border-color: #cbd5e1;
-    box-shadow: 0 16px 34px -26px rgba(15, 23, 42, 0.6);
-    transform: translateY(-1px);
+  @media (hover: hover) and (pointer: fine) {
+    .patient-card:hover {
+      border-color: #d9e3f0;
+    }
+  }
+
+  .patient-card:active {
+    background: #f8fafc;
   }
 
   .patient-card__row {
