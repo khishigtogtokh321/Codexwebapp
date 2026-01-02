@@ -34,10 +34,50 @@ Define reusable `.card` in `components.css` using tokens:
 
 **Rule:** Cards must **NOT** be rebuilt with long Tailwind chains. Use semantic classes.
 
+### CSS Placement Strategy (Hybrid 80/20) — Maintainability Rule
+**Goal:** Next developers can modify UI safely without hunting styles across random files.
+
+**Rule of thumb**
+- **80%**: Use Tailwind utilities + **shared semantic classes** in `src/assets/styles/components.css`
+- **20%**: Use **component-local CSS** only for truly component-specific needs
+
+#### Put in `components.css` (REQUIRED)
+Use `components.css` for **reusable UI patterns** used in 2+ places:
+- cards, toolbars, tables, rows, inputs, buttons, pills/badges
+- repeated typography helpers (primary/secondary/caption)
+- shared interaction states (hover/selected/disabled/focus ring)
+
+✅ Example semantic classes:
+- `.ui-card`, `.ui-card--dense`, `.ui-card--selected`
+- `.ui-toolbar`
+- `.ui-input`
+- `.ui-btn`, `.ui-btn--primary`, `.ui-btn--secondary`
+- `.ui-table`, `.ui-th`, `.ui-tr`, `.ui-td`
+- `.ui-row-selectable`, `.ui-row-selected`
+- `.ui-badge`, `.ui-pill`
+
+**DO NOT** rebuild these with long Tailwind chains in each component.
+
+#### Put in component SFC `<style scoped>` (ALLOWED, but limited)
+Use component-local CSS ONLY for:
+- one-off layout fixes unique to that component
+- complex positioning (e.g., SVG / ToothChart specifics)
+- component-specific keyframes/animations (not reused)
+- isolated third-party overrides
+
+**Do NOT** put these in local CSS:
+- button/input/card/table base styling
+- repeated colors/radius/shadows (must come from tokens + shared classes)
+
+#### Enforce consistency
+- If a Tailwind chain exceeds **10 utilities** OR repeats across components → extract a semantic class into `components.css`.
+- Prefer `@layer components` + `@apply` to keep styles searchable and consistent.
+
 ### Avoid
 - repeating `bg-white border rounded shadow` across components
 - Tailwind chains longer than **10 utilities**
 - large style logic inside Vue SFC when reusable
+- Any styling repeated in **2+ components** must be extracted to `components.css` as a semantic `.ui-*` class.
 
 ### Preferred Pattern
 - Tailwind = layout glue (grid/flex/gap), small utilities
