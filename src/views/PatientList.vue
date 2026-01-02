@@ -1,9 +1,7 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import TopBar from '@/components/clinic/TopBar.vue'
+import TopBar from '@/components/layout/TopBar.vue'
 import SideNav from '@/components/layout/SideNav.vue'
-
-const cardId = '2511002'
 
 const hovered = ref(false)
 const pinned = ref(false)
@@ -118,7 +116,7 @@ watch(
           <p class="text-base font-semibold text-gray-900">Patients</p>
         </div>
 
-        <TopBar :card-id="cardId" />
+        <TopBar />
 
         <main class="flex-1 bg-slate-50">
           <div class="mx-auto w-full max-w-[1500px] px-4 pb-16 pt-6 lg:px-6 lg:pb-12"></div>
