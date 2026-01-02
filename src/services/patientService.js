@@ -50,13 +50,24 @@ const normalize = (value = '') => value.toString().toLowerCase()
 
 const matchesQuery = (patient, query) => {
   const q = normalize(query)
-  return [patient.firstName, patient.lastName, patient.phone].some((field) => normalize(field).includes(q))
+  return [
+    patient.firstName,
+    patient.lastName,
+    patient.phone,
+    patient.cardNumber,
+    patient.cardNo,
+    patient.card,
+    patient.patientId,
+    patient.id,
+    patient.rd,
+    patient.registerNo,
+  ].some((field) => normalize(field).includes(q))
 }
 
 const searchPatients = (query) =>
   new Promise((resolve) => {
     const trimmed = (query || '').trim()
-    if (trimmed.length < 2) {
+    if (trimmed.length < 1) {
       resolve({ success: true, data: [] })
       return
     }
