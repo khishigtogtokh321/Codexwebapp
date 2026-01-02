@@ -19,7 +19,7 @@ const statusClass = (status) => {
 
 <template>
     <div :class="['flex min-h-0 min-w-0 flex-col gap-4', isPortrait ? '' : 'flex-1']">
-        <div :class="['ui-table-shell', isPortrait ? '' : 'min-h-0 flex-1']">
+        <div :class="['ui-table-shell', 'ui-table-shell--shadowed', isPortrait ? '' : 'min-h-0 flex-1']">
             <div v-if="!isPortrait" class="ui-table-header treatment-table-grid">
                 <div class="min-w-0">Огноо</div>
                 <div class="min-w-0 text-center">Шүд</div>

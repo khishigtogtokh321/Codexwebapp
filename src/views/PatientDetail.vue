@@ -56,23 +56,18 @@ const allergies = computed(() => [
 const recalls = computed(() => [
     { dueDate: '2026.06.28', plannedDate: '-', note: 'Урьдчилан сэргийлэх үзлэг' },
     { dueDate: '2024.12.01', plannedDate: '2024.11.25', note: 'Шүдний өнгө шалгах' },
-     { dueDate: '2024.12.01', plannedDate: '2024.11.25', note: 'Шүдний өнгө шалгах' },
-      { dueDate: '2024.12.01', plannedDate: '2024.11.25', note: 'Шүдний өнгө шалгах' },
-       { dueDate: '2024.12.01', plannedDate: '2024.11.25', note: 'Шүдний өнгө шалгах' },
-        { dueDate: '2024.12.01', plannedDate: '2024.11.25', note: 'Шүдний өнгө шалгах' },
-         { dueDate: '2024.12.01', plannedDate: '2024.11.25', note: 'Шүдний өнгө шалгах' },
-          { dueDate: '2024.12.01', plannedDate: '2024.11.25', note: 'Шүдний өнгө шалгах' },
 ])
 
-const tabs = [
+const primaryTabs = [
     { key: 'treatment', label: 'Эмчилгээ', component: PatientTreatmentTab },
-    { key: 'plan', label: 'Төлөвлөгөө', component: PatientPlanTab },
-    { key: 'schedule', label: 'Цаг товлол', component: PatientScheduleTab },
-    { key: 'history', label: 'Түүх', component: PatientHistoryTab },
-    { key: 'files', label: 'Файл', component: PatientFilesTab },
+    { key: 'plan', label: 'Эмчилгээний төлөвлөгөө', component: PatientPlanTab },
+    { key: 'schedule', label: 'Цаг товлох', component: PatientScheduleTab },
+    { key: 'recall', label: 'Дахин дуудах', component: PatientFilesTab },
+    { key: 'files', label: 'Файл', component: PatientHistoryTab },
 ]
-const activeTab = ref(tabs[0].key)
-const activeTabConfig = computed(() => tabs.find((tab) => tab.key === activeTab.value) || tabs[0])
+
+const activeTab = ref(primaryTabs[0].key)
+const activeTabConfig = computed(() => primaryTabs.find((tab) => tab.key === activeTab.value) || primaryTabs[0])
 
 const treatments = computed(() =>
     mockTreatmentHistory.map((item, idx) => ({
@@ -95,7 +90,12 @@ const activeTabProps = computed(() => {
             isPortrait: isPortrait.value,
         }
     }
-    if (activeTabConfig.value.key === 'files') {
+    if (activeTabConfig.value.key === 'plan') {
+        return {
+            isPortrait: isPortrait.value,
+        }
+    }
+    if (activeTabConfig.value.key === 'recall') {
         return {
             recalls: recalls.value,
         }
@@ -261,7 +261,11 @@ onBeforeUnmount(() => {
                                         <span class="profile-label">Мэргэжил</span>
                                         <span class="profile-value">{{ patient.job }}</span>
                                     </div>
-                                    
+                                </div>
+                                <div class="card__footer">
+                                    <button type="button" class="ui-btn ui-btn--primary w-full">
+                                        + Эмчилгээ эхлүүлэх
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -293,17 +297,13 @@ onBeforeUnmount(() => {
 
                             <div class="card card--soft flex min-h-0 flex-1 flex-col gap-4">
                                 <div class="flex flex-wrap items-center justify-between gap-3">
-                                    <div :class="['ui-tabs', isPortrait ? 'ui-tabs--segmented' : '']">
-                                        <button v-for="tab in tabs" :key="tab.key" type="button"
+                                    <div :class="['ui-tabs ui-tabs--underline', isPortrait ? 'w-full' : '']">
+                                        <button v-for="tab in primaryTabs" :key="tab.key" type="button"
                                             :class="['ui-tab', tab.key === activeTab ? 'ui-tab--active' : '']"
                                             @click="activeTab = tab.key">
                                             {{ tab.label }}
                                         </button>
                                     </div>
-                                    <button type="button"
-                                        class="ui-btn ui-btn--primary min-h-[24px] px-4 lg:min-h-[32px]">
-                                        + Эмчилгээ эхлүүлэх
-                                    </button>
                                 </div>
                                 <div
                                     :class="[

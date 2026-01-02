@@ -1,5 +1,9 @@
 <script setup>
 defineProps({
+    title: {
+        type: String,
+        default: 'Товолсон цаг'
+    },
     items: {
         type: Array,
         default: () => [
@@ -12,29 +16,30 @@ defineProps({
 </script>
 
 <template>
-    <div  > 
-    <div class="ui-table-shell">
-        <div class="ui-table-header date-time-table-grid">
-            <div class="min-w-0">Огноо</div>
-            <div class="min-w-0 text-center">Цаг</div>
-            <div class="min-w-0 text-right">Эмч</div>
+   <div class="card card--soft">
+    <div class="card__header">
+      <div class="card__title">{{ title }}</div>
+    </div>
+    <div class="recall-table" role="table">
+         <div class="recall-row recall-row--head" role="row">
+            <div class="recall-cell recall-cell--header" role="columnheader">Огноо</div>
+            <div class="recall-cell recall-cell--header" role="columnheader">Цаг</div>
+            <div class="recall-cell recall-cell--header" role="columnheader">Эмч</div>
         </div>
-        <div class="ui-table-scroll date-time-table-scroll">
-            <template v-if="items.length">
-                <div
-                    v-for="(item, index) in items"
-                    :key="`${item.date}-${item.time}-${index}`"
-                    class="ui-table-row date-time-table-grid"
-                >
-                    <div class="min-w-0 font-semibold text-slate-900">{{ item.date }}</div>
-                    <div class="min-w-0 text-center font-semibold text-slate-900">{{ item.time }}</div>
-                    <div class="min-w-0 text-right text-slate-700">{{ item.doctor }}</div>
-                </div>
-            </template>
-            <div v-else class="ui-table-row">
-                <div class="min-w-0 text-sm text-slate-500">Мэдээлэл алга.</div>
+        <div v-if="items.length" class="recall-body" role="rowgroup">
+        <div v-for="(item, index) in items" :key="index" class="recall-row" role="row">
+            <div class="recall-cell" role="cell">{{ item.date }}</div>
+            <div class="recall-cell" role="cell">{{ item.time }}</div>
+            <div class="recall-cell recall-cell--note" role="cell">
+                {{ item.doctor }}
+            </div>
             </div>
         </div>
+        <div v-else class="recall-empty" role="row">
+            Мэдээлэл алга.
+        </div>
+
+        
     </div>
     </div>
 </template>
