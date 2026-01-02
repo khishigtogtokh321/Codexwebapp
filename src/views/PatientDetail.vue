@@ -4,6 +4,11 @@ import SideNav from '@/components/layout/SideNav.vue'
 import TopBar from '@/components/layout/TopBar.vue'
 import AllergyCard from '@/components/patient/AllergyCard.vue'
 import RecallScheduleCard from '@/components/patient/RecallScheduleCard.vue'
+import PatientFilesTab from '@/components/patient/PatientFilesTab.vue'
+import PatientHistoryTab from '@/components/patient/PatientHistoryTab.vue'
+import PatientPlanTab from '@/components/patient/PatientPlanTab.vue'
+import PatientScheduleTab from '@/components/patient/PatientScheduleTab.vue'
+import PatientTreatmentTab from '@/components/patient/PatientTreatmentTab.vue'
 import { mockPatient, mockTreatmentHistory } from '@/data'
 import { formatDate } from '@/utils/formatters'
 
@@ -18,7 +23,6 @@ const hovered = ref(false)
 const pinned = ref(false)
 const isLgUp = ref(true)
 const isPortrait = ref(false)
-const searchTerm = ref('')
 const showSafety = ref(true)
 
 let mqLg
@@ -54,8 +58,15 @@ const recalls = computed(() => [
     { dueDate: '2024.12.01', plannedDate: '2024.11.25', note: 'Шүдний өнгө шалгах' },
 ])
 
-const tabs = ['Эмчилгээ', 'Төлөвлөгөө', 'Цаг товлол', 'Түүх', 'Файл']
-const activeTab = ref(tabs[0])
+const tabs = [
+    { key: 'treatment', label: 'Эмчилгээ', component: PatientTreatmentTab },
+    { key: 'plan', label: 'Төлөвлөгөө', component: PatientPlanTab },
+    { key: 'schedule', label: 'Цаг товлол', component: PatientScheduleTab },
+    { key: 'history', label: 'Түүх', component: PatientHistoryTab },
+    { key: 'files', label: 'Файл', component: PatientFilesTab },
+]
+const activeTab = ref(tabs[0].key)
+const activeTabConfig = computed(() => tabs.find((tab) => tab.key === activeTab.value) || tabs[0])
 
 const treatments = computed(() =>
     mockTreatmentHistory.map((item, idx) => ({
@@ -71,11 +82,17 @@ const treatments = computed(() =>
     })),
 )
 
-const statusClass = (status) => {
-    if (status === 'done') return 'badge-soft badge-soft--success'
-    if (status === 'planned') return 'badge-soft badge-soft--muted'
-    return 'badge-soft badge-soft--warning'
-}
+const activeTabProps = computed(() => {
+    if (activeTabConfig.value.key === 'treatment') {
+        return {
+            treatments: treatments.value,
+            isPortrait: isPortrait.value,
+        }
+    }
+    return {
+        label: activeTabConfig.value.label,
+    }
+})
 
 function toggleNav() {
     pinned.value = !pinned.value
@@ -84,17 +101,6 @@ function toggleNav() {
 function handleNavigate(id) {
     window.location.hash = `#${id}`
 }
-
-const filteredTreatments = computed(() => {
-    const term = searchTerm.value.trim().toLowerCase()
-    if (!term) return treatments.value
-    return treatments.value.filter(
-        (item) =>
-            item.description.toLowerCase().includes(term) ||
-            item.code.toLowerCase().includes(term) ||
-            item.doctor.toLowerCase().includes(term),
-    )
-})
 
 const updateBreakpoints = () => {
     if (typeof window === 'undefined') return
@@ -128,12 +134,12 @@ onBeforeUnmount(() => {
             </div>
         </aside>
 
-        <div class="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
             <TopBar :active-patient="patient" />
 
             <div class="flex flex-1 min-h-0 overflow-hidden">
                 <div
-                    class="flex min-w-0 flex-1 flex-col gap-4 px-4 pb-16 pt-4 lg:pb-6 lg:px-6 mx-auto w-full max-w-[1430px]">
+                    class="flex min-h-0 min-w-0 flex-1 flex-col gap-4 px-4 pb-16 pt-4 lg:pb-6 lg:px-6 mx-auto w-full max-w-[1430px]">
                     <div class="lg:hidden">
                         <div class="card card--soft flex flex-col gap-6">
                             <div class="flex items-center gap-3">
@@ -188,7 +194,7 @@ onBeforeUnmount(() => {
                     </div>
 
                     <div
-                        class="flex min-w-0 flex-1 flex-col gap-6 lg:grid lg:grid-cols-[clamp(18rem,26vw,22rem)_minmax(0,1fr)]">
+                        class="flex min-h-0 min-w-0 flex-1 flex-col gap-6 lg:grid lg:grid-cols-[clamp(18rem,26vw,22rem)_minmax(0,1fr)]">
                         <div class="hidden w-full min-w-0 max-w-sm flex-shrink-0 lg:block">
                             <div class="card card--soft flex flex-col gap-6">
                                 <div class="flex items-center gap-3">
@@ -242,7 +248,7 @@ onBeforeUnmount(() => {
                             </div>
                         </div>
 
-                        <div class="flex min-w-0 flex-1 flex-col gap-4 overflow-hidden">
+                        <div class="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-hidden">
                             <div class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
                                 <template v-if="isPortrait">
                                     <div class="card card--soft card--dense flex flex-col gap-3">
@@ -266,10 +272,10 @@ onBeforeUnmount(() => {
                             <div class="card card--soft flex min-h-0 flex-1 flex-col gap-4">
                                 <div class="flex flex-wrap items-center justify-between gap-3">
                                     <div :class="['ui-tabs', isPortrait ? 'ui-tabs--segmented' : '']">
-                                        <button v-for="tab in tabs" :key="tab" type="button"
-                                            :class="['ui-tab', tab === activeTab ? 'ui-tab--active' : '']"
-                                            @click="activeTab = tab">
-                                            {{ tab }}
+                                        <button v-for="tab in tabs" :key="tab.key" type="button"
+                                            :class="['ui-tab', tab.key === activeTab ? 'ui-tab--active' : '']"
+                                            @click="activeTab = tab.key">
+                                            {{ tab.label }}
                                         </button>
                                     </div>
                                     <button type="button"
@@ -277,82 +283,8 @@ onBeforeUnmount(() => {
                                         + Эмчилгээ эхлүүлэх
                                     </button>
                                 </div>
-<!-- 
-                                <div class="flex flex-wrap items-center justify-between gap-3">
-                                    <div class="relative w-full max-w-md">
-                                        <input v-model="searchTerm" type="search" class="ui-input"
-                                            placeholder="Хайх..." />
-                                    </div>
-                                    <span class="text-sm font-semibold text-slate-600">Нийт: {{
-                                        filteredTreatments.length }} бичлэг</span>
-                                </div> -->
-
-                                <div class="flex min-h-0 flex-1 overflow-hidden">
-                                    <div class="ui-table-shell">
-                                        <div v-if="!isPortrait" class="ui-table-header treatment-table-grid">
-                                            <div class="min-w-0">Огноо</div>
-                                            <div class="min-w-0 text-center">Шүд</div>
-                                            <div class="min-w-0 text-center">Гадаргуу</div>
-                                            <div class="min-w-0">Код</div>
-                                            <div class="min-w-0">Тайлбар</div>
-                                            <div class="min-w-0 text-center">Үнэ</div>
-                                            <div class="min-w-0 text-center">Статус</div>
-                                            <div class="min-w-0 text-right">Эмч</div>
-                                        </div>
-                                        <div :class="['ui-table-scroll', isPortrait ? 'pb-24' : '']">
-                                            <template v-if="isPortrait">
-                                                <div v-for="treatment in filteredTreatments" :key="treatment.id"
-                                                    class="treatment-card">
-                                                    <div class="treatment-card__row">
-                                                        <div class="treatment-meta">
-                                                            <span class="treatment-meta__date">{{ treatment.date
-                                                                }}</span>
-                                                            <span class="badge-soft">{{ treatment.tooth }}</span>
-                                                            <span class="badge-soft badge-soft--muted">{{
-                                                                treatment.surface }}</span>
-                                                        </div>
-                                                        <span :class="statusClass(treatment.status)">
-                                                            {{ treatment.status === 'done' ? 'Дууссан' : 'Төлөвлөсөн' }}
-                                                        </span>
-                                                    </div>
-                                                    <div class="treatment-card__body">
-                                                        <div class="treatment-body__code">{{ treatment.code }}</div>
-                                                        <div class="treatment-body__desc">{{ treatment.description }}
-                                                        </div>
-                                                    </div>
-                                                    <div class="treatment-card__footer">
-                                                        <div class="treatment-price">{{ treatment.price }}</div>
-                                                        <div class="treatment-doctor">{{ treatment.doctor }}</div>
-                                                    </div>
-                                                </div>
-                                            </template>
-                                            <template v-else>
-                                                <div v-for="treatment in filteredTreatments" :key="treatment.id"
-                                                    class="ui-table-row treatment-table-grid">
-                                                    <div class="min-w-0 font-semibold text-slate-900">{{ treatment.date
-                                                        }}</div>
-                                                    <div class="min-w-0 text-center">
-                                                        <span class="badge-soft">{{ treatment.tooth }}</span>
-                                                    </div>
-                                                    <div class="min-w-0 text-center">
-                                                        <span class="badge-soft badge-soft--muted">{{ treatment.surface
-                                                            }}</span>
-                                                    </div>
-                                                    <div class="min-w-0 text-blue-600">{{ treatment.code }}</div>
-                                                    <div class="min-w-0 font-medium text-slate-900">{{
-                                                        treatment.description }}</div>
-                                                    <div class="min-w-0 text-center font-semibold text-slate-900">{{
-                                                        treatment.price }}</div>
-                                                    <div class="min-w-0 text-center">
-                                                        <span :class="statusClass(treatment.status)">{{ treatment.status
-                                                            === 'done' ? 'Дууссан' : 'Төлөвлөсөн' }}</span>
-                                                    </div>
-                                                    <div class="min-w-0 text-right text-slate-700">{{ treatment.doctor
-                                                        }}</div>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </div>
+                                <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+                                    <component :is="activeTabConfig.component" v-bind="activeTabProps" />
                                 </div>
                             </div>
                         </div>
