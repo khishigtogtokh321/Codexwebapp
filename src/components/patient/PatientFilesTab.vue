@@ -1,14 +1,14 @@
 <script setup>
+import RecallScheduleCard from '@/components/patient/RecallScheduleCard.vue'
+
 defineProps({
-    label: {
-        type: String,
-        default: '',
+    recalls: {
+        type: Array,
+        default: () => [],
     },
 })
 </script>
 
 <template>
-    <div class="min-w-0 text-sm font-semibold text-slate-600">
-        {{ label }}
-    </div>
+    <RecallScheduleCard class="min-w-0" :recalls="recalls" />
 </template>

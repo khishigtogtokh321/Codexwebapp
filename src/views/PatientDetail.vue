@@ -3,7 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import SideNav from '@/components/layout/SideNav.vue'
 import TopBar from '@/components/layout/TopBar.vue'
 import AllergyCard from '@/components/patient/AllergyCard.vue'
-import RecallScheduleCard from '@/components/patient/RecallScheduleCard.vue'
+import DateTimeCard from '@/components/patient/DateTimeCard.vue'
 import PatientFilesTab from '@/components/patient/PatientFilesTab.vue'
 import PatientHistoryTab from '@/components/patient/PatientHistoryTab.vue'
 import PatientPlanTab from '@/components/patient/PatientPlanTab.vue'
@@ -56,6 +56,12 @@ const allergies = computed(() => [
 const recalls = computed(() => [
     { dueDate: '2026.06.28', plannedDate: '-', note: 'Урьдчилан сэргийлэх үзлэг' },
     { dueDate: '2024.12.01', plannedDate: '2024.11.25', note: 'Шүдний өнгө шалгах' },
+     { dueDate: '2024.12.01', plannedDate: '2024.11.25', note: 'Шүдний өнгө шалгах' },
+      { dueDate: '2024.12.01', plannedDate: '2024.11.25', note: 'Шүдний өнгө шалгах' },
+       { dueDate: '2024.12.01', plannedDate: '2024.11.25', note: 'Шүдний өнгө шалгах' },
+        { dueDate: '2024.12.01', plannedDate: '2024.11.25', note: 'Шүдний өнгө шалгах' },
+         { dueDate: '2024.12.01', plannedDate: '2024.11.25', note: 'Шүдний өнгө шалгах' },
+          { dueDate: '2024.12.01', plannedDate: '2024.11.25', note: 'Шүдний өнгө шалгах' },
 ])
 
 const tabs = [
@@ -87,6 +93,11 @@ const activeTabProps = computed(() => {
         return {
             treatments: treatments.value,
             isPortrait: isPortrait.value,
+        }
+    }
+    if (activeTabConfig.value.key === 'files') {
+        return {
+            recalls: recalls.value,
         }
     }
     return {
@@ -137,9 +148,12 @@ onBeforeUnmount(() => {
         <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
             <TopBar :active-patient="patient" />
 
-            <div class="flex flex-1 min-h-0 overflow-hidden">
+            <div :class="['flex flex-1 min-h-0', isPortrait ? 'overflow-y-auto' : 'overflow-hidden']">
                 <div
-                    class="flex min-h-0 min-w-0 flex-1 flex-col gap-4 px-4 pb-16 pt-4 lg:pb-6 lg:px-6 mx-auto w-full max-w-[1430px]">
+                    :class="[
+                        'flex min-h-0 min-w-0 flex-col gap-4 px-4 pb-16 pt-4 lg:pb-6 lg:px-6 mx-auto w-full max-w-[1430px]',
+                        isPortrait ? '' : 'flex-1',
+                    ]">
                     <div class="lg:hidden">
                         <div class="card card--soft flex flex-col gap-6">
                             <div class="flex items-center gap-3">
@@ -194,7 +208,10 @@ onBeforeUnmount(() => {
                     </div>
 
                     <div
-                        class="flex min-h-0 min-w-0 flex-1 flex-col gap-6 lg:grid lg:grid-cols-[clamp(18rem,26vw,22rem)_minmax(0,1fr)]">
+                        :class="[
+                            'flex min-h-0 min-w-0 flex-col gap-6 lg:grid lg:grid-cols-[clamp(18rem,26vw,22rem)_minmax(0,1fr)]',
+                            isPortrait ? '' : 'flex-1',
+                        ]">
                         <div class="hidden w-full min-w-0 max-w-sm flex-shrink-0 lg:block">
                             <div class="card card--soft flex flex-col gap-6">
                                 <div class="flex items-center gap-3">
@@ -244,11 +261,16 @@ onBeforeUnmount(() => {
                                         <span class="profile-label">Мэргэжил</span>
                                         <span class="profile-value">{{ patient.job }}</span>
                                     </div>
+                                    
                                 </div>
                             </div>
                         </div>
 
-                        <div class="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-hidden">
+                        <div
+                            :class="[
+                                'flex min-h-0 min-w-0 flex-col gap-4',
+                                isPortrait ? 'overflow-visible' : 'flex-1 overflow-hidden',
+                            ]">
                             <div class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
                                 <template v-if="isPortrait">
                                     <div class="card card--soft card--dense flex flex-col gap-3">
@@ -259,13 +281,13 @@ onBeforeUnmount(() => {
                                         </button>
                                         <div v-if="showSafety" class="space-y-3">
                                             <AllergyCard class="min-w-0" :allergies="allergies" />
-                                            <RecallScheduleCard class="min-w-0" :recalls="recalls" />
+                                            <DateTimeCard class="min-w-0" />
                                         </div>
                                     </div>
                                 </template>
                                 <template v-else>
                                     <AllergyCard class="min-w-0" :allergies="allergies" />
-                                    <RecallScheduleCard class="min-w-0" :recalls="recalls" />
+                                    <DateTimeCard class="min-w-0" />
                                 </template>
                             </div>
 
@@ -283,7 +305,11 @@ onBeforeUnmount(() => {
                                         + Эмчилгээ эхлүүлэх
                                     </button>
                                 </div>
-                                <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+                                <div
+                                    :class="[
+                                        'flex min-h-0 min-w-0 flex-col',
+                                        isPortrait ? 'overflow-visible' : 'flex-1 overflow-hidden',
+                                    ]">
                                     <component :is="activeTabConfig.component" v-bind="activeTabProps" />
                                 </div>
                             </div>

@@ -1725,6 +1725,15 @@
     grid-template-columns: 1fr 0.5fr 0.7fr 0.75fr 1.1fr 0.75fr 0.75fr 0.9fr;
   }
 
+  .date-time-table-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .date-time-table-scroll {
+    --date-time-row-h: 3.375rem;
+    max-height: calc(var(--date-time-row-h) * 2);
+  }
+
   .ui-tabs--segmented {
     width: 100%;
     background: #f1f5f9;

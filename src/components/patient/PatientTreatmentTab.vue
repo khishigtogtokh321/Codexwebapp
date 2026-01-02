@@ -18,8 +18,8 @@ const statusClass = (status) => {
 </script>
 
 <template>
-    <div class="flex min-h-0 min-w-0 flex-1 flex-col gap-4">
-        <div class="ui-table-shell min-h-0 flex-1">
+    <div :class="['flex min-h-0 min-w-0 flex-col gap-4', isPortrait ? '' : 'flex-1']">
+        <div :class="['ui-table-shell', isPortrait ? '' : 'min-h-0 flex-1']">
             <div v-if="!isPortrait" class="ui-table-header treatment-table-grid">
                 <div class="min-w-0">Огноо</div>
                 <div class="min-w-0 text-center">Шүд</div>
@@ -30,7 +30,7 @@ const statusClass = (status) => {
                 <div class="min-w-0 text-center">Статус</div>
                 <div class="min-w-0 text-right">Эмч</div>
             </div>
-            <div :class="['ui-table-scroll', isPortrait ? 'pb-24' : '']">
+            <div :class="['ui-table-scroll', isPortrait ? 'pb-24 flex-none overflow-visible' : '']">
                 <template v-if="isPortrait">
                     <div v-for="treatment in props.treatments" :key="treatment.id" class="treatment-card">
                         <div class="treatment-card__row">
