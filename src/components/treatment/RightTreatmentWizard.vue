@@ -279,6 +279,7 @@ function handleAdd() {
       'treatment-wizard',
       'card',
       'treatment-wizard--responsive',
+      'mx-auto w-full max-w-md lg:max-w-none',
       step === 1 ? 'treatment-wizard--step1' : 'treatment-wizard--step2'
     ]"
   >
@@ -467,43 +468,18 @@ function handleAdd() {
         </button>
       </div>
 
-      <div class="grid gap-3 min-w-0 
-      [grid-template-columns:repeat(auto-fit,minmax(84px, 1fr))]
-      lg:gap-2 lg:[grid-template-columns:repeat(auto-fit,minmax(72px,1fr))]
-      xl:gap-3 xl:[grid-template-columns:repeat(auto-fit,minmax(88px,1fr))]]
-      "
-      >
-        <div v-for="item in currentCodes" :key="item.code" class="relative group">
+      <div class="grid grid-cols-3 gap-2 lg:grid-cols-2 xl:grid-cols-3 min-w-0">
+        <div v-for="item in currentCodes" :key="item.code" class="relative">
           <button
             type="button"
-            class="treatment-code-button"
-            :class="selectedCodes.includes(item.code) ? 'bg-blue-50 border-blue-300 ring-1 ring-blue-200' : ''"
+            class="w-full px-2 py-2.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition-colors"
+            :class="selectedCodes.includes(item.code) 
+              ? 'bg-blue-50 border-blue-400 ring-1 ring-blue-200' 
+              : 'hover:border-slate-300'"
             @click="toggleCode(item.code)"
           >
-            <span class="block text-center">{{ item.code }}</span>
+            <span class="block text-center text-xs font-semibold text-slate-800">{{ item.code }}</span>
           </button>
-
-          <!-- <button
-            type="button"
-            class="absolute top-2 right-2 h-6 w-6 inline-flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-400 shadow-sm hover:text-slate-600"
-            @click.stop="toggleTooltip(item.code)"
-            aria-label="Code info"
-          >
-            <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-              <path
-                fill-rule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-11.25a.75.75 0 10-1.5 0 .75.75 0 001.5 0zM9.25 9a.75.75 0 000 1.5h.5v3.25a.75.75 0 001.5 0V9.75A.75.75 0 0010.5 9h-1.25z"
-                clip-rule="evenodd"
-              />
-            </svg>
-          </button> -->
-
-          <div
-            class="treatment-code-tooltip"
-            :class="showTooltipCode === item.code ? 'treatment-code-tooltip--visible' : ''"
-          >
-            {{ item.nameMn }}
-          </div>
         </div>
       </div>
 

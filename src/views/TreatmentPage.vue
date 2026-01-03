@@ -31,6 +31,8 @@ const hovered = ref(false)
 const pinned = ref(false)
 const drawerOpen = ref(false)
 const isLgUp = ref(false)
+const isPortrait = ref(false)
+const historyExpanded = ref(false)
 const isQuickAddOpen = ref(false)
 const drawerTriggerRef = ref(null)
 const drawerCloseRef = ref(null)
@@ -63,7 +65,7 @@ const quickAddCanSubmit = computed(
 
 
 const filteredLog = computed(() => {
-  let list = treatmentStore.treatments
+  let list = [...treatmentStore.treatments]
   if (searchQuery.value) {
     const q = searchQuery.value.toLowerCase()
     list = list.filter(
@@ -74,7 +76,7 @@ const filteredLog = computed(() => {
   if (statusFilter.value !== 'all') {
     list = list.filter((item) => item.status === statusFilter.value)
   }
-  return list
+  return list.sort((a, b) => new Date(b.date) - new Date(a.date))
 })
 
 function getDiagnosisLabels(codes) {
@@ -235,8 +237,8 @@ function handleWizardAdd(selectedCodes = []) {
     surface: surfaceText,
     diagnosis: diagnosisText,
     treatmentType: treatmentText,
-    doctor: '',
-    price: '',
+    doctor: 'Д. Гантулга', // Hardcoded for now per mock
+    price: '80,000₮', // Mock price
     status,
   }
 
@@ -252,6 +254,11 @@ function handleWizardAdd(selectedCodes = []) {
       })
     })
   })
+
+  // Close wizard and open history in portrait mode
+  if (isPortrait.value) {
+    historyExpanded.value = true
+  }
 
   state.selectedSurfaces = []
   state.selectedDiagnoses = []
@@ -329,6 +336,7 @@ const updateBreakpoint = () => {
     mediaQuery = window.matchMedia('(min-width: 1024px)')
   }
   isLgUp.value = mediaQuery?.matches || false
+  isPortrait.value = !isLgUp.value
   if (mediaQuery?.matches) {
     drawerOpen.value = false
   }
@@ -402,53 +410,148 @@ watch(
       </div>
 
       <TopBar :active-patient="activePatient" @patient-selected="handlePatientSelected" />
-      <main class="flex-1 overflow-y-auto bg-gray-100">
-        <div class="p-4 md:p-6 space-y-4">
-      
-
-          <div class="grid gap-4 lg:grid-cols-12 items-start lg:items-stretch">
-            <div class="space-y-4 lg:col-span-8">
-              <ToothChart
-                class="h-auto lg:h-auto"
-                :selected-teeth="selectedTeethList"
-                :tooth-statuses="toothStatuses"
-                :multi-select="true"
-                @teeth-select="selectTooth"
-                @select-all="selectTooth"
-                @clear-selection="() => selectTooth([])"
-              />
-
-
+      <main class="flex-1 overflow-hidden bg-gray-100 flex flex-col">
+        <!-- Portrait Layout (<1024px) - Bottom Sheet Design -->
+        <template v-if="isPortrait">
+          <div class="flex-1 flex flex-col overflow-hidden relative">
+            <!-- ToothChart: Full when no teeth, Mini when teeth selected -->
+            <div :class="[
+              'transition-all duration-300 ease-out bg-gray-100',
+              hasSelectedTeeth ? 'h-[28vh] min-h-[180px]' : 'flex-1'
+            ]">
+              <div class="p-3 h-full">
+                <ToothChart
+                  class="h-full"
+                  :selected-teeth="selectedTeethList"
+                  :tooth-statuses="toothStatuses"
+                  :multi-select="true"
+                  @teeth-select="selectTooth"
+                  @select-all="selectTooth"
+                  @clear-selection="() => selectTooth([])"
+                />
+              </div>
             </div>
 
-            <div class="lg:col-span-4 lg:pl-1 space-y-3 fill-height">
-              <div class="sticky top-4 fill-height">
-                <RightTreatmentWizard
-                  :selected-teeth="selectedTeethList"
-                  @update:surfaces="handleSurfacesUpdate"
-                  @update:diagnosis="handleDiagnosisUpdate"
-                  @add="handleWizardAdd"
+            <!-- Selected Teeth Info Bar -->
+            <div v-if="hasSelectedTeeth" class="px-4 py-2 bg-blue-50 border-y border-blue-100 flex items-center justify-between">
+              <span class="text-sm font-medium text-blue-800">
+                Сонгосон: {{ selectedTeethList.map(t => `#${t}`).join(', ') }}
+              </span>
+              <button
+                type="button"
+                class="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                @click="selectTooth([])"
+              >
+                Цэвэрлэх
+              </button>
+            </div>
+
+            <!-- Bottom Sheet -->
+            <Transition
+              enter-active-class="transform transition-all duration-300 ease-out"
+              leave-active-class="transform transition-all duration-200 ease-in"
+              enter-from-class="translate-y-full opacity-0"
+              enter-to-class="translate-y-0 opacity-100"
+              leave-from-class="translate-y-0 opacity-100"
+              leave-to-class="translate-y-full opacity-0"
+            >
+              <div v-if="hasSelectedTeeth" class="flex-1 flex flex-col bg-white rounded-t-2xl shadow-2xl overflow-hidden">
+                <!-- Drag Handle -->
+                <div class="flex justify-center py-2 bg-gray-50 border-b border-gray-100">
+                  <div class="w-12 h-1.5 bg-gray-300 rounded-full"></div>
+                </div>
+
+                <!-- Wizard Content -->
+                <div class="flex-1 overflow-y-auto p-4">
+                  <RightTreatmentWizard
+                    :selected-teeth="selectedTeethList"
+                    @update:surfaces="handleSurfacesUpdate"
+                    @update:diagnosis="handleDiagnosisUpdate"
+                    @add="handleWizardAdd"
+                  />
+                </div>
+              </div>
+            </Transition>
+          </div>
+
+          <!-- Collapsible History Footer -->
+          <div class="border-t border-gray-300 bg-white shadow-lg shrink-0">
+            <button
+              type="button"
+              class="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+              @click="historyExpanded = !historyExpanded"
+            >
+              <span class="flex items-center gap-2">
+                <svg :class="['h-4 w-4 transition-transform', historyExpanded ? 'rotate-180' : '']" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+                </svg>
+                Түүх ({{ filteredLog.length }})
+              </span>
+              <span class="text-xs text-gray-500">{{ historyExpanded ? 'Хаах' : 'Нээх' }}</span>
+            </button>
+            <div v-if="historyExpanded" class="max-h-[40vh] overflow-auto border-t border-gray-200">
+              <div class="p-4">
+                <TreatmentHistoryTable
+                  :treatments="filteredLog"
+                  :loading="false"
+                  :patient="activePatient"
+                  :search-query="searchQuery"
+                  :status-filter="statusFilter"
+                  @search="handleSearch"
+                  @filter-status="handleFilterStatus"
+                  @edit="handleEditTreatment"
+                  @delete="handleDeleteTreatment"
                 />
               </div>
             </div>
           </div>
+        </template>
 
-          <div class="dental-card p-4 md:p-5 space-y-3">
-            <div class="overflow-x-auto">
-              <TreatmentHistoryTable
-                :treatments="filteredLog"
-                :loading="false"
-                :patient="activePatient"
-                :search-query="searchQuery"
-                :status-filter="statusFilter"
-                @search="handleSearch"
-                @filter-status="handleFilterStatus"
-                @edit="handleEditTreatment"
-                @delete="handleDeleteTreatment"
-              />
+        <!-- Landscape Layout (≥1024px) - Original -->
+        <template v-else>
+          <div class="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
+            <div class="grid gap-4 lg:grid-cols-12 items-start lg:items-stretch">
+              <div class="space-y-4 lg:col-span-8">
+                <ToothChart
+                  class="h-auto lg:h-auto"
+                  :selected-teeth="selectedTeethList"
+                  :tooth-statuses="toothStatuses"
+                  :multi-select="true"
+                  @teeth-select="selectTooth"
+                  @select-all="selectTooth"
+                  @clear-selection="() => selectTooth([])"
+                />
+              </div>
+
+              <div class="lg:col-span-4 lg:pl-1 space-y-3 fill-height">
+                <div class="sticky top-4 fill-height">
+                  <RightTreatmentWizard
+                    :selected-teeth="selectedTeethList"
+                    @update:surfaces="handleSurfacesUpdate"
+                    @update:diagnosis="handleDiagnosisUpdate"
+                    @add="handleWizardAdd"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="dental-card p-4 md:p-5 space-y-3">
+              <div class="overflow-x-auto">
+                <TreatmentHistoryTable
+                  :treatments="filteredLog"
+                  :loading="false"
+                  :patient="activePatient"
+                  :search-query="searchQuery"
+                  :status-filter="statusFilter"
+                  @search="handleSearch"
+                  @filter-status="handleFilterStatus"
+                  @edit="handleEditTreatment"
+                  @delete="handleDeleteTreatment"
+                />
+              </div>
             </div>
           </div>
-        </div>
+        </template>
       </main>
     </div>
 
