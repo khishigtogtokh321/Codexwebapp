@@ -178,9 +178,11 @@ onBeforeUnmount(() => {
     </nav>
 
     <div class="side-nav__divider border-t px-3 py-3 sm:px-4" :class="props.isCollapsed ? 'text-center' : ''">
-      <div
-        class="side-nav__hoverable flex items-center rounded-xl px-3 py-2 transition-all"
+      <button
+        type="button"
+        class="side-nav__hoverable flex w-full items-center rounded-xl px-3 py-2 text-left transition-all hover:bg-slate-100 focus:outline-none"
         :class="props.isCollapsed ? 'flex-col gap-1' : 'gap-3'"
+        @click="emit('navigate', 'profile')"
       >
         <div class="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">Dr</div>
         <div v-if="!props.isCollapsed" class="transition-opacity duration-200">
@@ -188,7 +190,7 @@ onBeforeUnmount(() => {
           <p class="side-nav__muted text-xs">Шүдний эмч</p>
         </div>
         <span v-else class="side-nav__muted text-[11px]">Dr. D</span>
-      </div>
+      </button>
     </div>
   </div>
 </template>

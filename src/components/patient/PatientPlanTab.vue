@@ -122,13 +122,6 @@ onBeforeUnmount(() => {
             </div>
         </div>
         <div :class="['ui-table-shell', 'ui-table-shell--shadowed', isPortrait ? '' : 'min-h-0 flex-1']">
-            <div v-if="!isPortrait" class="ui-table-header plan-table-grid">
-                <div class="min-w-0">Огноо</div>
-                <div class="min-w-0">Гарчиг</div>
-                <div class="min-w-0 text-center">Статус</div>
-                <div class="min-w-0 text-right">Эмч</div>
-                <div class="min-w-0 text-right">Үйлдэл</div>
-            </div>
             <div :class="['ui-table-scroll', isPortrait ? 'pb-24 flex-none overflow-visible' : '']">
                 <template v-if="isPortrait">
                     <div v-for="plan in planItems" :key="plan.id" class="treatment-card">
@@ -148,6 +141,13 @@ onBeforeUnmount(() => {
                     </div>
                 </template>
                 <template v-else>
+                    <div class="ui-table-header plan-table-grid sticky top-0 z-10">
+                        <div class="min-w-0">Огноо</div>
+                        <div class="min-w-0">Гарчиг</div>
+                        <div class="min-w-0 text-center">Статус</div>
+                        <div class="min-w-0 text-right">Эмч</div>
+                        <div class="min-w-0 text-right">Үйлдэл</div>
+                    </div>
                     <div v-for="plan in planItems" :key="plan.id" class="ui-table-row plan-table-grid">
                         <div class="min-w-0 font-semibold text-slate-900">{{ plan.date }}</div>
                         <div class="min-w-0 font-medium text-slate-900">{{ plan.title }}</div>

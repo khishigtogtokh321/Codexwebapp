@@ -217,7 +217,7 @@ onBeforeUnmount(() => {
 
                     <div
                         :class="[
-                            'flex min-h-0 min-w-0 flex-col gap-6 lg:grid lg:grid-cols-[clamp(18rem,26vw,22rem)_minmax(0,1fr)]',
+                            'flex min-h-0 min-w-0 flex-col gap-6 lg:grid lg:grid-cols-[22rem_minmax(0,1fr)]',
                             isPortrait ? '' : 'flex-1',
                         ]">
                         <div class="hidden w-full min-w-0 max-w-sm flex-shrink-0 lg:block">

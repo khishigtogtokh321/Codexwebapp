@@ -1094,6 +1094,7 @@
       color: #475569;
     }
   }
+
   .treatment-wizard {
     container-type: inline-size;
     --tw-hit: 2.75rem;
@@ -1118,10 +1119,8 @@
     --treatment-pill-padding-x: clamp(0.6rem, 3.6cqw, 1rem);
     --treatment-pill-padding-y: clamp(0.3rem, 2.2cqw, 0.5rem);
     --treatment-hit-padding: max(0px, calc((var(--tw-hit) - var(--treatment-control-height)) / 2));
-    --treatment-hit-padding: min(
-        0.25rem,
-        max(0px, calc((var(--tw-hit) - var(--treatment-control-height)) / 2))
-      );
+    --treatment-hit-padding: min(0.25rem,
+        max(0px, calc((var(--tw-hit) - var(--treatment-control-height)) / 2)));
     width: 100%;
     max-width: var(--treatment-wizard-width);
     height: auto;
@@ -1164,7 +1163,7 @@
       aspect-ratio: 1 / 1.18;
     }
   }
- 
+
 
   @container (min-width: 480px) {
     .treatment-wizard {
@@ -1179,16 +1178,18 @@
     }
   }
 
-  .treatment-wizard--step1{
-    overflow: visible; /* dropdown тасрахгүй */
+  .treatment-wizard--step1 {
+    overflow: visible;
+    /* dropdown тасрахгүй */
   }
 
-  .treatment-wizard--step2{
-    overflow: hidden;  /* STEP2 дотор scroll-оо зөв удирдана */
+  .treatment-wizard--step2 {
+    overflow: hidden;
+    /* STEP2 дотор scroll-оо зөв удирдана */
     display: flex;
     flex-direction: column;
   }
-    
+
 
 
   .treatment-surface-grid {
@@ -1246,15 +1247,16 @@
     font-size: var(--treatment-control-font);
   }
 
-  .treatment-hit-visual{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    width:100%;
-    height:100%;
+  .treatment-hit-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
     padding: 0 var(--treatment-control-padding-x);
-    line-height: 1.1; 
+    line-height: 1.1;
   }
+
   .treatment-diagnosis-dropdown {
     position: fixed;
     z-index: 120;
@@ -1463,6 +1465,7 @@
   }
 
   @media (min-width: 1138px) {
+
     .treatment-wizard--step1 .treatment-action-secondary,
     .treatment-wizard--step2 .treatment-action-button {
       --treatment-control-height: 3.25rem;
@@ -1775,6 +1778,7 @@
     0% {
       background-position: 200% 0;
     }
+
     100% {
       background-position: -200% 0;
     }
@@ -1797,13 +1801,17 @@
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
   }
 
   .recall-row {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns:
+      minmax(110px, 1fr) minmax(110px, 1fr) minmax(150px, 1.5fr);
     gap: 0.5rem;
     align-items: center;
+    min-width: 400px;
   }
 
   .recall-row--head {
@@ -1998,11 +2006,15 @@
   }
 
   .treatment-table-grid {
-    grid-template-columns: 1fr 0.5fr 0.7fr 0.75fr 1.1fr 0.75fr 0.75fr 0.9fr;
+    grid-template-columns:
+      minmax(90px, 1fr) minmax(50px, 0.5fr) minmax(70px, 0.7fr) minmax(70px, 0.75fr) minmax(120px, 1.1fr) minmax(80px, 0.75fr) minmax(80px, 0.75fr) minmax(90px, 0.9fr);
+    min-width: 800px;
   }
 
   .plan-table-grid {
-    grid-template-columns: 0.9fr 2.1fr 0.9fr 0.9fr 1.2fr;
+    grid-template-columns:
+      minmax(90px, 0.9fr) minmax(200px, 2.1fr) minmax(80px, 0.9fr) minmax(90px, 0.9fr) minmax(120px, 1.2fr);
+    min-width: 600px;
   }
 
   .date-time-table-grid {

@@ -20,16 +20,6 @@ const statusClass = (status) => {
 <template>
     <div :class="['flex min-h-0 min-w-0 flex-col gap-4', isPortrait ? '' : 'flex-1']">
         <div :class="['ui-table-shell', 'ui-table-shell--shadowed', isPortrait ? '' : 'min-h-0 flex-1']">
-            <div v-if="!isPortrait" class="ui-table-header treatment-table-grid">
-                <div class="min-w-0">Огноо</div>
-                <div class="min-w-0 text-center">Шүд</div>
-                <div class="min-w-0 text-center">Гадаргуу</div>
-                <div class="min-w-0">Код</div>
-                <div class="min-w-0">Тайлбар</div>
-                <div class="min-w-0 text-center">Үнэ</div>
-                <div class="min-w-0 text-center">Статус</div>
-                <div class="min-w-0 text-right">Эмч</div>
-            </div>
             <div :class="['ui-table-scroll', isPortrait ? 'pb-24 flex-none overflow-visible' : '']">
                 <template v-if="isPortrait">
                     <div v-for="treatment in props.treatments" :key="treatment.id" class="treatment-card">
@@ -54,6 +44,16 @@ const statusClass = (status) => {
                     </div>
                 </template>
                 <template v-else>
+                    <div class="ui-table-header treatment-table-grid sticky top-0 z-10">
+                        <div class="min-w-0">Огноо</div>
+                        <div class="min-w-0 text-center">Шүд</div>
+                        <div class="min-w-0 text-center">Гадаргуу</div>
+                        <div class="min-w-0">Код</div>
+                        <div class="min-w-0">Тайлбар</div>
+                        <div class="min-w-0 text-center">Үнэ</div>
+                        <div class="min-w-0 text-center">Статус</div>
+                        <div class="min-w-0 text-right">Эмч</div>
+                    </div>
                     <div v-for="treatment in props.treatments" :key="treatment.id"
                         class="ui-table-row treatment-table-grid">
                         <div class="min-w-0 font-semibold text-slate-900">{{ treatment.date }}</div>

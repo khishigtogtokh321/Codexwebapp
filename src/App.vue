@@ -3,6 +3,8 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import TreatmentPage from './views/TreatmentPage.vue'
 import PatientList from './views/PatientList.vue'
 import PatientDetail from './views/PatientDetail.vue'
+import MyProfile from './views/MyProfile.vue'
+import AppointmentList from './views/AppointmentList.vue'
 
 const parseHash = () => {
   const raw = window.location.hash.replace('#', '') // e.g. "patient?pid=123"
@@ -15,6 +17,8 @@ const parseHash = () => {
   // default behavior: old logic was patients else treatments
   if (path === 'patients') return { page: 'patients', pid: null }
   if (path === 'patient') return { page: 'patient', pid }
+  if (path === 'profile') return { page: 'profile', pid: null }
+  if (path === 'appointments' || path === 'appointment') return { page: 'appointments', pid: null }
   return { page: 'treatments', pid }
 }
 
@@ -35,6 +39,8 @@ onBeforeUnmount(() => {
 const currentComponent = computed(() => {
   if (route.value.page === 'patients') return PatientList
   if (route.value.page === 'patient') return PatientDetail
+  if (route.value.page === 'profile') return MyProfile
+  if (route.value.page === 'appointments') return AppointmentList
   return TreatmentPage
 })
 
