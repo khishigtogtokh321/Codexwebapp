@@ -11,6 +11,9 @@ import PatientScheduleTab from '@/components/patient/PatientScheduleTab.vue'
 import PatientTreatmentTab from '@/components/patient/PatientTreatmentTab.vue'
 import { mockPatient, mockTreatmentHistory } from '@/data'
 import { formatDate } from '@/utils/formatters'
+import { usePatientStore } from '@/stores/patient'
+
+const patientStore = usePatientStore()
 
 const props = defineProps({
     pid: {
@@ -32,7 +35,12 @@ const patient = computed(() => {
     const hash = typeof window !== 'undefined' ? window.location.hash : ''
     const idFromHash = hash.match(/pid=([^&]+)/)?.[1]
     const resolvedId = decodeURIComponent(idFromHash || props.pid || mockPatient.id)
-    return {
+    
+    // Try to get patient from store first
+    const storePatient = patientStore.getPatientById(resolvedId)
+    
+    // Fallback to mock patient with resolved ID
+    return storePatient || {
         ...mockPatient,
         id: resolvedId,
         name: mockPatient.name || 'Тодорхойгүй өвчтөн',

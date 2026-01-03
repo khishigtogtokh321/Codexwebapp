@@ -5,6 +5,9 @@ import SideNav from '@/components/layout/SideNav.vue'
 import patientService from '@/services/patientService'
 import { mockPatient } from '@/data'
 import { getInitials } from '@/utils/formatters'
+import { usePatientStore } from '@/stores/patient'
+
+const patientStore = usePatientStore()
 
 const hovered = ref(false)
 const pinned = ref(false)
@@ -14,9 +17,10 @@ const desktopExpanded = computed(() => isLgUp.value && (hovered.value || pinned.
 const drawerTriggerRef = ref(null)
 const drawerCloseRef = ref(null)
 
-const patients = ref([])
-const loading = ref(true)
 let loadTimeout
+
+const patients = computed(() => patientStore.patients)
+const loading = computed(() => patientStore.loading)
 
 const skeletonRows = computed(() => Array.from({ length: 8 }, (_, index) => index))
 const totalCount = computed(() => patients.value.length || 0)
@@ -112,11 +116,11 @@ function loadPatients() {
     },
   ]
 
-  loading.value = true
+  patientStore.loading = true
   window.clearTimeout(loadTimeout)
   loadTimeout = window.setTimeout(() => {
-    patients.value = seedPatients.map((patient, index) => normalizePatient(patient, index))
-    loading.value = false
+    patientStore.patients = seedPatients.map((patient, index) => normalizePatient(patient, index))
+    patientStore.loading = false
   }, 260)
 }
 

@@ -12,6 +12,9 @@ import { useToothStatus } from '@/composables/useToothStatus'
 import { formatToothNumber } from '@/utils/toothHelpers'
 import { getTreatmentScope, TREATMENT_SCOPE } from '@/utils/treatmentScope'
 import patientService from '@/services/patientService'
+import { useTreatmentStore } from '@/stores/treatment'
+
+const treatmentStore = useTreatmentStore()
 
 const state = reactive({
   selectedTeeth: [],
@@ -19,7 +22,6 @@ const state = reactive({
   selectedTreatments: [],
   selectedDiagnoses: [],
   selectedStatus: 'planned',
-  treatmentLog: [],
 })
 
 const searchQuery = ref('')
@@ -61,7 +63,7 @@ const quickAddCanSubmit = computed(
 
 
 const filteredLog = computed(() => {
-  let list = state.treatmentLog
+  let list = treatmentStore.treatments
   if (searchQuery.value) {
     const q = searchQuery.value.toLowerCase()
     list = list.filter(
@@ -147,7 +149,7 @@ function commitAddTreatment({
     status,
   }
 
-  state.treatmentLog.unshift(entry)
+  treatmentStore.addTreatment(entry)
 
   if (selectedTeeth.length) {
     selectedTeeth.forEach((tooth) => {
@@ -238,7 +240,7 @@ function handleWizardAdd(selectedCodes = []) {
     status,
   }
 
-  state.treatmentLog.unshift(entry)
+  treatmentStore.addTreatment(entry)
 
   state.selectedTeeth.forEach((tooth) => {
     selectedCodes.forEach((codeItem) => {
@@ -268,9 +270,7 @@ function handleFilterStatus(status) {
 
 function handleEditTreatment(updated) {
   if (!updated?.id) return
-  const index = state.treatmentLog.findIndex((t) => t.id === updated.id)
-  if (index === -1) return
-  state.treatmentLog.splice(index, 1, { ...state.treatmentLog[index], ...updated })
+  treatmentStore.updateTreatment(updated.id, updated)
   const teeth = (updated.tooth || '')
     .split(',')
     .map((tooth) => tooth.trim())
@@ -285,7 +285,7 @@ function handleEditTreatment(updated) {
 }
 
 function handleDeleteTreatment(treatmentId) {
-  state.treatmentLog = state.treatmentLog.filter((t) => t.id !== treatmentId)
+  treatmentStore.deleteTreatment(treatmentId)
 }
 
 function handleStatusChange(status) {
