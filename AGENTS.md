@@ -6,19 +6,72 @@ Generate/modify UI code that is:
 - **Tablet-safe** (portrait & landscape, iPad + Android)
 - **Cross-browser stable** (Safari/iOS included)
 - **Maintainable** (Tailwind for small utilities + CSS tokens/classes, not utility soup)
+- **Human-readable** (next dev can understand quickly; clarity > cleverness)
 
 Primary users: doctors working on tablets under time pressure.
 
 ---
 
+## Codex Operating Contract (TL;DR — MUST FOLLOW)
+### Tablet + Safety
+- MUST NOT introduce **horizontal scroll** in tablet portrait (768–1023).
+- MUST keep CTAs visible: **no clipped CTAs**, no “desktop shrink”.
+- MUST keep tap targets **≥ 44px** (prefer **48–56px** for primary flows).
+- MUST ensure **scroll is intentional**: exactly **one** intended scroll area (lists/grids), never accidental whole-card scroll.
+- MUST be **iOS Safari safe**: avoid `100vh`-only, avoid sticky inside overflow containers, avoid `min-height` + `height:100%` trap.
+
+### Maintainability
+- MUST use Tailwind for **layout glue** only (grid/flex/gap/spacing).
+- MUST extract reusable patterns into `src/assets/styles/components.css` as semantic `.ui-*` classes.
+- If a Tailwind chain exceeds **10 utilities** OR repeats in **2+ places** → MUST extract to `components.css`.
+
+### Human-readable code
+- MUST prefer clarity over brevity; no “clever” one-liners for complex logic.
+- MUST keep functions/handlers small (target **≤ 25 lines**) and single-purpose.
+- MUST avoid nested ternaries and long chained expressions.
+- MUST use predictable naming (`is/has/can`, `onX`, `filteredX`, `selectedX`).
+- MUST end work with a short **Self-check** (see Output Requirements).
+
+---
+
 ## Non-negotiables (Golden Rules)
-1) **No layout breakage** on tablet portrait (768–1023):  
-   - no horizontal scroll  
-   - no clipped CTAs  
-   - no “desktop shrink” layouts  
-2) **Tap targets ≥ 44px** (prefer 48–56px for critical actions).  
-3) **Scroll is intentional**: only the intended area scrolls (never accidental whole-card scroll).  
+1) **No layout breakage** on tablet portrait (768–1023):
+   - no horizontal scroll
+   - no clipped CTAs
+   - no “desktop shrink” layouts
+2) **Tap targets ≥ 44px** (prefer 48–56px for critical actions).
+3) **Scroll is intentional**: only the intended area scrolls (never accidental whole-card scroll).
 4) **Safari/iOS must work**: avoid patterns known to break on iOS (vh, sticky+overflow, min-height+100%).
+
+---
+
+## Human-Readable Code Rules (REQUIRED)
+
+### Readability (Clarity > Cleverness)
+- Prefer explicit code over clever shortcuts.
+- No nested ternaries. No long chained expressions for core logic.
+- Keep handlers/helpers small (aim **≤ 25 lines**) and single-responsibility.
+- Avoid magic numbers; use tokens/vars/clamp() with safe fallbacks.
+
+### Naming Conventions (Predictable)
+- booleans: `isLoading`, `hasSelection`, `canSave`
+- handlers/events: `onSave()`, `onSelectTooth()`, `onOpenDrawer()`
+- computed/derived: `filteredTreatments`, `selectedPreview`, `canSubmit`
+
+### Vue SFC Structure (script setup order)
+1) imports
+2) props / emits
+3) constants (config/enums)
+4) state (ref/reactive)
+5) computed
+6) handlers/methods (`onX`)
+7) watchers (minimize)
+8) lifecycle hooks
+
+### Template Rules (Keep template “dumb”)
+- Move complex conditions/formatting into computed/helpers.
+- No inline anonymous handlers (e.g. `@click="() => ..."`). Use named handlers.
+- Always include clear loading/empty/disabled UI states.
 
 ---
 
@@ -258,6 +311,12 @@ When implementing a feature:
 - Do NOT repeat complex Tailwind in components
 - Ensure code is runnable (no missing imports)
 - When using `clamp()` + `var()` ensure variables exist or have fallbacks
+
+### Required Self-check (append in final output)
+- Readability: small functions, predictable naming, templates stay simple
+- Tablet portrait: no horizontal scroll, CTA visible
+- Scroll: exactly one intended scroll area
+- iOS Safari: no `100vh`-only, no sticky+overflow traps, no `min-height` + `height:100%` trap
 
 ---
 

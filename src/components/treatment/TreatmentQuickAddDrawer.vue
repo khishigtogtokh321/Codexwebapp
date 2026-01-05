@@ -22,7 +22,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['close', 'treatment-toggle', 'add'])
+const emit = defineEmits(['close', 'treatment-toggle'])
 
 const currentStep = ref(1)
 const selectedMode = ref('general')
@@ -55,13 +55,7 @@ const modeTreatments = computed(() => {
   return props.treatments
 })
 
-const requiresToothSelection = computed(() =>
-  selectedTreatmentItems.value.some((treatment) => getTreatmentScope(treatment) === TREATMENT_SCOPE.TOOTH),
-)
-
-const canAdd = computed(
-  () => props.selectedTreatments.length > 0 && (!requiresToothSelection.value || hasSelectedTeeth.value),
-)
+const canFinish = computed(() => props.selectedTreatments.length > 0)
 
 const toothContext = computed(() =>
   hasSelectedTeeth.value ? `Сонгосон шүд: ${props.selectedTeeth.join(', ')}` : 'Шүд сонгоогүй',
@@ -116,8 +110,9 @@ function goBack() {
   if (currentStep.value > 1) currentStep.value -= 1
 }
 
-function handleAdd() {
-  if (canAdd.value) emit('add')
+function handleFinish() {
+  if (!canFinish.value) return
+  emit('close')
 }
 </script>
 
@@ -207,9 +202,6 @@ function handleAdd() {
             :treatments="modeTreatments"
             @toggle="(id) => emit('treatment-toggle', id)"
           />
-          <p v-if="requiresToothSelection && !hasSelectedTeeth" class="text-xs text-amber-600">
-            Эхлээд шүд сонгоно уу.
-          </p>
         </div>
 
         <div v-else class="space-y-3">
@@ -236,10 +228,6 @@ function handleAdd() {
             <p class="text-xs text-slate-500">Шүдний сонголт</p>
             <p class="text-sm font-semibold text-gray-900">{{ toothContext }}</p>
           </div>
-
-          <p v-if="requiresToothSelection && !hasSelectedTeeth" class="text-xs text-amber-600">
-            Эхлээд шүд сонгоно уу.
-          </p>
         </div>
       </div>
 
@@ -272,11 +260,11 @@ function handleAdd() {
           <button
             v-else
             type="button"
-            :disabled="!canAdd"
+            :disabled="!canFinish"
             class="min-h-[44px] flex-1 rounded-lg bg-blue-600 px-3 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-            @click="handleAdd"
+            @click="handleFinish"
           >
-            Нэмэх
+            Хэрэглэх
           </button>
         </div>
       </div>

@@ -27,6 +27,7 @@ const pinned = ref(false)
 const isLgUp = ref(true)
 const isPortrait = ref(false)
 const showSafety = ref(true)
+const showProfileDetails = ref(false)
 
 let mqLg
 let mqPortrait
@@ -70,7 +71,7 @@ const primaryTabs = [
     { key: 'treatment', label: 'Эмчилгээ', component: PatientTreatmentTab },
     { key: 'plan', label: 'Эмчилгээний төлөвлөгөө', component: PatientPlanTab },
     { key: 'schedule', label: 'Цаг товлох', component: PatientScheduleTab },
-    { key: 'recall', label: 'Дахин дуудах', component: PatientFilesTab },
+    { key: 'recall', label: 'Дахин дуудах хуваарь', component: PatientFilesTab },
     { key: 'files', label: 'Файл', component: PatientHistoryTab },
 ]
 
@@ -163,13 +164,12 @@ onBeforeUnmount(() => {
                         isPortrait ? '' : 'flex-1',
                     ]">
                     <div class="lg:hidden">
-                        <div class="card card--soft flex flex-col gap-6">
-                            <div class="flex items-center gap-3">
-                                <div
-                                    class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-slate-100 text-lg font-bold text-slate-600">
+                        <div class="card card--soft patient-summary">
+                            <div class="patient-summary__header">
+                                <div class="patient-summary__avatar">
                                     {{ patient.name.slice(0, 2).toUpperCase() }}
                                 </div>
-                                <div class="min-w-0">
+                                <div class="patient-summary__meta">
                                     <p class="text-lg font-bold text-slate-900">{{ patient.name }}</p>
                                     <p class="text-sm font-semibold text-blue-600">Өвчтөний мэдээлэл</p>
                                 </div>
@@ -194,7 +194,17 @@ onBeforeUnmount(() => {
                                 </div>
                             </div>
 
-                            <div class="profile-secondary">
+                            <button
+                                type="button"
+                                class="patient-summary__toggle"
+                                aria-controls="patient-summary-details"
+                                :aria-expanded="showProfileDetails"
+                                @click="showProfileDetails = !showProfileDetails">
+                                <span class="patient-summary__toggle-label">More details</span>
+                                <span class="pill pill--muted">{{ showProfileDetails ? 'Hide' : 'Show' }}</span>
+                            </button>
+
+                            <div v-if="showProfileDetails" id="patient-summary-details" class="profile-secondary patient-summary__details">
                                 <div class="profile-field">
                                     <span class="profile-label">Төрсөн өдөр</span>
                                     <span class="profile-value">{{ patient.birthDate }}</span>

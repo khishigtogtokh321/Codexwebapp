@@ -866,6 +866,7 @@
     display: flex;
     flex-direction: column;
     max-height: 90vh;
+    max-height: 90vh;
     max-height: 90dvh;
     overflow: hidden;
   }
@@ -1097,7 +1098,7 @@
   .treatment-wizard {
     container-type: inline-size;
     --tw-hit: 2.75rem;
-    --tw-touch: 2.35rem;
+    --tw-touch: 2.75rem;
     --treatment-wizard-width: clamp(18rem, 42vw, 26.25rem);
     --treatment-wizard-height: clamp(22rem, 62dvh, 34rem);
     --treatment-surface-size: clamp(var(--tw-touch), 13cqw, 3.5rem);
@@ -1107,7 +1108,7 @@
     --treatment-control-padding-x: clamp(0.6rem, 4.2cqw, 1rem);
     --treatment-control-padding-y: clamp(0.45rem, 3cqw, 0.75rem);
     --treatment-control-font: clamp(0.75rem, 2.2cqw, 0.9rem);
-    --treatment-diagnosis-height: clamp(2rem, 7cqw, 3rem);
+    --treatment-diagnosis-height: clamp(var(--tw-touch), 7cqw, 3rem);
     --treatment-diagnosis-padding-y: clamp(0.25rem, 2cqw, 0.6rem);
     --treatment-diagnosis-max-height: clamp(3rem, 28dvh, 12rem);
     --treatment-code-padding-x: clamp(0.6rem, 3.6cqw, 0.9rem);
@@ -1125,6 +1126,7 @@
     width: 100%;
     max-width: var(--treatment-wizard-width);
     height: auto;
+    max-height: 90vh;
     max-height: 90dvh;
     aspect-ratio: 1 / 0.88;
     position: relative;
@@ -1140,7 +1142,7 @@
       --treatment-control-padding-x: clamp(0.6rem, 2vw, 1rem);
       --treatment-control-padding-y: clamp(0.45rem, 1.4vw, 0.75rem);
       --treatment-control-font: clamp(0.75rem, 1.6vw, 0.9rem);
-      --treatment-diagnosis-height: clamp(2.75rem, 3.5vw, 3rem);
+      --treatment-diagnosis-height: clamp(var(--tw-touch), 3.5vw, 3rem);
       --treatment-diagnosis-padding-y: clamp(0.35rem, 1.2vw, 0.6rem);
       --treatment-code-padding-x: clamp(0.6rem, 1.6vw, 0.9rem);
       --treatment-code-padding-y: clamp(0.55rem, 1.4vw, 0.85rem);
@@ -1187,6 +1189,103 @@
     overflow: hidden;  /* STEP2 дотор scroll-оо зөв удирдана */
     display: flex;
     flex-direction: column;
+  }
+
+  .treatment-wizard--single {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.75rem, 2.6cqw, 1.1rem);
+    aspect-ratio: auto;
+    height: auto;
+  }
+
+  .treatment-wizard__content {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.75rem, 2.6cqw, 1.1rem);
+    min-height: 0;
+  }
+
+  .treatment-wizard__block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .treatment-wizard__block--codes {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .treatment-surface-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem;
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    padding: var(--treatment-control-padding-y) var(--treatment-control-padding-x);
+    min-height: var(--treatment-control-height);
+    font-size: var(--treatment-control-font);
+    color: #475569;
+    line-height: 1.2;
+    cursor: pointer;
+  }
+
+  .treatment-surface-trigger:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .treatment-surface-trigger__label {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+    font-weight: 600;
+  }
+
+  .treatment-surface-dropdown {
+    position: fixed;
+    z-index: 120;
+    border-radius: 0.75rem;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.1), 0 2px 4px -2px rgba(15, 23, 42, 0.1);
+    overflow: hidden;
+    max-width: calc(100vw - 1rem);
+  }
+
+  .treatment-surface-dropdown--bottom {
+    transform-origin: top center;
+  }
+
+  .treatment-surface-dropdown--top {
+    transform-origin: bottom center;
+  }
+
+  .treatment-surface-dropdown__content {
+    display: flex;
+    justify-content: center;
+    padding: clamp(0.6rem, 2vw, 0.9rem);
+  }
+
+  .treatment-code-grid {
+
+    max-height: clamp(10rem, 30vh, 18rem);
+    max-height: clamp(10rem, 30dvh, 18rem);
+    overflow: auto;
+    padding-right: 0.25rem;
+    min-height: 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .treatment-code-grid::-webkit-scrollbar {
+    width: 0;
+    height: 0;
   }
     
 
@@ -1406,6 +1505,15 @@
     right: var(--treatment-action-offset);
     bottom: var(--treatment-action-offset);
     background: var(--card-bg);
+  }
+
+
+  .treatment-action-bar--inline {
+    position: static;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    margin-top: clamp(0.5rem, 2.6cqw, 1rem);
   }
 
   .treatment-action-bar__buttons {

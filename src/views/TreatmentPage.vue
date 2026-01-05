@@ -1,4 +1,4 @@
-﻿<script setup>
+﻿﻿<script setup>
 import { reactive, computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import TopBar from '@/components/layout/TopBar.vue'
 import SideNav from '@/components/layout/SideNav.vue'
@@ -10,7 +10,6 @@ import { treatmentTypes, getTreatmentById } from '@/data/treatmentTypes'
 import { diagnoses, mockToothStatuses } from '@/data'
 import { useToothStatus } from '@/composables/useToothStatus'
 import { formatToothNumber } from '@/utils/toothHelpers'
-import { getTreatmentScope, TREATMENT_SCOPE } from '@/utils/treatmentScope'
 import patientService from '@/services/patientService'
 import { useTreatmentStore } from '@/stores/treatment'
 
@@ -19,8 +18,9 @@ const treatmentStore = useTreatmentStore()
 const state = reactive({
   selectedTeeth: [],
   selectedSurfaces: [],
-  selectedTreatments: [],
-  selectedDiagnoses: [],
+  selectedDiagnosis: null,
+  selectedCodes: [],
+  selectedTreatmentTypeIds: [],
   selectedStatus: 'planned',
 })
 
@@ -31,41 +31,25 @@ const hovered = ref(false)
 const pinned = ref(false)
 const drawerOpen = ref(false)
 const isLgUp = ref(false)
-const isPortrait = ref(false)
-const historyExpanded = ref(false)
 const isQuickAddOpen = ref(false)
 const drawerTriggerRef = ref(null)
 const drawerCloseRef = ref(null)
-
-const quickAddState = reactive({
-  selectedTreatments: [],
-})
 
 const desktopExpanded = computed(() => isLgUp.value && (hovered.value || pinned.value))
 
 const { toothStatuses, updateToothStatusFromTreatment } = useToothStatus(mockToothStatuses)
 
 const selectedTeethList = computed(() => state.selectedTeeth)
-const selectedTreatmentIds = computed(() => state.selectedTreatments)
-
-const hasSelectedTeeth = computed(() => selectedTeethList.value.length > 0)
 
 const availableTreatments = computed(() => treatmentTypes)
 
-const quickAddRequiresToothSelection = computed(() =>
-  getSelectedTreatments(quickAddState.selectedTreatments).some(
-    (treatment) => getTreatmentScope(treatment) === TREATMENT_SCOPE.TOOTH,
-  ),
-)
-const quickAddCanSubmit = computed(
-  () =>
-    quickAddState.selectedTreatments.length > 0 &&
-    (!quickAddRequiresToothSelection.value || hasSelectedTeeth.value),
+const hasSelectedTreatments = computed(
+  () => state.selectedCodes.length > 0 || state.selectedTreatmentTypeIds.length > 0,
 )
 
 
 const filteredLog = computed(() => {
-  let list = [...treatmentStore.treatments]
+  let list = treatmentStore.treatments
   if (searchQuery.value) {
     const q = searchQuery.value.toLowerCase()
     list = list.filter(
@@ -76,14 +60,18 @@ const filteredLog = computed(() => {
   if (statusFilter.value !== 'all') {
     list = list.filter((item) => item.status === statusFilter.value)
   }
-  return list.sort((a, b) => new Date(b.date) - new Date(a.date))
+  return list
 })
 
-function getDiagnosisLabels(codes) {
-  return codes.map((code) => {
-    const match = diagnoses.find((d) => d.code === code)
-    return match ? `${match.code} · ${match.name}` : code
-  })
+function getDiagnosisLabel(diagnosis) {
+  if (!diagnosis) return ''
+  if (typeof diagnosis === 'string') {
+    const match = diagnoses.find((item) => item.code === diagnosis)
+    return match ? `${match.code} · ${match.name}` : diagnosis
+  }
+  if (!diagnosis.code) return ''
+  const labelName = diagnosis.name || diagnosis.nameMn || ''
+  return labelName ? `${diagnosis.code} · ${labelName}` : diagnosis.code
 }
 
 function getSelectedTreatments(ids) {
@@ -93,11 +81,6 @@ function getSelectedTreatments(ids) {
 function selectTooth(teeth) {
   const next = Array.isArray(teeth) ? teeth.filter(Boolean) : teeth ? [teeth] : []
   state.selectedTeeth = [...new Set(next)]
-  if (!hasSelectedTeeth.value) {
-    state.selectedSurfaces = []
-    state.selectedDiagnoses = []
-    state.selectedTreatments = []
-  }
 }
 
 function handleSurfacesUpdate(surfaces = []) {
@@ -105,84 +88,106 @@ function handleSurfacesUpdate(surfaces = []) {
 }
 
 function handleDiagnosisUpdate(diagnosis) {
-  state.selectedDiagnoses = diagnosis?.code ? [diagnosis.code] : []
+  state.selectedDiagnosis = diagnosis?.code ? diagnosis : null
 }
 
-function canCommitSelection({ selectedTeeth = [], selectedTreatments = [] }) {
-  if (!selectedTreatments.length) return false
-  const requiresTooth = getSelectedTreatments(selectedTreatments).some(
-    (treatment) => getTreatmentScope(treatment) === TREATMENT_SCOPE.TOOTH,
-  )
-  return !requiresTooth || selectedTeeth.length > 0
+function handleCodesUpdate(codes = []) {
+  state.selectedCodes = Array.isArray(codes) ? codes : []
 }
 
-function commitAddTreatment({
-  selectedTeeth = state.selectedTeeth,
-  selectedSurfaces = state.selectedSurfaces,
-  selectedDiagnoses = state.selectedDiagnoses,
-  selectedTreatments = state.selectedTreatments,
-} = {}) {
-  const treatments = getSelectedTreatments(selectedTreatments)
-  if (!treatments.length) return
+function getSelectedCodeLabels(codes = []) {
+  return codes
+    .map((codeItem) => [codeItem?.code, codeItem?.nameMn].filter(Boolean).join(' '))
+    .filter(Boolean)
+}
 
-  const diagnosisLabels = getDiagnosisLabels(selectedDiagnoses)
-  const surfaceText = selectedSurfaces.join(', ')
-  const toothText = selectedTeeth.map((tooth) => formatToothNumber(tooth)).join(', ')
-  const treatmentText = treatments
+function getSelectedTreatmentLabels(typeIds = []) {
+  return getSelectedTreatments(typeIds)
     .map((treatment) => treatment?.label || treatment?.id)
     .filter(Boolean)
-    .join(', ')
-  const fallbackDiagnosis = treatments
-    .map((treatment) => treatment?.label)
-    .filter(Boolean)
-    .join(', ')
-  const diagnosisText = diagnosisLabels.join(', ') || fallbackDiagnosis || '???? ?????????'
-  const status = state.selectedStatus || 'done'
+}
 
-  const entry = {
+function getCombinedTreatmentLabels() {
+  const labels = [
+    ...getSelectedCodeLabels(state.selectedCodes),
+    ...getSelectedTreatmentLabels(state.selectedTreatmentTypeIds),
+  ]
+  return [...new Set(labels)]
+}
+
+function buildDiagnosisText(treatmentLabels = []) {
+  const diagnosisLabel = getDiagnosisLabel(state.selectedDiagnosis)
+  return diagnosisLabel || treatmentLabels.join(', ') || '???? ?????????'
+}
+
+function getToothText(tooth) {
+  return tooth ? formatToothNumber(tooth) : ''
+}
+
+function buildTreatmentEntry(tooth, treatmentLabel) {
+  const surfaceText = state.selectedSurfaces.join(', ')
+  const status = state.selectedStatus || 'done'
+  const toothText = getToothText(tooth)
+
+  return {
     id: crypto.randomUUID(),
     date: new Date().toISOString(),
     tooth: toothText,
     surface: surfaceText,
-    diagnosis: diagnosisText,
-    treatmentType: treatmentText,
+    diagnosis: buildDiagnosisText([treatmentLabel]),
+    treatmentType: treatmentLabel,
     doctor: '',
     price: '',
     status,
   }
-
-  treatmentStore.addTreatment(entry)
-
-  if (selectedTeeth.length) {
-    selectedTeeth.forEach((tooth) => {
-      treatments.forEach((treatment) => {
-        if (!treatment) return
-        updateToothStatusFromTreatment({
-          tooth: formatToothNumber(tooth),
-          treatmentType: treatment.label || treatment.id,
-          status,
-        })
-      })
-    })
-  }
-
-  state.selectedSurfaces = []
-  state.selectedDiagnoses = []
-  state.selectedTreatments = []
-  state.selectedTeeth = []
 }
 
+function buildTreatmentEntries(treatmentLabels = []) {
+  const teeth = state.selectedTeeth.length ? state.selectedTeeth : [null]
+  const entries = []
 
-function handleAddTreatment(overrides = {}) {
-  const payload = {
-    selectedTeeth: state.selectedTeeth,
-    selectedSurfaces: state.selectedSurfaces,
-    selectedDiagnoses: state.selectedDiagnoses,
-    selectedTreatments: state.selectedTreatments,
-    ...overrides,
-  }
-  if (!canCommitSelection(payload)) return
-  commitAddTreatment(payload)
+  teeth.forEach((tooth) => {
+    treatmentLabels.forEach((label) => {
+      if (!label) return
+      entries.push(buildTreatmentEntry(tooth, label))
+    })
+  })
+
+  return entries
+}
+
+function applyToothStatusUpdates(treatmentLabels = []) {
+  if (!state.selectedTeeth.length) return
+  const status = state.selectedStatus || 'done'
+  state.selectedTeeth.forEach((tooth) => {
+    treatmentLabels.forEach((label) => {
+      if (!label) return
+      updateToothStatusFromTreatment({
+        tooth: formatToothNumber(tooth),
+        treatmentType: label,
+        status,
+      })
+    })
+  })
+}
+
+function resetTreatmentDraft() {
+  state.selectedSurfaces = []
+  state.selectedDiagnosis = null
+  state.selectedCodes = []
+  state.selectedTreatmentTypeIds = []
+}
+
+function handleAddSelection() {
+  if (!hasSelectedTreatments.value) return
+  const treatmentLabels = getCombinedTreatmentLabels()
+  if (!treatmentLabels.length) return
+
+  const entries = buildTreatmentEntries(treatmentLabels)
+  if (!entries.length) return
+  entries.forEach((entry) => treatmentStore.addTreatment(entry))
+  applyToothStatusUpdates(treatmentLabels)
+  resetTreatmentDraft()
 }
 
 function openQuickAdd() {
@@ -191,79 +196,15 @@ function openQuickAdd() {
 
 function closeQuickAdd() {
   isQuickAddOpen.value = false
-  quickAddState.selectedTreatments = []
 }
 
 function toggleQuickAddTreatment(typeId) {
   const treatment = getTreatmentById(typeId)
   if (!treatment) return
-  quickAddState.selectedTreatments = quickAddState.selectedTreatments.includes(typeId)
-    ? quickAddState.selectedTreatments.filter((id) => id !== typeId)
-    : [...quickAddState.selectedTreatments, typeId]
-}
-
-function handleQuickAdd() {
-  if (!quickAddCanSubmit.value) return
-  handleAddTreatment({
-    selectedTreatments: quickAddState.selectedTreatments,
-    selectedSurfaces: [],
-    selectedDiagnoses: [],
-  })
-  closeQuickAdd()
-}
-
-function handleWizardAdd(selectedCodes = []) {
-  if (!Array.isArray(selectedCodes) || selectedCodes.length === 0) return
-  if (!state.selectedTeeth?.length) return
-
-  const diagnosisLabels = getDiagnosisLabels(state.selectedDiagnoses)
-  const surfaceText = state.selectedSurfaces.join(', ')
-  const toothText = state.selectedTeeth.map((tooth) => formatToothNumber(tooth)).join(', ')
-  const treatmentText = selectedCodes
-    .map((codeItem) => [codeItem?.code, codeItem?.nameMn].filter(Boolean).join(' '))
-    .filter(Boolean)
-    .join(', ')
-  const fallbackDiagnosis = selectedCodes
-    .map((codeItem) => codeItem?.nameMn || codeItem?.code)
-    .filter(Boolean)
-    .join(', ')
-  const diagnosisText = diagnosisLabels.join(', ') || fallbackDiagnosis || '???? ?????????'
-  const status = state.selectedStatus || 'done'
-
-  const entry = {
-    id: crypto.randomUUID(),
-    date: new Date().toISOString(),
-    tooth: toothText,
-    surface: surfaceText,
-    diagnosis: diagnosisText,
-    treatmentType: treatmentText,
-    doctor: 'Д. Гантулга', // Hardcoded for now per mock
-    price: '80,000₮', // Mock price
-    status,
-  }
-
-  treatmentStore.addTreatment(entry)
-
-  state.selectedTeeth.forEach((tooth) => {
-    selectedCodes.forEach((codeItem) => {
-      if (!codeItem) return
-      updateToothStatusFromTreatment({
-        tooth: formatToothNumber(tooth),
-        treatmentType: [codeItem.code, codeItem.nameMn].filter(Boolean).join(' '),
-        status,
-      })
-    })
-  })
-
-  // Close wizard and open history in portrait mode
-  if (isPortrait.value) {
-    historyExpanded.value = true
-  }
-
-  state.selectedSurfaces = []
-  state.selectedDiagnoses = []
-  state.selectedTreatments = []
-  state.selectedTeeth = []
+  const next = state.selectedTreatmentTypeIds.includes(typeId)
+    ? state.selectedTreatmentTypeIds.filter((id) => id !== typeId)
+    : [...state.selectedTreatmentTypeIds, typeId]
+  state.selectedTreatmentTypeIds = next
 }
 
 
@@ -336,7 +277,6 @@ const updateBreakpoint = () => {
     mediaQuery = window.matchMedia('(min-width: 1024px)')
   }
   isLgUp.value = mediaQuery?.matches || false
-  isPortrait.value = !isLgUp.value
   if (mediaQuery?.matches) {
     drawerOpen.value = false
   }
@@ -410,148 +350,57 @@ watch(
       </div>
 
       <TopBar :active-patient="activePatient" @patient-selected="handlePatientSelected" />
-      <main class="flex-1 overflow-hidden bg-gray-100 flex flex-col">
-        <!-- Portrait Layout (<1024px) - Bottom Sheet Design -->
-        <template v-if="isPortrait">
-          <div class="flex-1 flex flex-col overflow-hidden relative">
-            <!-- ToothChart: Full when no teeth, Mini when teeth selected -->
-            <div :class="[
-              'transition-all duration-300 ease-out bg-gray-100',
-              hasSelectedTeeth ? 'h-[28vh] min-h-[180px]' : 'flex-1'
-            ]">
-              <div class="p-3 h-full">
-                <ToothChart
-                  class="h-full"
-                  :selected-teeth="selectedTeethList"
-                  :tooth-statuses="toothStatuses"
-                  :multi-select="true"
-                  @teeth-select="selectTooth"
-                  @select-all="selectTooth"
-                  @clear-selection="() => selectTooth([])"
-                />
-              </div>
+      <main class="flex-1 overflow-y-auto bg-gray-100">
+        <div class="p-4 md:p-6 space-y-4">
+      
+
+          <div class="grid gap-4 lg:grid-cols-12 items-start lg:items-stretch">
+            <div class="space-y-4 lg:col-span-8">
+              <ToothChart
+                class="h-auto lg:h-auto"
+                :selected-teeth="selectedTeethList"
+                :tooth-statuses="toothStatuses"
+                :multi-select="true"
+                @teeth-select="selectTooth"
+                @select-all="selectTooth"
+                @clear-selection="() => selectTooth([])"
+              />
+
+
             </div>
 
-            <!-- Selected Teeth Info Bar -->
-            <div v-if="hasSelectedTeeth" class="px-4 py-2 bg-blue-50 border-y border-blue-100 flex items-center justify-between">
-              <span class="text-sm font-medium text-blue-800">
-                Сонгосон: {{ selectedTeethList.map(t => `#${t}`).join(', ') }}
-              </span>
-              <button
-                type="button"
-                class="text-xs text-blue-600 hover:text-blue-800 font-medium"
-                @click="selectTooth([])"
-              >
-                Цэвэрлэх
-              </button>
-            </div>
-
-            <!-- Bottom Sheet -->
-            <Transition
-              enter-active-class="transform transition-all duration-300 ease-out"
-              leave-active-class="transform transition-all duration-200 ease-in"
-              enter-from-class="translate-y-full opacity-0"
-              enter-to-class="translate-y-0 opacity-100"
-              leave-from-class="translate-y-0 opacity-100"
-              leave-to-class="translate-y-full opacity-0"
-            >
-              <div v-if="hasSelectedTeeth" class="flex-1 flex flex-col bg-white rounded-t-2xl shadow-2xl overflow-hidden">
-                <!-- Drag Handle -->
-                <div class="flex justify-center py-2 bg-gray-50 border-b border-gray-100">
-                  <div class="w-12 h-1.5 bg-gray-300 rounded-full"></div>
-                </div>
-
-                <!-- Wizard Content -->
-                <div class="flex-1 overflow-y-auto p-4">
-                  <RightTreatmentWizard
-                    :selected-teeth="selectedTeethList"
-                    @update:surfaces="handleSurfacesUpdate"
-                    @update:diagnosis="handleDiagnosisUpdate"
-                    @add="handleWizardAdd"
-                  />
-                </div>
-              </div>
-            </Transition>
-          </div>
-
-          <!-- Collapsible History Footer -->
-          <div class="border-t border-gray-300 bg-white shadow-lg shrink-0">
-            <button
-              type="button"
-              class="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-              @click="historyExpanded = !historyExpanded"
-            >
-              <span class="flex items-center gap-2">
-                <svg :class="['h-4 w-4 transition-transform', historyExpanded ? 'rotate-180' : '']" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
-                </svg>
-                Түүх ({{ filteredLog.length }})
-              </span>
-              <span class="text-xs text-gray-500">{{ historyExpanded ? 'Хаах' : 'Нээх' }}</span>
-            </button>
-            <div v-if="historyExpanded" class="max-h-[40vh] overflow-auto border-t border-gray-200">
-              <div class="p-4">
-                <TreatmentHistoryTable
-                  :treatments="filteredLog"
-                  :loading="false"
-                  :patient="activePatient"
-                  :search-query="searchQuery"
-                  :status-filter="statusFilter"
-                  @search="handleSearch"
-                  @filter-status="handleFilterStatus"
-                  @edit="handleEditTreatment"
-                  @delete="handleDeleteTreatment"
+            <div class="lg:col-span-4 lg:pl-1 space-y-3 fill-height">
+              <div class="sticky top-4 fill-height">
+                <RightTreatmentWizard
+                  :selected-surfaces="state.selectedSurfaces"
+                  :selected-diagnosis="state.selectedDiagnosis"
+                  :selected-codes="state.selectedCodes"
+                  :can-add="hasSelectedTreatments"
+                  @update:surfaces="handleSurfacesUpdate"
+                  @update:diagnosis="handleDiagnosisUpdate"
+                  @update:code="handleCodesUpdate"
+                  @add="handleAddSelection"
                 />
               </div>
             </div>
           </div>
-        </template>
 
-        <!-- Landscape Layout (≥1024px) - Original -->
-        <template v-else>
-          <div class="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
-            <div class="grid gap-4 lg:grid-cols-12 items-start lg:items-stretch">
-              <div class="space-y-4 lg:col-span-8">
-                <ToothChart
-                  class="h-auto lg:h-auto"
-                  :selected-teeth="selectedTeethList"
-                  :tooth-statuses="toothStatuses"
-                  :multi-select="true"
-                  @teeth-select="selectTooth"
-                  @select-all="selectTooth"
-                  @clear-selection="() => selectTooth([])"
-                />
-              </div>
-
-              <div class="lg:col-span-4 lg:pl-1 space-y-3 fill-height">
-                <div class="sticky top-4 fill-height">
-                  <RightTreatmentWizard
-                    :selected-teeth="selectedTeethList"
-                    @update:surfaces="handleSurfacesUpdate"
-                    @update:diagnosis="handleDiagnosisUpdate"
-                    @add="handleWizardAdd"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div class="dental-card p-4 md:p-5 space-y-3">
-              <div class="overflow-x-auto">
-                <TreatmentHistoryTable
-                  :treatments="filteredLog"
-                  :loading="false"
-                  :patient="activePatient"
-                  :search-query="searchQuery"
-                  :status-filter="statusFilter"
-                  @search="handleSearch"
-                  @filter-status="handleFilterStatus"
-                  @edit="handleEditTreatment"
-                  @delete="handleDeleteTreatment"
-                />
-              </div>
+          <div class="dental-card p-4 md:p-5 space-y-3">
+            <div class="overflow-x-auto">
+              <TreatmentHistoryTable
+                :treatments="filteredLog"
+                :loading="false"
+                :patient="activePatient"
+                :search-query="searchQuery"
+                :status-filter="statusFilter"
+                @search="handleSearch"
+                @filter-status="handleFilterStatus"
+                @edit="handleEditTreatment"
+                @delete="handleDeleteTreatment"
+              />
             </div>
           </div>
-        </template>
+        </div>
       </main>
     </div>
 
@@ -566,11 +415,10 @@ watch(
     <TreatmentQuickAddDrawer
       :open="isQuickAddOpen"
       :selected-teeth="selectedTeethList"
-      :selected-treatments="quickAddState.selectedTreatments"
+      :selected-treatments="state.selectedTreatmentTypeIds"
       :treatments="availableTreatments"
       @close="closeQuickAdd"
       @treatment-toggle="toggleQuickAddTreatment"
-      @add="handleQuickAdd"
     />
 
     <Transition
