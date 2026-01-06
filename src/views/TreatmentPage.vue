@@ -10,6 +10,7 @@ import { treatmentTypes, getTreatmentById } from '@/data/treatmentTypes'
 import { diagnoses, mockToothStatuses } from '@/data'
 import { useToothStatus } from '@/composables/useToothStatus'
 import { formatToothNumber } from '@/utils/toothHelpers'
+import { getScopeMeta, SCOPE_TYPE } from '@/utils/treatmentScope'
 import patientService from '@/services/patientService'
 import { useTreatmentStore } from '@/stores/treatment'
 
@@ -40,12 +41,28 @@ const desktopExpanded = computed(() => isLgUp.value && (hovered.value || pinned.
 const { toothStatuses, updateToothStatusFromTreatment } = useToothStatus(mockToothStatuses)
 
 const selectedTeethList = computed(() => state.selectedTeeth)
+const selectedTreatmentItems = computed(() => getSelectedTreatments(state.selectedTreatmentTypeIds))
 
 const availableTreatments = computed(() => treatmentTypes)
 
 const hasSelectedTreatments = computed(
   () => state.selectedCodes.length > 0 || state.selectedTreatmentTypeIds.length > 0,
 )
+const scopeMeta = computed(() => getScopeMeta(selectedTreatmentItems.value))
+const requiresTooth = computed(
+  () => scopeMeta.value.requiresTooth && selectedTreatmentItems.value.length > 0,
+)
+const requiresSurface = computed(
+  () => scopeMeta.value.requiresSurface && selectedTreatmentItems.value.length > 0,
+)
+const hasSelectedTooth = computed(() => state.selectedTeeth.length > 0)
+const hasSelectedSurface = computed(() => state.selectedSurfaces.length > 0)
+const meetsScopeGuard = computed(() => {
+  if (requiresSurface.value) return hasSelectedTooth.value && hasSelectedSurface.value
+  if (requiresTooth.value) return hasSelectedTooth.value
+  return true
+})
+const canAddSelection = computed(() => hasSelectedTreatments.value && meetsScopeGuard.value)
 
 
 const filteredLog = computed(() => {
@@ -183,7 +200,7 @@ function resetTreatmentDraft() {
 }
 
 function handleAddSelection() {
-  if (!hasSelectedTreatments.value) return
+  if (!canAddSelection.value) return
   const treatmentLabels = getCombinedTreatmentLabels()
   if (!treatmentLabels.length) return
 
@@ -378,7 +395,7 @@ watch(
                 :selected-diagnosis="state.selectedDiagnosis"
                 :selected-codes="state.selectedCodes"
                 :selected-status="state.selectedStatus"
-                :can-add="hasSelectedTreatments"
+                :can-add="canAddSelection"
                 @update:surfaces="handleSurfacesUpdate"
                 @update:diagnosis="handleDiagnosisUpdate"
                 @update:code="handleCodesUpdate"
@@ -418,6 +435,7 @@ watch(
     <TreatmentQuickAddDrawer
       :open="isQuickAddOpen"
       :selected-teeth="selectedTeethList"
+      :selected-surfaces="state.selectedSurfaces"
       :selected-treatments="state.selectedTreatmentTypeIds"
       :treatments="availableTreatments"
       @close="closeQuickAdd"

@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import TreatmentTypeSelector from './TreatmentTypeSelector.vue'
-import { getTreatmentScope, TREATMENT_SCOPE } from '@/utils/treatmentScope'
+import { getScopeMeta, getTreatmentScope, SCOPE_TYPE, TREATMENT_SCOPE } from '@/utils/treatmentScope'
 
 const props = defineProps({
   open: {
@@ -9,6 +9,10 @@ const props = defineProps({
     default: false,
   },
   selectedTeeth: {
+    type: Array,
+    default: () => [],
+  },
+  selectedSurfaces: {
     type: Array,
     default: () => [],
   },
@@ -55,7 +59,20 @@ const modeTreatments = computed(() => {
   return props.treatments
 })
 
-const canFinish = computed(() => props.selectedTreatments.length > 0)
+const scopeMeta = computed(() => getScopeMeta(selectedTreatmentItems.value))
+const requiresTooth = computed(
+  () => scopeMeta.value.requiresTooth && selectedTreatmentItems.value.length > 0,
+)
+const requiresSurface = computed(
+  () => scopeMeta.value.scopeType === SCOPE_TYPE.SURFACE && selectedTreatmentItems.value.length > 0,
+)
+const hasSelectedSurfaces = computed(() => props.selectedSurfaces.length > 0)
+const canFinish = computed(() => {
+  if (props.selectedTreatments.length === 0) return false
+  if (requiresSurface.value) return hasSelectedTeeth.value && hasSelectedSurfaces.value
+  if (requiresTooth.value) return hasSelectedTeeth.value
+  return true
+})
 
 const toothContext = computed(() =>
   hasSelectedTeeth.value ? `Сонгосон шүд: ${props.selectedTeeth.join(', ')}` : 'Шүд сонгоогүй',
