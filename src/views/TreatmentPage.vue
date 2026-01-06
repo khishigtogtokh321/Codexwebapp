@@ -83,6 +83,10 @@ function selectTooth(teeth) {
   state.selectedTeeth = [...new Set(next)]
 }
 
+function clearSelectedTeeth() {
+  selectTooth([])
+}
+
 function handleSurfacesUpdate(surfaces = []) {
   state.selectedSurfaces = Array.isArray(surfaces) ? surfaces : []
 }
@@ -355,33 +359,32 @@ watch(
       
 
           <div class="grid gap-4 lg:grid-cols-12 items-start lg:items-stretch">
-            <div class="space-y-4 lg:col-span-8">
+            <div class="space-y-4 lg:col-span-7 min-w-0">
               <ToothChart
-                class="h-auto lg:h-auto"
+                class="h-auto lg:h-full"
                 :selected-teeth="selectedTeethList"
                 :tooth-statuses="toothStatuses"
                 :multi-select="true"
                 @teeth-select="selectTooth"
                 @select-all="selectTooth"
-                @clear-selection="() => selectTooth([])"
+                @clear-selection="clearSelectedTeeth"
               />
-
-
             </div>
 
-            <div class="lg:col-span-4 lg:pl-1 space-y-3 fill-height">
-              <div class="sticky top-4 fill-height">
-                <RightTreatmentWizard
-                  :selected-surfaces="state.selectedSurfaces"
-                  :selected-diagnosis="state.selectedDiagnosis"
-                  :selected-codes="state.selectedCodes"
-                  :can-add="hasSelectedTreatments"
-                  @update:surfaces="handleSurfacesUpdate"
-                  @update:diagnosis="handleDiagnosisUpdate"
-                  @update:code="handleCodesUpdate"
-                  @add="handleAddSelection"
-                />
-              </div>
+            <div class="lg:col-span-5 lg:pl-2 min-w-0">
+              <RightTreatmentWizard
+                class="lg:h-full"
+                :selected-surfaces="state.selectedSurfaces"
+                :selected-diagnosis="state.selectedDiagnosis"
+                :selected-codes="state.selectedCodes"
+                :selected-status="state.selectedStatus"
+                :can-add="hasSelectedTreatments"
+                @update:surfaces="handleSurfacesUpdate"
+                @update:diagnosis="handleDiagnosisUpdate"
+                @update:code="handleCodesUpdate"
+                @update:status="handleStatusChange"
+                @add="handleAddSelection"
+              />
             </div>
           </div>
 

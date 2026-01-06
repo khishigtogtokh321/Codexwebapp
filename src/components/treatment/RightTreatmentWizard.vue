@@ -15,13 +15,17 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  selectedStatus: {
+    type: String,
+    default: 'planned',
+  },
   canAdd: {
     type: Boolean,
     default: false,
   },
 })
 
-const emit = defineEmits(['update:surfaces', 'update:diagnosis', 'update:code', 'add'])
+const emit = defineEmits(['update:surfaces', 'update:diagnosis', 'update:code', 'update:status', 'add'])
 const diagnosisQuery = ref('')
 const showDiagnosisDropdown = ref(false)
 const showSurfaceDropdown = ref(false)
@@ -44,6 +48,11 @@ const treatmentTypes = [
   { id: 'extraction', label: 'Extraction' },
   { id: 'restoration', label: 'Restoration' },
   { id: 'prosthodontics', label: 'Prosthodontics' },
+]
+const maxPreviewCodes = 3
+const statusOptions = [
+  { id: 'done', label: 'Duussan' },
+  { id: 'planned', label: 'Tuluvluguut' },
 ]
 
 const treatmentCodesByType = {
@@ -96,12 +105,37 @@ const selectedCodes = computed({
   get: () => (Array.isArray(props.selectedCodes) ? props.selectedCodes : []),
   set: (value) => emit('update:code', value),
 })
+const statusSelection = computed({
+  get: () => props.selectedStatus || 'planned',
+  set: (value) => emit('update:status', value),
+})
 const selectedCodeSet = computed(() =>
   new Set(selectedCodes.value.map((item) => item?.code).filter(Boolean)),
 )
 const canAdd = computed(() => props.canAdd)
 const currentType = computed(() => treatmentTypes[currentTypeIndex.value])
 const currentCodes = computed(() => treatmentCodesByType[currentType.value.id] || [])
+const selectedCodeLabels = computed(() =>
+  selectedCodes.value
+    .map((item) => [item?.code, item?.nameMn].filter(Boolean).join(' '))
+    .filter(Boolean),
+)
+const previewCodes = computed(() => selectedCodeLabels.value.slice(0, maxPreviewCodes))
+const remainingCodeCount = computed(() => Math.max(0, selectedCodeLabels.value.length - maxPreviewCodes))
+const surfaceTriggerLabel = computed(() =>
+  selectedSurfaces.value.length ? selectedSurfaces.value.join(', ') : 'Гадаргуу сонгох',
+)
+const diagnosisSummary = computed(() => {
+  const diagnosis = selectedDiagnosis.value
+  if (!diagnosis?.code) return 'Select diagnosis'
+  const name = diagnosis.name || diagnosis.nameMn || ''
+  return name ? `${diagnosis.code} ${name}` : diagnosis.code
+})
+const selectionSummary = computed(() => {
+  const surfaceText = selectedSurfaces.value.length ? selectedSurfaces.value.join(', ') : 'Surface'
+  const diagnosisText = selectedDiagnosis.value?.code ? selectedDiagnosis.value.code : 'Diagnosis'
+  return `${surfaceText} • ${diagnosisText}`
+})
 const mockDiagnoses = computed(() => diagnoses.slice(0, 6))
 const filteredDiagnoses = computed(() => {
   if (!diagnosisQuery.value) return mockDiagnoses.value
@@ -262,11 +296,13 @@ function toggleSurface(id) {
 
 function selectDiagnosis(item) {
   selectedDiagnosis.value = item
+  diagnosisQuery.value = diagnosisSummary.value
   showDiagnosisDropdown.value = false
 }
 
 function clearDiagnosis() {
   selectedDiagnosis.value = null
+  diagnosisQuery.value = ''
   showDiagnosisDropdown.value = false
 }
 
@@ -274,8 +310,13 @@ function toggleSurfaceDropdown() {
   showSurfaceDropdown.value = !showSurfaceDropdown.value
 }
 
+function toggleDiagnosisDropdown() {
+  showDiagnosisDropdown.value = !showDiagnosisDropdown.value
+}
 
-
+function openDiagnosisDropdown() {
+  showDiagnosisDropdown.value = true
+}
 
 function prevType() {
   currentTypeIndex.value = (currentTypeIndex.value - 1 + treatmentTypes.length) % treatmentTypes.length
@@ -303,6 +344,15 @@ function toggleTooltip(code) {
   showTooltipCode.value = showTooltipCode.value === code ? null : code
 }
 
+function isStatusActive(status) {
+  return statusSelection.value === status
+}
+
+function onSelectStatus(status) {
+  if (!status) return
+  statusSelection.value = status
+}
+
 function handleAdd() {
   if (!canAdd.value) return
   emit('add')
@@ -316,15 +366,17 @@ function handleAdd() {
       'treatment-wizard',
       'card',
       'treatment-wizard--responsive',
-      'treatment-wizard--single'
+      'treatment-wizard--single',
+      'treatment-wizard--match'
     ]"
   >
-    
 
     <div class="treatment-wizard__content">
-      <div class="treatment-wizard__block">
-        <div class="space-y-3">
-          <div class="relative">
+      <div class="treatment-wizard__row">
+        <div class="treatment-wizard__block treatment-wizard__field">
+          <div class="space-y-2">
+            <!-- <span class="treatment-wizard__field-label">Гадаргуу</span> -->
+            <div class="relative">
             <button
               type="button"
               ref="surfaceTriggerRef"
@@ -332,7 +384,7 @@ function handleAdd() {
               @click="toggleSurfaceDropdown"
             >
               <span class="treatment-surface-trigger__label">
-                {{ selectedSurfaces.length ? selectedSurfaces.join(', ') : 'Гадаргуу сонгох' }}
+                {{ surfaceTriggerLabel }}
               </span>
               <svg class="h-4 w-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path
@@ -359,9 +411,7 @@ function handleAdd() {
                     <button
                       type="button"
                       class="treatment-surface-button"
-                      :class="selectedSurfaces.includes('B/F')
-                        ? 'border-blue-600 bg-blue-50 text-slate-900 ring-2 ring-blue-400 ring-offset-2 ring-offset-white'
-                        : ''"
+                      :class="selectedSurfaces.includes('B/F') ? 'treatment-surface-button--selected' : ''"
                       @click="toggleSurface('B/F')"
                     >
                       B/F
@@ -372,7 +422,7 @@ function handleAdd() {
                     <button
                       type="button"
                       class="treatment-surface-button"
-                      :class="selectedSurfaces.includes('M') ? 'bg-emerald-50 border-blue-500 text-emerald-700 ring-2 ring-blue-400 ring-offset-2 ring-offset-white' : ''"
+                      :class="selectedSurfaces.includes('M') ? 'treatment-surface-button--selected' : ''"
                       @click="toggleSurface('M')"
                     >
                       M
@@ -381,7 +431,7 @@ function handleAdd() {
                     <button
                       type="button"
                       class="treatment-surface-button"
-                      :class="selectedSurfaces.includes('O/I') ? 'bg-emerald-50 border-blue-500 text-emerald-700 ring-2 ring-blue-400 ring-offset-2 ring-offset-white' : ''"
+                      :class="selectedSurfaces.includes('O/I') ? 'treatment-surface-button--selected' : ''"
                       @click="toggleSurface('O/I')"
                     >
                       O/I
@@ -390,7 +440,7 @@ function handleAdd() {
                     <button
                       type="button"
                       class="treatment-surface-button"
-                      :class="selectedSurfaces.includes('D') ? 'bg-emerald-50 border-blue-500 text-emerald-700 ring-2 ring-blue-400 ring-offset-2 ring-offset-white' : ''"
+                      :class="selectedSurfaces.includes('D') ? 'treatment-surface-button--selected' : ''"
                       @click="toggleSurface('D')"
                     >
                       D
@@ -400,7 +450,7 @@ function handleAdd() {
                     <button
                       type="button"
                       class="treatment-surface-button"
-                      :class="selectedSurfaces.includes('L/P') ? 'bg-emerald-50 border-blue-500 text-emerald-700 ring-2 ring-blue-400 ring-offset-2 ring-offset-white' : ''"
+                      :class="selectedSurfaces.includes('L/P') ? 'treatment-surface-button--selected' : ''"
                       @click="toggleSurface('L/P')"
                     >
                       L/P
@@ -411,28 +461,26 @@ function handleAdd() {
               </div>
             </Teleport>
 
-            <!-- <p v-if="selectedSurfaces.length" class="mt-2 text-xs text-emerald-700">
-              Selected surfaces: {{ selectedSurfaces.join(', ') }}
-            </p> -->
           </div>
         </div>
       </div>
 
-      <div class="treatment-wizard__block">
-        <div class="space-y-3">
-          <div>
-            <div class="relative">
+        <div class="treatment-wizard__block treatment-wizard__field">
+          <div class="space-y-3">
+            <!-- <span class="treatment-wizard__field-label">Онош сонгох</span> -->
+            <div>
+              <div class="relative">
               <div
                 ref="diagnosisTriggerRef"
                 class="treatment-diagnosis-trigger"
-                @click="showDiagnosisDropdown = !showDiagnosisDropdown"
+                @click="toggleDiagnosisDropdown"
               >
                 <input
                   v-model="diagnosisQuery"
                   type="text"
-                  placeholder="Оншилгоо хайх..."
+                  placeholder="Онош сонгох"
                   class="treatment-input w-full bg-transparent text-slate-600 focus:outline-none"
-                  @focus="showDiagnosisDropdown = true"
+                  @focus="openDiagnosisDropdown"
                 />
                 <svg class="h-4 w-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path
@@ -455,7 +503,7 @@ function handleAdd() {
                 >
                   <button
                     type="button"
-                    class="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                    class="treatment-diagnosis-clear"
                     @click.stop="clearDiagnosis"
                   >
                     Алгасах
@@ -465,7 +513,7 @@ function handleAdd() {
                       v-for="item in filteredDiagnoses"
                       :key="item.code"
                       type="button"
-                      class="w-full px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
+                      class="treatment-diagnosis-item"
                       @click.stop="selectDiagnosis(item)"
                     >
                       <p class="font-semibold">{{ item.code }}</p>
@@ -475,12 +523,11 @@ function handleAdd() {
                 </div>
               </Teleport>
 
-              <p v-if="selectedDiagnosis" class="mt-2 text-xs text-emerald-700">
-                {{ selectedDiagnosis.code }} A? {{ selectedDiagnosis.name }}
-              </p>
             </div>
           </div>
         </div>
+      </div>
+
       </div>
 
       <div class="treatment-wizard__block treatment-wizard__block--codes min-w-0">
@@ -534,22 +581,6 @@ function handleAdd() {
             >
               <span class="block text-center">{{ item.code }}</span>
             </button>
-
-            <!-- <button
-              type="button"
-              class="absolute top-2 right-2 h-6 w-6 inline-flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-400 shadow-sm hover:text-slate-600"
-              @click.stop="toggleTooltip(item.code)"
-              aria-label="Code info"
-            >
-              <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path
-                  fill-rule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-11.25a.75.75 0 10-1.5 0 .75.75 0 001.5 0zM9.25 9a.75.75 0 000 1.5h.5v3.25a.75.75 0 001.5 0V9.75A.75.75 0 0010.5 9h-1.25z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </button> -->
-
             <div
               class="treatment-code-tooltip"
               :class="showTooltipCode === item.code ? 'treatment-code-tooltip--visible' : ''"
@@ -559,10 +590,28 @@ function handleAdd() {
           </div>
         </div>
       </div>
+
     </div>
 
-    <div class="treatment-action-bar treatment-action-bar--inline">
-      <div class="treatment-action-bar__buttons">
+    <div class="treatment-action-bar treatment-action-bar--inline treatment-action-bar--compact">
+      <div class="treatment-status-row treatment-footer--compact">
+        <div class>
+        
+          <div class="treatment-status-actions">
+            <button
+              v-for="option in statusOptions"
+              :key="option.id"
+              type="button"
+              class="treatment-status-button"
+              :class="isStatusActive(option.id) ? 'treatment-status-button--active' : ''"
+              @click="onSelectStatus(option.id)"
+            >
+              {{ option.label }}
+            </button>
+          </div>
+        </div>
+
+        <div class="treatment-action-bar__buttons">
         <button
           type="button"
           class="treatment-action-button treatment-action-button--primary"
@@ -571,6 +620,7 @@ function handleAdd() {
         >
           <span class="treatment-hit-visual">нэмэх</span>
         </button>
+        </div>
       </div>
     </div>
   </section>
