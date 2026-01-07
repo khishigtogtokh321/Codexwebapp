@@ -1,6 +1,7 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import diagnoses from '@/data/diagnoses'
+import { treatmentCodesByType, wizardTreatmentTypes } from '@/data/treatmentWizardOptions'
 
 const props = defineProps({
   selectedSurfaces: {
@@ -43,54 +44,50 @@ let surfaceDropdownRafId = null
 
 const showTooltipCode = ref(null)
 
-const treatmentTypes = [
-  { id: 'root-canal', label: 'Root Canal' },
-  { id: 'extraction', label: 'Extraction' },
-  { id: 'restoration', label: 'Restoration' },
-  { id: 'prosthodontics', label: 'Prosthodontics' },
-]
 const maxPreviewCodes = 3
 const statusOptions = [
-  { id: 'done', label: 'Duussan' },
-  { id: 'planned', label: 'Tuluvluguut' },
+  { id: 'done', label: 'Дууссан' },
+  { id: 'planned', label: 'Төлөвлөгөөт' },
 ]
 
-const treatmentCodesByType = {
+// Legacy mock codes kept as a fallback for missing wizard options.
+const legacyTreatmentCodesByType = {
   'root-canal': [
-    { code: 'D3220', nameMn: 'Моляр шүдний сувгийн эмчилгээ' },
-    { code: 'D3221', nameMn: 'Премоляр сувгийн өргөтгөх ба эмчилгээ' },
-    { code: 'D3222', nameMn: 'Нэг сувгийн тайвшруулах эмчилгээ' },
-    { code: 'D3222', nameMn: 'Нэг сувгийн тайвшруулах эмчилгээ' },
-    { code: 'D3222', nameMn: 'Нэг сувгийн тайвшруулах эмчилгээ' },
+    { code: 'D3220', nameMn: 'Сувгийн эмчилгээ (анхан шат)' },
+    { code: 'D3221', nameMn: 'Сувгийн эмчилгээ (дахин боловсруулалт)' },
+    { code: 'D3222', nameMn: 'Сувгийн эмчилгээ (олон суваг)' },
+    { code: 'D3222', nameMn: 'Сувгийн эмчилгээ (олон суваг)' },
+    { code: 'D3222', nameMn: 'Сувгийн эмчилгээ (олон суваг)' },
   ],
   extraction: [
-    { code: 'D7140', nameMn: 'Энгийн суудлын суваг авах' },
-    { code: 'D7210', nameMn: 'Мэс заслын хүндрэлийн суваг авах' },
-    { code: 'D7250', nameMn: 'Хатингаршсан үлдэгдэл суваг авах' },
-    { code: 'D7250', nameMn: 'Хатингаршсан үлдэгдэл суваг авах' },
-    { code: 'D7250', nameMn: 'Хатингаршсан үлдэгдэл суваг авах' },
-    { code: 'D7250', nameMn: 'Хатингаршсан үлдэгдэл суваг авах' },
+    { code: 'D7140', nameMn: 'Энгийн шүд авах' },
+    { code: 'D7210', nameMn: 'Мэс заслын шүд авах' },
+    { code: 'D7250', nameMn: 'Үлдэгдэл үндэс авах' },
+    { code: 'D7250', nameMn: 'Үлдэгдэл үндэс авах' },
+    { code: 'D7250', nameMn: 'Үлдэгдэл үндэс авах' },
+    { code: 'D7250', nameMn: 'Үлдэгдэл үндэс авах' },
   ],
   restoration: [
-    { code: 'D2391', nameMn: 'Нэг гадаргуун композит ломбо' },
-    { code: 'D2392', nameMn: 'Хоёр гадаргуун композит ломбо' },
-    { code: 'D2393', nameMn: 'Гурван гадаргуун композит ломбо' },
-    { code: 'D2393', nameMn: 'Гурван гадаргуун композит ломбо' },
-    { code: 'D2393', nameMn: 'Гурван гадаргуун композит ломбо' },
-    { code: 'D2393', nameMn: 'Гурван гадаргуун композит ломбо' },
-    { code: 'D2393', nameMn: 'Гурван гадаргуун композит ломбо' },
-    { code: 'D2393', nameMn: 'Гурван гадаргуун композит ломбо' },
-    { code: 'D2393', nameMn: 'Гурван гадаргуун композит ломбо' },
-    { code: 'D2393', nameMn: 'Гурван гадаргуун композит ломбо' },
-    { code: 'D2393', nameMn: 'Гурван гадаргуун композит ломбо' },
-    { code: 'D2393', nameMn: 'Гурван гадаргуун композит ломбо' },
+    { code: 'D2391', nameMn: 'Нийлмэл ломбо 1 гадаргуу' },
+    { code: 'D2392', nameMn: 'Нийлмэл ломбо 2 гадаргуу' },
+    { code: 'D2393', nameMn: 'Нийлмэл ломбо 3+ гадаргуу' },
+    { code: 'D2393', nameMn: 'Нийлмэл ломбо 3+ гадаргуу' },
+    { code: 'D2393', nameMn: 'Нийлмэл ломбо 3+ гадаргуу' },
+    { code: 'D2393', nameMn: 'Нийлмэл ломбо 3+ гадаргуу' },
+    { code: 'D2393', nameMn: 'Нийлмэл ломбо 3+ гадаргуу' },
+    { code: 'D2393', nameMn: 'Нийлмэл ломбо 3+ гадаргуу' },
+    { code: 'D2393', nameMn: 'Нийлмэл ломбо 3+ гадаргуу' },
+    { code: 'D2393', nameMn: 'Нийлмэл ломбо 3+ гадаргуу' },
+    { code: 'D2393', nameMn: 'Нийлмэл ломбо 3+ гадаргуу' },
+    { code: 'D2393', nameMn: 'Нийлмэл ломбо 3+ гадаргуу' },
   ],
   prosthodontics: [
-    { code: 'D2750', nameMn: 'Бүрээс, бүрэн металл' },
-    { code: 'D2751', nameMn: 'Бүрээс, металл-керамик' },
-    { code: 'D2799', nameMn: 'Түр бүрээс хийх' },
+    { code: 'D2750', nameMn: 'Металл-порцелан бүрээс' },
+    { code: 'D2751', nameMn: 'Металл-резин бүрээс' },
+    { code: 'D2799', nameMn: 'Бусад төрлийн бүрээс' },
   ],
 }
+
 
 const currentTypeIndex = ref(0)
 const selectedSurfaces = computed({
@@ -113,11 +110,13 @@ const selectedCodeSet = computed(() =>
   new Set(selectedCodes.value.map((item) => item?.code).filter(Boolean)),
 )
 const canAdd = computed(() => props.canAdd)
-const currentType = computed(() => treatmentTypes[currentTypeIndex.value])
-const currentCodes = computed(() => treatmentCodesByType[currentType.value.id] || [])
+const currentType = computed(() => wizardTreatmentTypes[currentTypeIndex.value])
+const currentCodes = computed(
+  () => treatmentCodesByType[currentType.value?.id] || legacyTreatmentCodesByType[currentType.value?.id] || [],
+)
 const selectedCodeLabels = computed(() =>
   selectedCodes.value
-    .map((item) => [item?.code, item?.nameMn].filter(Boolean).join(' '))
+    .map((item) => [item?.code, item?.nameMn || item?.name].filter(Boolean).join(' '))
     .filter(Boolean),
 )
 const previewCodes = computed(() => selectedCodeLabels.value.slice(0, maxPreviewCodes))
@@ -319,11 +318,15 @@ function openDiagnosisDropdown() {
 }
 
 function prevType() {
-  currentTypeIndex.value = (currentTypeIndex.value - 1 + treatmentTypes.length) % treatmentTypes.length
+  const typeCount = wizardTreatmentTypes.length
+  if (!typeCount) return
+  currentTypeIndex.value = (currentTypeIndex.value - 1 + typeCount) % typeCount
 }
 
 function nextType() {
-  currentTypeIndex.value = (currentTypeIndex.value + 1) % treatmentTypes.length
+  const typeCount = wizardTreatmentTypes.length
+  if (!typeCount) return
+  currentTypeIndex.value = (currentTypeIndex.value + 1) % typeCount
 }
 
 function isCodeSelected(code) {
@@ -585,7 +588,7 @@ function handleAdd() {
               class="treatment-code-tooltip"
               :class="showTooltipCode === item.code ? 'treatment-code-tooltip--visible' : ''"
             >
-              {{ item.nameMn }}
+              {{ item.nameMn || item.name }}
             </div>
           </div>
         </div>
@@ -593,33 +596,36 @@ function handleAdd() {
 
     </div>
 
-    <div class="treatment-action-bar treatment-action-bar--inline treatment-action-bar--compact">
-      <div class="treatment-status-row treatment-footer--compact">
-        <div class>
-        
-          <div class="treatment-status-actions">
-            <button
-              v-for="option in statusOptions"
-              :key="option.id"
-              type="button"
-              class="treatment-status-button"
-              :class="isStatusActive(option.id) ? 'treatment-status-button--active' : ''"
-              @click="onSelectStatus(option.id)"
-            >
-              {{ option.label }}
-            </button>
+    <div class="treatment-action-bar treatment-action-bar--inline">
+      <div class="treatment-wizard-footer">
+        <!-- Row 1: Status selection -->
+        <div class="treatment-footer-row">
+          <div class="treatment-status-actions-container">
+            <div class="treatment-status-actions-segmented">
+              <button
+                v-for="option in statusOptions"
+                :key="option.id"
+                type="button"
+                class="treatment-status-segment"
+                :class="isStatusActive(option.id) ? 'treatment-status-segment--active' : ''"
+                @click="onSelectStatus(option.id)"
+              >
+                {{ option.label }}
+              </button>
+            </div>
           </div>
         </div>
 
-        <div class="treatment-action-bar__buttons">
-        <button
-          type="button"
-          class="treatment-action-button treatment-action-button--primary"
-          :disabled="!canAdd"
-          @click="handleAdd"
-        >
-          <span class="treatment-hit-visual">нэмэх</span>
-        </button>
+        <!-- Row 2: Add button -->
+        <div class="treatment-footer-row">
+          <button
+            type="button"
+            class="treatment-add-button-primary"
+            :disabled="!canAdd"
+            @click="handleAdd"
+          >
+            Нэмэх
+          </button>
         </div>
       </div>
     </div>

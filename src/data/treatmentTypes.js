@@ -4,6 +4,20 @@
 
 import { applyScopeDefaults, COVERAGE_SCOPE } from '@/utils/treatmentScope'
 
+const PAINT_TYPE_BY_CATEGORY = {
+  diagnostic: 'diagnostic',
+  preventive: 'preventive',
+  restorative: 'restorative',
+  endodontic: 'endodontic',
+  prosthetic: 'prosthetic',
+  surgery: 'surgery',
+  periodontal: 'periodontal',
+  orthodontic: 'orthodontic',
+  cosmetic: 'cosmetic',
+  emergency: 'emergency',
+  other: 'other',
+}
+
 function createTreatment({
   id,
   code,
@@ -13,10 +27,11 @@ function createTreatment({
   coverageScope,
   defaultPrice = 0,
   isActive = true,
-  paintType = 'default',
+  paintType,
   toothRequired,
 }) {
   const displayName = nameShort || nameFull || id
+  const resolvedPaintType = paintType || PAINT_TYPE_BY_CATEGORY[category] || 'default'
   const treatment = {
     id,
     code: code || id?.toUpperCase?.() || id,
@@ -25,7 +40,7 @@ function createTreatment({
     category,
     defaultPrice,
     isActive,
-    paintType,
+    paintType: resolvedPaintType,
     coverageScope,
     label: displayName,
     toothRequired,

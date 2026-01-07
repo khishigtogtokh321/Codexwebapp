@@ -72,6 +72,17 @@ export const treatmentCodesByType = {
   ],
   pulpotomy: [
     { code: 'D3220', name: 'Therapeutic pulpotomy' },
+    { code: 'D3220', name: 'Therapeutic pulpotomy' },
+    { code: 'D3220', name: 'Therapeutic pulpotomy' },
+    { code: 'D3220', name: 'Therapeutic pulpotomy' },
+    { code: 'D3220', name: 'Therapeutic pulpotomy' },
+    { code: 'D3220', name: 'Therapeutic pulpotomy' },
+    { code: 'D3220', name: 'Therapeutic pulpotomy' },
+    { code: 'D3220', name: 'Therapeutic pulpotomy' },
+    { code: 'D3220', name: 'Therapeutic pulpotomy' },
+    { code: 'D3220', name: 'Therapeutic pulpotomy' },
+    { code: 'D3220', name: 'Therapeutic pulpotomy' },
+    { code: 'D3220', name: 'Therapeutic pulpotomy' },
   ],
   denture: [
     { code: 'D5110', name: 'Complete denture maxillary' },
