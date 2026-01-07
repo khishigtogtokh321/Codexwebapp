@@ -1,7 +1,7 @@
 ﻿<script setup>
 import { ref, computed, watch } from 'vue'
 import ToothItem from './ToothItem.vue'
-import { FDI_NOTATION } from '@/utils/toothHelpers'
+import { getDentitionLayout } from '@/utils/toothHelpers'
 
 const props = defineProps({
   selectedTeeth: {
@@ -24,17 +24,25 @@ const props = defineProps({
 
 const emit = defineEmits(['tooth-select', 'teeth-select', 'select-all', 'clear-selection'])
 
-const upperRightTeeth = computed(() => [...FDI_NOTATION.UPPER_RIGHT].reverse())
-const upperLeftTeeth = computed(() => FDI_NOTATION.UPPER_LEFT)
-const lowerRightTeeth = computed(() => [...FDI_NOTATION.LOWER_RIGHT].reverse())
-const lowerLeftTeeth = computed(() => FDI_NOTATION.LOWER_LEFT)
+const dentitionFilter = ref('permanent') // 'permanent' | 'primary' | 'mixed'
 
-const allTeeth = computed(() => [
-  ...FDI_NOTATION.UPPER_RIGHT,
-  ...FDI_NOTATION.UPPER_LEFT,
-  ...FDI_NOTATION.LOWER_LEFT,
-  ...FDI_NOTATION.LOWER_RIGHT,
-])
+const currentLayout = computed(() => getDentitionLayout(dentitionFilter.value))
+
+const upperRightTeeth = computed(() => currentLayout.value.UPPER_RIGHT.filter((s) => s.isActive))
+const upperLeftTeeth = computed(() => currentLayout.value.UPPER_LEFT.filter((s) => s.isActive))
+const lowerRightTeeth = computed(() => currentLayout.value.LOWER_RIGHT.filter((s) => s.isActive))
+const lowerLeftTeeth = computed(() => currentLayout.value.LOWER_LEFT.filter((s) => s.isActive))
+
+const allActiveTeeth = computed(() => {
+  return [
+    ...currentLayout.value.UPPER_RIGHT,
+    ...currentLayout.value.UPPER_LEFT,
+    ...currentLayout.value.LOWER_LEFT,
+    ...currentLayout.value.LOWER_RIGHT,
+  ]
+    .filter((t) => t.isActive)
+    .map((t) => t.toothNumber)
+})
 
 const lastSelection = ref([])
 
@@ -84,7 +92,7 @@ function isSelected(toothNumber) {
 }
 
 function selectAll() {
-  emit('select-all', allTeeth.value.map(String))
+  emit('select-all', allActiveTeeth.value)
 }
 
 function clearSelection() {
@@ -114,12 +122,12 @@ function undoSelection() {
         <div class="quadrant">
           <div class="tooth-row tooth-row--reverse">
             <ToothItem
-              v-for="tooth in upperRightTeeth"
-              :key="tooth"
-              :tooth-number="String(tooth)"
-              :status="getToothStatus(String(tooth))"
-              :paint-type="getToothPaintType(String(tooth))"
-              :is-selected="isSelected(String(tooth))"
+              v-for="slot in upperRightTeeth"
+              :key="slot.toothNumber"
+              :tooth-number="slot.toothNumber"
+              :status="getToothStatus(slot.toothNumber)"
+              :paint-type="getToothPaintType(slot.toothNumber)"
+              :is-selected="isSelected(slot.toothNumber)"
               @click="handleToothClick"
             />
           </div>
@@ -130,12 +138,12 @@ function undoSelection() {
         <div class="quadrant">
           <div class="tooth-row">
             <ToothItem
-              v-for="tooth in upperLeftTeeth"
-              :key="tooth"
-              :tooth-number="String(tooth)"
-              :status="getToothStatus(String(tooth))"
-              :paint-type="getToothPaintType(String(tooth))"
-              :is-selected="isSelected(String(tooth))"
+              v-for="slot in upperLeftTeeth"
+              :key="slot.toothNumber"
+              :tooth-number="slot.toothNumber"
+              :status="getToothStatus(slot.toothNumber)"
+              :paint-type="getToothPaintType(slot.toothNumber)"
+              :is-selected="isSelected(slot.toothNumber)"
               @click="handleToothClick"
             />
           </div>
@@ -150,12 +158,12 @@ function undoSelection() {
         <div class="quadrant">
           <div class="tooth-row tooth-row--reverse">
             <ToothItem
-              v-for="tooth in lowerRightTeeth"
-              :key="tooth"
-              :tooth-number="String(tooth)"
-              :status="getToothStatus(String(tooth))"
-              :paint-type="getToothPaintType(String(tooth))"
-              :is-selected="isSelected(String(tooth))"
+              v-for="slot in lowerRightTeeth"
+              :key="slot.toothNumber"
+              :tooth-number="slot.toothNumber"
+              :status="getToothStatus(slot.toothNumber)"
+              :paint-type="getToothPaintType(slot.toothNumber)"
+              :is-selected="isSelected(slot.toothNumber)"
               @click="handleToothClick"
             />
           </div>
@@ -166,12 +174,12 @@ function undoSelection() {
         <div class="quadrant">
           <div class="tooth-row">
             <ToothItem
-              v-for="tooth in lowerLeftTeeth"
-              :key="tooth"
-              :tooth-number="String(tooth)"
-              :status="getToothStatus(String(tooth))"
-              :paint-type="getToothPaintType(String(tooth))"
-              :is-selected="isSelected(String(tooth))"
+              v-for="slot in lowerLeftTeeth"
+              :key="slot.toothNumber"
+              :tooth-number="slot.toothNumber"
+              :status="getToothStatus(slot.toothNumber)"
+              :paint-type="getToothPaintType(slot.toothNumber)"
+              :is-selected="isSelected(slot.toothNumber)"
               @click="handleToothClick"
             />
           </div>
@@ -182,24 +190,32 @@ function undoSelection() {
 
     <div class="selector-toolbar">
       <div class="selector-actions">
-        <button type="button" class="selector-btn" :disabled="!hasSelection" @click="clearSelection">
+        <button type="button" class="selector-btn" @click="selectAll">
           Бүгд
         </button>
-          <button type="button" class="selector-btn" :disabled="!hasSelection" @click="clearSelection">
+        <button
+          type="button"
+          :class="['selector-btn', { active: dentitionFilter === 'permanent' }]"
+          @click="dentitionFilter = 'permanent'"
+        >
           Байнгийн
         </button>
-          <button type="button" class="selector-btn" :disabled="!hasSelection" @click="clearSelection">
+        <button
+          type="button"
+          :class="['selector-btn', { active: dentitionFilter === 'primary' }]"
+          @click="dentitionFilter = 'primary'"
+        >
           Сүүн
         </button>
-          <button type="button" class="selector-btn" :disabled="!hasSelection" @click="clearSelection">
-          Холимлог
+        <button
+          type="button"
+          :class="['selector-btn', { active: dentitionFilter === 'mixed' }]"
+          @click="dentitionFilter = 'mixed'"
+        >
+          Холимог
         </button>
-          <button type="button" class="selector-btn" :disabled="!hasSelection" @click="clearSelection">
-          Авхуулсан
-        </button>
-          <button type="button" class="selector-btn" :disabled="!hasSelection" @click="clearSelection">
-          Аваагүй
-        </button>
+        <button type="button" class="selector-btn" disabled>Авхуулсан</button>
+        <button type="button" class="selector-btn" disabled>Аваагүй</button>
       </div>
     </div>
   </div>
@@ -364,8 +380,10 @@ function undoSelection() {
   transition: all 140ms ease;
 }
 
-.selector-btn:hover:enabled {
+.selector-btn:hover:enabled,
+.selector-btn.active {
   border-color: #2563eb;
+  background: #eff6ff;
   color: #1d4ed8;
   box-shadow: 0 10px 30px -20px rgba(37, 99, 235, 0.4);
 }

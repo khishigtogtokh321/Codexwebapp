@@ -14,8 +14,12 @@ const props = defineProps({
     type: String,
     default: 'healthy',
   },
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
   paintType: {
-    type: [Number, String], // Accept numeric IDs or fallback strings
+    type: [Number, String],
     default: null,
   },
 })
@@ -50,8 +54,9 @@ const toothClasses = computed(() => {
   const selectedClass = props.isSelected
     ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-white z-10 is-selected'
     : ''
+  const activeClass = props.isActive ? '' : 'opacity-30 grayscale pointer-events-none'
 
-  return `${base} ${statusClass} ${selectedClass}`
+  return `${base} ${statusClass} ${selectedClass} ${activeClass}`
 })
 
 const markerColor = computed(() => PAINT_COLORS[props.paintType] || '#94a3b8')
@@ -75,8 +80,8 @@ function handleClick() {
       {{ toothNumber }}
     </span>
 
-    <!-- TREATMENT VISUALS (SVG / SHAPES) -->
-    <div class="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden">
+    <!-- TREATMENT VISUALS (SVG / SHAPES) - ONLY SHOW IF ACTIVE -->
+    <div v-if="isActive" class="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden">
       <!-- 1: Extraction / Шүд авах (Large Red X) -->
       <svg v-if="paintType === 1" class="w-full h-full text-red-500 opacity-80" viewBox="0 0 100 100">
         <line x1="15" y1="15" x2="85" y2="85" stroke="currentColor" stroke-width="10" stroke-linecap="round" />

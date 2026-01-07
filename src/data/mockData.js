@@ -200,11 +200,16 @@ export const mockPatientStats = {
 // Helper function to get initial tooth statuses (all healthy)
 export const getInitialToothStatuses = () => {
   const statuses = {}
-  // Generate all tooth numbers using FDI notation
-  for (let quadrant = 1; quadrant <= 4; quadrant++) {
-    for (let tooth = 1; tooth <= 8; tooth++) {
-      const toothNumber = `${quadrant}${tooth}`
-      statuses[toothNumber] = 'healthy'
+  // Permanent teeth (11-48)
+  for (let q = 1; q <= 4; q++) {
+    for (let t = 1; t <= 8; t++) {
+      statuses[`${q}${t}`] = 'healthy'
+    }
+  }
+  // Primary teeth (51-85)
+  for (let q = 5; q <= 8; q++) {
+    for (let t = 1; t <= 5; t++) {
+      statuses[`${q}${t}`] = 'healthy'
     }
   }
   return statuses

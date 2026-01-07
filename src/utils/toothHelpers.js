@@ -8,7 +8,7 @@ export const FDI_NOTATION = {
   UPPER_RIGHT: [18, 17, 16, 15, 14, 13, 12, 11],
   UPPER_LEFT: [21, 22, 23, 24, 25, 26, 27, 28],
   LOWER_LEFT: [31, 32, 33, 34, 35, 36, 37, 38],
-  LOWER_RIGHT: [48, 47, 46, 45, 44, 43, 42, 41],
+  LOWER_RIGHT: [41, 42, 43, 44, 45, 46, 47, 48],
 }
 
 // Tooth surfaces
@@ -57,7 +57,7 @@ export const BABY_TEETH = {
   UPPER_RIGHT: [51, 52, 53, 54, 55],
   UPPER_LEFT: [61, 62, 63, 64, 65],
   LOWER_LEFT: [71, 72, 73, 74, 75],
-  LOWER_RIGHT: [81, 82, 83, 84, 85],
+  LOWER_RIGHT: [85, 84, 83, 82, 81],
 }
 
 // Get all baby teeth
@@ -166,7 +166,7 @@ export function parseToothNumber(toothString) {
 // Validate tooth number
 export function isValidToothNumber(toothNumber) {
   const num = parseInt(toothNumber)
-  return getAllTeeth().includes(num)
+  return getAllTeeth().includes(num) || getAllBabyTeeth().includes(num)
 }
 
 // Get tooth type (incisor, canine, premolar, molar)
@@ -245,14 +245,115 @@ export function getSurfaceName(surface) {
   return TOOTH_SURFACES[surface.toUpperCase()] || surface
 }
 
+/**
+ * Returns the 32-slot layout for the tooth chart based on the dentition mode.
+ * Each slot contains { toothNumber, isActive }
+ */
+export function getDentitionLayout(mode = 'permanent') {
+  const layout = {
+    UPPER_RIGHT: [],
+    UPPER_LEFT: [],
+    LOWER_LEFT: [],
+    LOWER_RIGHT: [],
+  }
+
+  // 1. UPPER RIGHT (18-11)
+  FDI_NOTATION.UPPER_RIGHT.forEach((perm) => {
+    let toothNumber = perm
+    let isActive = false
+
+    if (mode === 'permanent') {
+      isActive = true
+    } else {
+      // Primary/Mixed slots for 15-11 are 55-51
+      const pos = getPositionInQuadrant(perm)
+      if (pos <= 5) {
+        toothNumber = 50 + pos
+        isActive = true
+      } else if (mode === 'mixed' && pos === 6) {
+        isActive = true // 16 is active in mixed
+      }
+    }
+    layout.UPPER_RIGHT.push({ toothNumber: String(toothNumber), isActive })
+  })
+
+  // 2. UPPER LEFT (21-28)
+  FDI_NOTATION.UPPER_LEFT.forEach((perm) => {
+    let toothNumber = perm
+    let isActive = false
+
+    if (mode === 'permanent') {
+      isActive = true
+    } else {
+      // Primary/Mixed slots for 21-25 are 61-65
+      const pos = getPositionInQuadrant(perm)
+      if (pos <= 5) {
+        toothNumber = 60 + pos
+        isActive = true
+      } else if (mode === 'mixed' && pos === 6) {
+        isActive = true // 26 is active in mixed
+      }
+    }
+    layout.UPPER_LEFT.push({ toothNumber: String(toothNumber), isActive })
+  })
+
+  // 3. LOWER LEFT (31-38)
+  FDI_NOTATION.LOWER_LEFT.forEach((perm) => {
+    let toothNumber = perm
+    let isActive = false
+
+    if (mode === 'permanent') {
+      isActive = true
+    } else {
+      // Primary/Mixed slots for 31-35 are 71-75
+      const pos = getPositionInQuadrant(perm)
+      if (pos <= 5) {
+        toothNumber = 70 + pos
+        isActive = true
+      } else if (mode === 'mixed' && pos === 6) {
+        isActive = true // 36 is active in mixed
+      }
+    }
+    layout.LOWER_LEFT.push({ toothNumber: String(toothNumber), isActive })
+  })
+
+  // 4. LOWER RIGHT (41-48)
+  // Logic needs to reverse for the 41-48 quadrant to maintain 18-11 flow
+  const lowerRightRev = [...FDI_NOTATION.LOWER_RIGHT].reverse() // 41, 42...48
+  lowerRightRev.forEach((perm) => {
+    let toothNumber = perm
+    let isActive = false
+
+    if (mode === 'permanent') {
+      isActive = true
+    } else {
+      const pos = getPositionInQuadrant(perm)
+      if (pos <= 5) {
+        toothNumber = 80 + pos
+        isActive = true
+      } else if (mode === 'mixed' && pos === 6) {
+        isActive = true // 46 is active in mixed
+      }
+    }
+    layout.LOWER_RIGHT.push({ toothNumber: String(toothNumber), isActive })
+  })
+  // Reverse back to match 48-41 visual order
+  layout.LOWER_RIGHT.reverse()
+
+  return layout
+}
+
 export default {
   FDI_NOTATION,
+  BABY_TEETH,
   TOOTH_SURFACES,
   getAllTeeth,
+  getAllBabyTeeth,
   getUpperTeeth,
   getLowerTeeth,
   isUpperTooth,
   isLowerTooth,
+  isBabyTooth,
   getQuadrant,
   getPositionInQuadrant,
   getToothName,
@@ -268,4 +369,5 @@ export default {
   arrayToSurfaces,
   isValidSurface,
   getSurfaceName,
+  getDentitionLayout,
 }
