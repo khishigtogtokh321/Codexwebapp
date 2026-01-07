@@ -48,7 +48,7 @@ const toothClasses = computed(() => {
 
   const statusClass = statusColors[props.status] || statusColors.healthy
   const selectedClass = props.isSelected
-    ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-white z-10'
+    ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-white z-10 is-selected'
     : ''
 
   return `${base} ${statusClass} ${selectedClass}`
@@ -56,7 +56,13 @@ const toothClasses = computed(() => {
 
 const markerColor = computed(() => PAINT_COLORS[props.paintType] || '#94a3b8')
 
-const tooltipText = computed(() => `#${props.toothNumber} (${props.status || 'healthy'})`)
+const numberColorClass = computed(() => {
+  if (props.status === 'healthy') return 'text-gray-800'
+  // If there's a clinical marker (paintType), the marker itself shows status.
+  // We only color the number if there's history but NO visual marker.
+  if (props.paintType && props.paintType !== 0) return 'text-gray-800'
+  return 'text-blue-600'
+})
 
 function handleClick() {
   emit('click', props.toothNumber)
@@ -64,8 +70,8 @@ function handleClick() {
 </script>
 
 <template>
-  <div :class="toothClasses" @click="handleClick" :title="tooltipText">
-    <span class="font-extrabold text-gray-800 tooth-number z-10">
+  <div :class="toothClasses" @click="handleClick">
+    <span :class="['font-extrabold tooth-number z-10', numberColorClass]">
       {{ toothNumber }}
     </span>
 
@@ -129,10 +135,14 @@ function handleClick() {
 
 .tooth-number {
   line-height: 1;
-  text-shadow: 0 0 2px white;
+  text-shadow: 0 0 2px white, 0 0 4px white;
+  opacity: 0.8;
+  transition: all 0.2s ease-in-out;
 }
 
-.tooth-item__check {
-  filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.8));
+.tooth-item:hover .tooth-number,
+.tooth-item.is-selected .tooth-number {
+  opacity: 1;
+  transform: scale(1.1);
 }
 </style>
