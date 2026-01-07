@@ -9,59 +9,88 @@ import { getInitialToothStatuses } from '@/data/mockData'
 export function useToothStatus(initialStatuses = null) {
   // Tooth status map { '21': 'treated', '16': 'problem', ... }
   const toothStatuses = ref(initialStatuses || getInitialToothStatuses())
+  // Tooth paint type map { '21': 3, ... } (numeric ID from user table)
+  const toothPaintTypes = ref({})
+
+  // Priority rule based on clinical importance (Higher number = higher priority)
+  const PAINT_TYPE_PRIORITY = {
+    1: 10,  // Extraction
+    2: 10,  // Implant
+    3: 9,   // RCT
+    7: 8,   // Crown
+    9: 8,   // Bridge
+    11: 8,  // Denture
+    6: 7,   // Filling
+    14: 6,  // Veneer
+    13: 5,  // Sealant
+    15: 4,  // Watch
+    0: 0,   // None
+  }
 
   // Get status for a specific tooth
   function getToothStatus(toothNumber) {
     return toothStatuses.value[toothNumber] || 'healthy'
   }
 
-  // Set status for a specific tooth
-  function setToothStatus(toothNumber, status) {
+  // Set status for a specific tooth with Priority Logic
+  function setToothStatus(toothNumber, status, paintTypeId = null) {
     if (!toothNumber) return
-    toothStatuses.value[toothNumber] = status
-  }
 
-  // Update tooth status based on treatment
-  function updateToothStatusFromTreatment(treatment) {
-    if (!treatment.tooth) return
+    // Priority: treated/missing (2) > planned/problem (1) > healthy (0)
+    const STATUS_PRIORITY = { missing: 2, treated: 2, problem: 1, planned: 1, healthy: 0 }
+    const currentStatus = toothStatuses.value[toothNumber] || 'healthy'
 
-    // Extract tooth number from '#21' format
-    const toothNumber = treatment.tooth.replace('#', '')
+    const currentRank = STATUS_PRIORITY[currentStatus] || 0
+    const newRank = STATUS_PRIORITY[status] || 0
 
-    // Determine status based on treatment status and type
-    if (treatment.status === 'done') {
-      // Check if it's an extraction
-      if (
-        treatment.treatmentType?.toLowerCase().includes('extraction') ||
-        treatment.treatmentType?.toLowerCase().includes('шүд авах')
-      ) {
-        setToothStatus(toothNumber, 'missing')
-      } else {
-        setToothStatus(toothNumber, 'treated')
+    // Only update if the new status is higher or equal priority
+    if (newRank >= currentRank) {
+      toothStatuses.value[toothNumber] = status
+
+      // Update paint type ONLY if it's higher priority or the current one is empty
+      const currentPaintId = Number(toothPaintTypes.value[toothNumber] || 0)
+      const newPaintId = Number(paintTypeId || 0)
+
+      if (newPaintId > 0 && (newPaintId > currentPaintId || currentRank === 0)) {
+        toothPaintTypes.value[toothNumber] = newPaintId
       }
-    } else if (treatment.status === 'planned') {
-      setToothStatus(toothNumber, 'planned')
     }
   }
 
-  // Mark tooth as having a problem
+  // Update tooth status based on treatment record
+  function updateToothStatusFromTreatment(treatment) {
+    if (!treatment.tooth) return
+    const toothNum = treatment.tooth.replace('#', '')
+    const paintId = treatment.paintType || 0
+
+    // Status in record is 'done' or 'planned'
+    const status = treatment.status === 'done' ? 'treated' : 'planned'
+
+    // Check if it's an extraction specifically
+    if (status === 'treated' && (treatment.treatmentType?.toLowerCase().includes('extraction') || treatment.treatmentType?.toLowerCase().includes('авах'))) {
+      setToothStatus(toothNum, 'missing', 1)
+    } else {
+      setToothStatus(toothNum, status, paintId)
+    }
+  }
+
   function markToothAsProblem(toothNumber) {
     setToothStatus(toothNumber, 'problem')
   }
 
-  // Mark tooth as missing
   function markToothAsMissing(toothNumber) {
-    setToothStatus(toothNumber, 'missing')
+    setToothStatus(toothNumber, 'missing', 1)
   }
 
-  // Mark tooth as healthy
   function markToothAsHealthy(toothNumber) {
-    setToothStatus(toothNumber, 'healthy')
+    delete toothStatuses.value[toothNumber]
+    delete toothPaintTypes.value[toothNumber]
   }
 
-  // Reset all tooth statuses to healthy
+  // CRITICAL: Reset must be a clean slate to match history table exactly
   function resetAllStatuses() {
-    toothStatuses.value = getInitialToothStatuses()
+    toothStatuses.value = {}
+    toothPaintTypes.value = {}
   }
 
   // Get tooth status color class
@@ -136,6 +165,7 @@ export function useToothStatus(initialStatuses = null) {
   return {
     // State
     toothStatuses,
+    toothPaintTypes,
 
     // Computed
     toothStats,

@@ -38,7 +38,7 @@ const drawerCloseRef = ref(null)
 
 const desktopExpanded = computed(() => isLgUp.value && (hovered.value || pinned.value))
 
-const { toothStatuses, updateToothStatusFromTreatment } = useToothStatus(mockToothStatuses)
+const { toothStatuses, toothPaintTypes, updateToothStatusFromTreatment, updateStatusesFromHistory } = useToothStatus(mockToothStatuses)
 
 const selectedTeethList = computed(() => state.selectedTeeth)
 const selectedTreatmentItems = computed(() => getSelectedTreatments(state.selectedTreatmentTypeIds))
@@ -58,8 +58,11 @@ const requiresSurface = computed(
 const hasSelectedTooth = computed(() => state.selectedTeeth.length > 0)
 const hasSelectedSurface = computed(() => state.selectedSurfaces.length > 0)
 const meetsScopeGuard = computed(() => {
+  // 1. Хэрэв гадаргуу шаардлагатай бол (Surface scope)
   if (requiresSurface.value) return hasSelectedTooth.value && hasSelectedSurface.value
+  // 2. Хэрэв шүд шаардлагатай бол (Tooth scope)
   if (requiresTooth.value) return hasSelectedTooth.value
+  // 3. Бусад (Ам, Рентген г.м) бол шууд true
   return true
 })
 const canAddSelection = computed(() => hasSelectedTreatments.value && meetsScopeGuard.value)
@@ -136,16 +139,22 @@ function getCombinedTreatmentLabels() {
   return [...new Set(labels)]
 }
 
-function buildDiagnosisText(treatmentLabels = []) {
+function buildDiagnosisText() {
   const diagnosisLabel = getDiagnosisLabel(state.selectedDiagnosis)
-  return diagnosisLabel || treatmentLabels.join(', ') || '???? ?????????'
+  return diagnosisLabel || ''
 }
 
 function getToothText(tooth) {
   return tooth ? formatToothNumber(tooth) : ''
 }
 
-function buildTreatmentEntry(tooth, treatmentLabel) {
+function resolvePaintType(label, explicitPaintType) {
+  if (explicitPaintType) return explicitPaintType
+  const match = treatmentTypes.find((t) => t.label === label || t.nameFull === label)
+  return match?.paintType || 'other'
+}
+
+function buildTreatmentEntry(tooth, treatmentLabel, paintType = null) {
   const surfaceText = state.selectedSurfaces.join(', ')
   const status = state.selectedStatus || 'done'
   const toothText = getToothText(tooth)
@@ -155,22 +164,35 @@ function buildTreatmentEntry(tooth, treatmentLabel) {
     date: new Date().toISOString(),
     tooth: toothText,
     surface: surfaceText,
-    diagnosis: buildDiagnosisText([treatmentLabel]),
+    diagnosis: buildDiagnosisText(),
     treatmentType: treatmentLabel,
+    paintType: paintType, // Store paintType for Chart markers
     doctor: '',
     price: '',
     status,
   }
 }
 
-function buildTreatmentEntries(treatmentLabels = []) {
+function buildTreatmentEntries() {
   const teeth = state.selectedTeeth.length ? state.selectedTeeth : [null]
   const entries = []
 
+  // Get full treatment objects to access paintType
+  const selectedTypes = getSelectedTreatments(state.selectedTreatmentTypeIds)
+  const selectedCodes = state.selectedCodes // These already have code/nameMn
+
   teeth.forEach((tooth) => {
-    treatmentLabels.forEach((label) => {
-      if (!label) return
-      entries.push(buildTreatmentEntry(tooth, label))
+    // 1. Process specific codes (Right Wizard)
+    selectedCodes.forEach((codeItem) => {
+      const label = codeItem.nameMn || codeItem.name || codeItem.code
+      // Ensure we get the paintType directly from the code item
+      const paintType = codeItem.paintType || resolvePaintType(label)
+      entries.push(buildTreatmentEntry(tooth, label, paintType))
+    })
+
+    // 2. Process treatment types (Quick Add)
+    selectedTypes.forEach((t) => {
+      entries.push(buildTreatmentEntry(tooth, t.label, t.paintType))
     })
   })
 
@@ -193,6 +215,7 @@ function applyToothStatusUpdates(treatmentLabels = []) {
 }
 
 function resetTreatmentDraft() {
+  state.selectedTeeth = []
   state.selectedSurfaces = []
   state.selectedDiagnosis = null
   state.selectedCodes = []
@@ -201,13 +224,13 @@ function resetTreatmentDraft() {
 
 function handleAddSelection() {
   if (!canAddSelection.value) return
-  const treatmentLabels = getCombinedTreatmentLabels()
-  if (!treatmentLabels.length) return
-
-  const entries = buildTreatmentEntries(treatmentLabels)
+  
+  const entries = buildTreatmentEntries()
   if (!entries.length) return
+  
   entries.forEach((entry) => treatmentStore.addTreatment(entry))
-  applyToothStatusUpdates(treatmentLabels)
+  
+  // Clear selection after adding
   resetTreatmentDraft()
 }
 
@@ -240,17 +263,6 @@ function handleFilterStatus(status) {
 function handleEditTreatment(updated) {
   if (!updated?.id) return
   treatmentStore.updateTreatment(updated.id, updated)
-  const teeth = (updated.tooth || '')
-    .split(',')
-    .map((tooth) => tooth.trim())
-    .filter(Boolean)
-  teeth.forEach((tooth) => {
-    updateToothStatusFromTreatment({
-      tooth,
-      treatmentType: updated.treatmentType,
-      status: updated.status,
-    })
-  })
 }
 
 function handleDeleteTreatment(treatmentId) {
@@ -313,6 +325,15 @@ onBeforeUnmount(() => {
   mediaQuery?.removeEventListener('change', updateBreakpoint)
   window.removeEventListener('keydown', handleEsc)
 })
+
+watch(
+  () => treatmentStore.treatments,
+  (newList) => {
+    // Update Tooth Chart markers based on history table contents
+    updateStatusesFromHistory(newList)
+  },
+  { deep: true, immediate: true },
+)
 
 watch(
   () => drawerOpen.value,
@@ -381,6 +402,7 @@ watch(
                 class="h-auto lg:h-full"
                 :selected-teeth="selectedTeethList"
                 :tooth-statuses="toothStatuses"
+                :tooth-paint-types="toothPaintTypes"
                 :multi-select="true"
                 @teeth-select="selectTooth"
                 @select-all="selectTooth"

@@ -5,17 +5,17 @@
 import { applyScopeDefaults, COVERAGE_SCOPE } from '@/utils/treatmentScope'
 
 const PAINT_TYPE_BY_CATEGORY = {
-  diagnostic: 'diagnostic',
-  preventive: 'preventive',
-  restorative: 'restorative',
-  endodontic: 'endodontic',
-  prosthetic: 'prosthetic',
-  surgery: 'surgery',
-  periodontal: 'periodontal',
-  orthodontic: 'orthodontic',
-  cosmetic: 'cosmetic',
-  emergency: 'emergency',
-  other: 'other',
+  diagnostic: 15,  // Watch
+  preventive: 13,  // Sealant
+  restorative: 6,  // Filling
+  endodontic: 3,   // RCT
+  prosthetic: 7,   // Crown
+  surgery: 1,      // Extraction
+  periodontal: 15, // Watch
+  orthodontic: 15, // Watch
+  cosmetic: 14,    // Veneer
+  emergency: 1,    // Extraction (fallback)
+  other: 0,        // None
 }
 
 function createTreatment({

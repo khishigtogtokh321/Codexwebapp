@@ -136,12 +136,15 @@ watch(isEditOpen, (open) => {
         <thead>
           <tr>
             <th>Огноо</th>
+            <th>Дууссан</th>
+            <th>Онош</th>
+            <th>Эмч</th>
             <th>Шүд</th>
             <th>Гадаргуу</th>
-            <th>Оношлогоо</th>
-            <th>Эмчилгээ</th>
-            <th>Эмч</th>
+            <th>Код</th>
+            <th>Тайлбар</th>
             <th class="history-grid__cell--number">Үнэ</th>
+            <th>Тэмдэглэл</th>
             <th>Төлөв</th>
             <th>Үйлдэл</th>
           </tr>
@@ -149,7 +152,7 @@ watch(isEditOpen, (open) => {
         <tbody>
           <!-- Loading State -->
           <tr v-if="loading" class="history-grid__row">
-            <td colspan="9" class="history-grid__cell history-grid__cell--muted">
+            <td colspan="12" class="history-grid__cell history-grid__cell--muted">
               <div class="history-grid__loading">
                 <svg class="history-grid__spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -162,7 +165,7 @@ watch(isEditOpen, (open) => {
 
           <!-- Empty State -->
           <tr v-else-if="treatments.length === 0" class="history-grid__row">
-            <td colspan="9" class="history-grid__cell history-grid__cell--muted">
+            <td colspan="12" class="history-grid__cell history-grid__cell--muted">
               Эмчилгээний түүх олдсонгүй
             </td>
           </tr>
@@ -177,27 +180,38 @@ watch(isEditOpen, (open) => {
               <td class="history-grid__cell history-grid__cell--date">
                 {{ formatDate(treatment.date) }}
               </td>
+              <td class="history-grid__cell history-grid__cell--date">
+                {{ treatment.status === 'done' ? formatDate(treatment.date) : '' }}
+              </td>
+              <td class="history-grid__cell">
+                <span class="history-grid__ellipsis" :title="treatment.diagnosis">
+                  {{ typeof treatment.diagnosis === 'object' ? (treatment.diagnosis.name || treatment.diagnosis.code) : (treatment.diagnosis || '---') }}
+                </span>
+              </td>
+              <td class="history-grid__cell">
+                {{ treatment.doctor || '---' }}
+              </td>
               <td class="history-grid__cell history-grid__cell--code">
                 {{ treatment.tooth }}
               </td>
               <td class="history-grid__cell">
                 {{ treatment.surface }}
               </td>
-              <td class="history-grid__cell">
-                <span class="history-grid__ellipsis" :title="treatment.diagnosis">
-                  {{ treatment.diagnosis }}
-                </span>
+              <td class="history-grid__cell text-xs font-mono">
+                {{ treatment.code }}
               </td>
               <td class="history-grid__cell">
                 <span class="history-grid__ellipsis" :title="treatment.treatmentType">
                   {{ treatment.treatmentType }}
                 </span>
               </td>
-              <td class="history-grid__cell">
-                {{ treatment.doctor }}
-              </td>
               <td class="history-grid__cell history-grid__cell--number">
-                {{ treatment.price }}
+                {{ Number(treatment.price || 0).toLocaleString() }}₮
+              </td>
+              <td class="history-grid__cell">
+                <span class="history-grid__ellipsis" :title="treatment.note">
+                  {{ treatment.note || '' }}
+                </span>
               </td>
               <td class="history-grid__cell">
                 <span

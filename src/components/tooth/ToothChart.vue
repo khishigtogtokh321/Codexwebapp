@@ -12,6 +12,10 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  toothPaintTypes: {
+    type: Object,
+    default: () => ({}),
+  },
   multiSelect: {
     type: Boolean,
     default: true,
@@ -68,6 +72,10 @@ function getToothStatus(toothNumber) {
   return props.toothStatuses[toothNumber] || 'healthy'
 }
 
+function getToothPaintType(toothNumber) {
+  return props.toothPaintTypes[toothNumber] || null
+}
+
 function isSelected(toothNumber) {
   if (props.multiSelect) {
     return props.selectedTeeth.includes(toothNumber)
@@ -110,6 +118,7 @@ function undoSelection() {
               :key="tooth"
               :tooth-number="String(tooth)"
               :status="getToothStatus(String(tooth))"
+              :paint-type="getToothPaintType(String(tooth))"
               :is-selected="isSelected(String(tooth))"
               @click="handleToothClick"
             />
@@ -125,6 +134,7 @@ function undoSelection() {
               :key="tooth"
               :tooth-number="String(tooth)"
               :status="getToothStatus(String(tooth))"
+              :paint-type="getToothPaintType(String(tooth))"
               :is-selected="isSelected(String(tooth))"
               @click="handleToothClick"
             />
@@ -144,6 +154,7 @@ function undoSelection() {
               :key="tooth"
               :tooth-number="String(tooth)"
               :status="getToothStatus(String(tooth))"
+              :paint-type="getToothPaintType(String(tooth))"
               :is-selected="isSelected(String(tooth))"
               @click="handleToothClick"
             />
@@ -159,6 +170,7 @@ function undoSelection() {
               :key="tooth"
               :tooth-number="String(tooth)"
               :status="getToothStatus(String(tooth))"
+              :paint-type="getToothPaintType(String(tooth))"
               :is-selected="isSelected(String(tooth))"
               @click="handleToothClick"
             />
