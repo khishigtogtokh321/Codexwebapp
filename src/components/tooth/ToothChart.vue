@@ -22,6 +22,11 @@ const props = defineProps({
   },
 })
 
+// Use the setToothStatus method from props or provide a fallback
+const setToothStatusLocal = (toothNumber, status) => {
+  emit('set-status', { toothNumber, status })
+}
+
 const emit = defineEmits(['tooth-select', 'teeth-select', 'select-all', 'clear-selection'])
 
 const dentitionFilter = ref('permanent') // 'permanent' | 'primary' | 'mixed'
@@ -107,6 +112,22 @@ function undoSelection() {
   } else {
     emit('tooth-select', lastSelection.value[0] || '')
   }
+}
+
+function handleExtracted() {
+  if (!props.selectedTeeth.length) return
+  props.selectedTeeth.forEach((tooth) => {
+    setToothStatusLocal(tooth, 'missing')
+  })
+  emit('clear-selection')
+}
+
+function handleImpacted() {
+  if (!props.selectedTeeth.length) return
+  props.selectedTeeth.forEach((tooth) => {
+    setToothStatusLocal(tooth, 'healthy')
+  })
+  emit('clear-selection')
 }
 </script>
 
@@ -214,8 +235,22 @@ function undoSelection() {
         >
           Холимог
         </button>
-        <button type="button" class="selector-btn" disabled>Авхуулсан</button>
-        <button type="button" class="selector-btn" disabled>Аваагүй</button>
+        <button
+          type="button"
+          class="selector-btn"
+          :disabled="!hasSelection"
+          @click="handleExtracted"
+        >
+          Авхуулсан
+        </button>
+        <button
+          type="button"
+          class="selector-btn"
+          :disabled="!hasSelection"
+          @click="handleImpacted"
+        >
+          Аваагүй
+        </button>
       </div>
     </div>
   </div>

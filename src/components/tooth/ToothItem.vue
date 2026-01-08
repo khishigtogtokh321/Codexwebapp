@@ -47,7 +47,7 @@ const toothClasses = computed(() => {
     treated: 'bg-white border-gray-300', // Hide blue marker
     problem: 'bg-red-50 border-red-400',
     planned: 'bg-white border-gray-300', // Hide amber marker
-    missing: 'bg-gray-100 border-gray-400 opacity-60',
+    missing: 'bg-transparent border-gray-200 border-dashed opacity-100', // Slot placeholder
   }
 
   const statusClass = statusColors[props.status] || statusColors.healthy
@@ -62,9 +62,8 @@ const toothClasses = computed(() => {
 const markerColor = computed(() => PAINT_COLORS[props.paintType] || '#94a3b8')
 
 const numberColorClass = computed(() => {
+  if (props.status === 'missing') return 'text-gray-400 opacity-10' // Faded for missing
   if (props.status === 'healthy') return 'text-gray-800'
-  // If there's a clinical marker (paintType), the marker itself shows status.
-  // We only color the number if there's history but NO visual marker.
   if (props.paintType && props.paintType !== 0) return 'text-gray-800'
   return 'text-blue-600'
 })
@@ -80,8 +79,13 @@ function handleClick() {
       {{ toothNumber }}
     </span>
 
-    <!-- TREATMENT VISUALS (SVG / SHAPES) - ONLY SHOW IF ACTIVE -->
-    <div v-if="isActive" class="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden">
+    <!-- TOOTH IMAGE PLACEHOLDER (Original tooth) - HIDE IF MISSING -->
+    <!-- <div v-if="status !== 'missing'" class="absolute inset-x-0 bottom-0 top-6 px-1.5 flex items-center justify-center pointer-events-none">
+       <div class="w-full h-full bg-slate-100/30 rounded-t-lg border-x border-t border-slate-200/50"></div>
+    </div> -->
+
+    <!-- TREATMENT VISUALS (SVG / SHAPES) - ONLY SHOW IF ACTIVE AND NOT MISSING -->
+    <div v-if="isActive && status !== 'missing'" class="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden">
       <!-- 1: Extraction / Шүд авах (Large Red X) -->
       <svg v-if="paintType === 1" class="w-full h-full text-red-500 opacity-80" viewBox="0 0 100 100">
         <line x1="15" y1="15" x2="85" y2="85" stroke="currentColor" stroke-width="10" stroke-linecap="round" />

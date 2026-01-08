@@ -44,8 +44,15 @@ export function useToothStatus(initialStatuses = null) {
     const newRank = STATUS_PRIORITY[status] || 0
 
     // Only update if the new status is higher or equal priority
-    if (newRank >= currentRank) {
+    // EXCEPT if we are explicitly setting it to healthy (to restore a missing tooth)
+    if (newRank >= currentRank || status === 'healthy') {
       toothStatuses.value[toothNumber] = status
+
+      // If setting to healthy, clear paint types
+      if (status === 'healthy') {
+        toothPaintTypes.value[toothNumber] = 0
+        return
+      }
 
       // Update paint type ONLY if it's higher priority or the current one is empty
       const currentPaintId = Number(toothPaintTypes.value[toothNumber] || 0)
@@ -83,8 +90,7 @@ export function useToothStatus(initialStatuses = null) {
   }
 
   function markToothAsHealthy(toothNumber) {
-    delete toothStatuses.value[toothNumber]
-    delete toothPaintTypes.value[toothNumber]
+    setToothStatus(toothNumber, 'healthy')
   }
 
   // CRITICAL: Reset must be a clean slate to match history table exactly

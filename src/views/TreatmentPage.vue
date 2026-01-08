@@ -38,7 +38,7 @@ const drawerCloseRef = ref(null)
 
 const desktopExpanded = computed(() => isLgUp.value && (hovered.value || pinned.value))
 
-const { toothStatuses, toothPaintTypes, updateToothStatusFromTreatment, updateStatusesFromHistory } = useToothStatus(mockToothStatuses)
+const { toothStatuses, toothPaintTypes, setToothStatus, updateToothStatusFromTreatment, updateStatusesFromHistory } = useToothStatus(mockToothStatuses)
 
 const selectedTeethList = computed(() => state.selectedTeeth)
 const selectedTreatmentItems = computed(() => getSelectedTreatments(state.selectedTreatmentTypeIds))
@@ -273,6 +273,10 @@ function handleStatusChange(status) {
   state.selectedStatus = status
 }
 
+function handleSetStatus({ toothNumber, status }) {
+  setToothStatus(toothNumber, status)
+}
+
 function handlePatientSelected(patient) {
   activePatient.value = patient || activePatient.value
 }
@@ -407,6 +411,7 @@ watch(
                 @teeth-select="selectTooth"
                 @select-all="selectTooth"
                 @clear-selection="clearSelectedTeeth"
+                @set-status="handleSetStatus"
               />
             </div>
 
