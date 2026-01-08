@@ -1,21 +1,23 @@
+
 /**
  * Dental treatment type definitions with canonical fields and backward-compatible flags.
  */
 
 import { applyScopeDefaults, COVERAGE_SCOPE } from '@/utils/treatmentScope'
 
+// Fallback paint types by category (if not explicit in treatment object)
 const PAINT_TYPE_BY_CATEGORY = {
-  diagnostic: 15,  // Watch
-  preventive: 13,  // Sealant
-  restorative: 6,  // Filling
-  endodontic: 3,   // RCT
-  prosthetic: 7,   // Crown
-  surgery: 1,      // Extraction
-  periodontal: 15, // Watch
-  orthodontic: 15, // Watch
-  cosmetic: 14,    // Veneer
-  emergency: 1,    // Extraction (fallback)
-  other: 0,        // None
+  diagnostic: 15, // Watch / Хяналт
+  preventive: 13, // Sealant / Чигжээс
+  restorative: 6, // Filling / Ломбо
+  endodontic: 3, // RCT / Суваг
+  prosthetic: 7, // Crown / Бүрээс (Note: Bridge is 9, Denture is 11)
+  surgery: 1, // Extraction / Шүд авах
+  periodontal: 15, // Watch / Хяналт
+  orthodontic: 15, // Watch / Хяналт
+  cosmetic: 14, // Veneer / Өнгөлгөө
+  emergency: 1, // Extraction fallback
+  other: 0, // None
 }
 
 function createTreatment({

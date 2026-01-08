@@ -154,7 +154,7 @@ function resolvePaintType(label, explicitPaintType) {
   return match?.paintType || 'other'
 }
 
-function buildTreatmentEntry(tooth, treatmentLabel, paintType = null) {
+function buildTreatmentEntry(tooth, treatmentLabel, paintType = null, price = '', code = '') {
   const surfaceText = state.selectedSurfaces.join(', ')
   const status = state.selectedStatus || 'done'
   const toothText = getToothText(tooth)
@@ -166,9 +166,10 @@ function buildTreatmentEntry(tooth, treatmentLabel, paintType = null) {
     surface: surfaceText,
     diagnosis: buildDiagnosisText(),
     treatmentType: treatmentLabel,
+    code: code,
     paintType: paintType, // Store paintType for Chart markers
     doctor: '',
-    price: '',
+    price: price,
     status,
   }
 }
@@ -187,12 +188,16 @@ function buildTreatmentEntries() {
       const label = codeItem.nameMn || codeItem.name || codeItem.code
       // Ensure we get the paintType directly from the code item
       const paintType = codeItem.paintType || resolvePaintType(label)
-      entries.push(buildTreatmentEntry(tooth, label, paintType))
+      const price = codeItem.price || ''
+      const code = codeItem.code || ''
+      entries.push(buildTreatmentEntry(tooth, label, paintType, price, code))
     })
 
     // 2. Process treatment types (Quick Add)
     selectedTypes.forEach((t) => {
-      entries.push(buildTreatmentEntry(tooth, t.label, t.paintType))
+      // Quick add types might not have explicit price/code in the generic object, 
+      // but if we had them mapped we could pass them. For now, pass empty or resolved defaults.
+      entries.push(buildTreatmentEntry(tooth, t.label, t.paintType, '', t.id))
     })
   })
 

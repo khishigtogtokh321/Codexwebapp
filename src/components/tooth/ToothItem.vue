@@ -33,6 +33,8 @@ const PAINT_COLORS = {
   3: '#a855f7', // RCT (Purple)
   6: '#3b82f6', // Filling (Blue)
   7: '#3b82f6', // Crown (Blue)
+  9: '#f97316', // Bridge (Orange)
+  11: '#14b8a6', // Denture (Teal)
   13: '#14b8a6', // Sealant (Teal)
   14: '#f97316', // Veneer (Orange)
   15: '#64748b', // Watch (Slate)
@@ -92,12 +94,27 @@ function handleClick() {
         <line x1="85" y1="15" x2="15" y2="85" stroke="currentColor" stroke-width="10" stroke-linecap="round" />
       </svg>
 
-      <!-- 2: Implant / Имплант (Screw at bottom) -->
-      <div v-if="paintType === 2" class="absolute bottom-1 w-full flex justify-center">
-        <svg class="w-5 h-6 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <path d="M12 2v18M7 7h10M7 11h10M7 15h10M10 22h4" stroke-linecap="round" />
-        </svg>
-      </div>
+      <!-- paintType === 2 : Implant (solid green screw) -->
+        <div v-if="paintType === 2" class="absolute bottom-1 w-full flex justify-center pointer-events-none">
+          <svg class="w-5 h-6" viewBox="0 0 24 24" aria-hidden="true">
+            <!-- body -->
+            <defs>
+              <!-- ridge stripes like the screenshot -->
+              <pattern id="implantRidges" width="6" height="4" patternUnits="userSpaceOnUse">
+                <rect x="0" y="0" width="6" height="4" fill="#22c55e"/>
+                <rect x="0" y="3" width="6" height="1" fill="#16a34a"/>
+              </pattern>
+            </defs>
+
+            <!-- main cylinder -->
+            <rect x="9" y="3" width="6" height="16" rx="2" fill="url(#implantRidges)"/>
+            <!-- slight highlight strip -->
+            <rect x="10" y="4" width="1" height="14" rx="0.5" fill="#86efac" opacity="0.9"/>
+
+            <!-- bottom tip -->
+            <path d="M9 19h6v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-2z" fill="#16a34a"/>
+          </svg>
+        </div>
 
       <!-- 3: RCT / Суваг (Vertical dashed line) -->
       <svg v-if="paintType === 3" class="w-full h-full text-purple-500 opacity-60" viewBox="0 0 100 100">

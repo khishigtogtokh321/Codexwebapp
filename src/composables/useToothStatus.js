@@ -14,16 +14,16 @@ export function useToothStatus(initialStatuses = null) {
 
   // Priority rule based on clinical importance (Higher number = higher priority)
   const PAINT_TYPE_PRIORITY = {
-    1: 10,  // Extraction
-    2: 10,  // Implant
-    3: 9,   // RCT
-    7: 8,   // Crown
-    9: 8,   // Bridge
-    11: 8,  // Denture
-    6: 7,   // Filling
-    14: 6,  // Veneer
-    13: 5,  // Sealant
-    15: 4,  // Watch
+    1: 10,  // Extraction / Шүд авах (Highest)
+    2: 10,  // Implant / Имплант (Highest)
+    3: 9,   // RCT / Суваг
+    9: 9,   // Bridge / Гүүр
+    11: 9,  // Denture / Хиймэл шүд
+    7: 8,   // Crown / Бүрээс
+    6: 7,   // Filling / Ломбо
+    14: 6,  // Veneer / Өнгөлгөө
+    13: 5,  // Sealant / Чигжээс
+    15: 4,  // Watch / Хяналт
     0: 0,   // None
   }
 
