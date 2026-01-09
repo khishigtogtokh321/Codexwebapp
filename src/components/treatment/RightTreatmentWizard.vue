@@ -24,6 +24,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  requiresTooth: {
+    type: Boolean,
+    default: false,
+  },
+  requiresSurface: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['update:surfaces', 'update:diagnosis', 'update:code', 'update:status', 'add'])
@@ -43,6 +51,7 @@ let dropdownRafId = null
 let surfaceDropdownRafId = null
 
 const showTooltipCode = ref(null)
+const showCategoryDropdown = ref(false)
 
 const maxPreviewCodes = 3
 const statusOptions = [
@@ -114,6 +123,19 @@ const currentType = computed(() => wizardTreatmentTypes[currentTypeIndex.value])
 const currentCodes = computed(
   () => treatmentCodesByType[currentType.value?.id] || legacyTreatmentCodesByType[currentType.value?.id] || [],
 )
+// Computed for carousel-with-peek navigation
+const prevType = computed(() => {
+  const typeCount = wizardTreatmentTypes.length
+  if (!typeCount) return null
+  const prevIndex = (currentTypeIndex.value - 1 + typeCount) % typeCount
+  return wizardTreatmentTypes[prevIndex]
+})
+const nextType = computed(() => {
+  const typeCount = wizardTreatmentTypes.length
+  if (!typeCount) return null
+  const nextIndex = (currentTypeIndex.value + 1) % typeCount
+  return wizardTreatmentTypes[nextIndex]
+})
 const selectedCodeLabels = computed(() =>
   selectedCodes.value
     .map((item) => [item?.code, item?.nameMn || item?.name].filter(Boolean).join(' '))
@@ -317,16 +339,26 @@ function openDiagnosisDropdown() {
   showDiagnosisDropdown.value = true
 }
 
-function prevType() {
+function handlePrevType() {
   const typeCount = wizardTreatmentTypes.length
   if (!typeCount) return
   currentTypeIndex.value = (currentTypeIndex.value - 1 + typeCount) % typeCount
 }
 
-function nextType() {
+function handleNextType() {
   const typeCount = wizardTreatmentTypes.length
   if (!typeCount) return
   currentTypeIndex.value = (currentTypeIndex.value + 1) % typeCount
+}
+
+// Category dropdown functions (UI only)
+function toggleCategoryDropdown() {
+  showCategoryDropdown.value = !showCategoryDropdown.value
+}
+
+function selectCategory(index) {
+  currentTypeIndex.value = index
+  showCategoryDropdown.value = false
 }
 
 function isCodeSelected(code) {
@@ -534,20 +566,78 @@ function handleAdd() {
       </div>
 
       <div class="treatment-wizard__block treatment-wizard__block--codes min-w-0">
-        <!-- Scrollable Horizontal Tabs for Treatment Types -->
-        <div class="treatment-tabs-container">
-          <div class="treatment-tabs-scroll">
+        <!-- Carousel-with-Peek Navigation + Dropdown -->
+        <div class="treatment-carousel">
+          <!-- Left Arrow -->
+          <button
+            type="button"
+            class="treatment-carousel__arrow"
+            @click="handlePrevType"
+            aria-label="Previous category"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M12.78 4.22a.75.75 0 010 1.06L8.06 10l4.72 4.72a.75.75 0 11-1.06 1.06l-5.25-5.25a.75.75 0 010-1.06l5.25-5.25a.75.75 0 011.06 0z" clip-rule="evenodd" />
+            </svg>
+          </button>
+
+          <!-- Previous Category (Faded) -->
+          <button
+            type="button"
+            class="treatment-carousel__item treatment-carousel__item--prev"
+            @click="handlePrevType"
+          >
+            {{ prevType?.label }}
+          </button>
+
+          <!-- Active Category (Clickable for Dropdown) -->
+          <div class="treatment-carousel__active-wrapper">
             <button
-              v-for="(type, index) in wizardTreatmentTypes"
-              :key="type.id"
               type="button"
-              class="treatment-tab"
-              :class="currentTypeIndex === index ? 'treatment-tab--active' : ''"
-              @click="currentTypeIndex = index"
+              class="treatment-carousel__item treatment-carousel__item--active"
+              @click="toggleCategoryDropdown"
             >
-              {{ type.label }}
+              {{ currentType?.label }}
+              <svg class="w-3 h-3 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd" />
+              </svg>
             </button>
+
+            <!-- Category Dropdown -->
+            <div v-if="showCategoryDropdown" class="treatment-carousel__dropdown">
+              <button
+                v-for="(type, index) in wizardTreatmentTypes"
+                :key="type.id"
+                type="button"
+                class="treatment-carousel__dropdown-item"
+                :class="currentTypeIndex === index ? 'treatment-carousel__dropdown-item--active' : ''"
+                @click="selectCategory(index)"
+              >
+                <span v-if="currentTypeIndex === index" class="treatment-carousel__dropdown-check">✓</span>
+                {{ type.label }}
+              </button>
+            </div>
           </div>
+
+          <!-- Next Category (Faded) -->
+          <button
+            type="button"
+            class="treatment-carousel__item treatment-carousel__item--next"
+            @click="handleNextType"
+          >
+            {{ nextType?.label }}
+          </button>
+
+          <!-- Right Arrow -->
+          <button
+            type="button"
+            class="treatment-carousel__arrow"
+            @click="handleNextType"
+            aria-label="Next category"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M7.22 4.22a.75.75 0 011.06 0l5.25 5.25a.75.75 0 010 1.06l-5.25 5.25a.75.75 0 11-1.06-1.06L11.94 10 7.22 5.28a.75.75 0 010-1.06z" clip-rule="evenodd" />
+            </svg>
+          </button>
         </div>
 
         <div
@@ -579,30 +669,24 @@ function handleAdd() {
     </div>
 
     <div class="treatment-action-bar treatment-action-bar--inline">
-      <div class="treatment-wizard-footer">
-        <!-- Row 1: Status selection -->
-        <div class="treatment-footer-row">
-          <div class="treatment-status-actions-container">
-            <div class="treatment-status-actions-segmented">
-              <button
-                v-for="option in statusOptions"
-                :key="option.id"
-                type="button"
-                class="treatment-status-segment"
-                :class="isStatusActive(option.id) ? 'treatment-status-segment--active' : ''"
-                @click="onSelectStatus(option.id)"
-              >
-                {{ option.label }}
-              </button>
-            </div>
-          </div>
+      <div class="treatment-wizard-footer treatment-wizard-footer--inline">
+        <!-- Inline layout: Status on left, Add button on right -->
+        <div class="treatment-status-actions-segmented treatment-status-actions-segmented--compact">
+          <button
+            v-for="option in statusOptions"
+            :key="option.id"
+            type="button"
+            class="treatment-status-segment treatment-status-segment--compact"
+            :class="isStatusActive(option.id) ? 'treatment-status-segment--active' : ''"
+            @click="onSelectStatus(option.id)"
+          >
+            {{ option.label }}
+          </button>
         </div>
-
-        <!-- Row 2: Add button -->
-        <div class="treatment-footer-row">
+        <div class="flex-1 flex flex-col items-end gap-1.5">
           <button
             type="button"
-            class="treatment-add-button-primary"
+            class="treatment-add-button-primary treatment-add-button-primary--compact w-full"
             :disabled="!canAdd"
             @click="handleAdd"
           >

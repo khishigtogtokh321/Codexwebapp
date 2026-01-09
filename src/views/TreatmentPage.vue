@@ -35,6 +35,7 @@ const isLgUp = ref(false)
 const isQuickAddOpen = ref(false)
 const drawerTriggerRef = ref(null)
 const drawerCloseRef = ref(null)
+const isAlertDismissed = ref(false)
 
 const desktopExpanded = computed(() => isLgUp.value && (hovered.value || pinned.value))
 
@@ -48,12 +49,17 @@ const availableTreatments = computed(() => treatmentTypes)
 const hasSelectedTreatments = computed(
   () => state.selectedCodes.length > 0 || state.selectedTreatmentTypeIds.length > 0,
 )
-const scopeMeta = computed(() => getScopeMeta(selectedTreatmentItems.value))
+const combinedSelectedItems = computed(() => [
+  ...selectedTreatmentItems.value,
+  ...state.selectedCodes,
+])
+
+const scopeMeta = computed(() => getScopeMeta(combinedSelectedItems.value))
 const requiresTooth = computed(
-  () => scopeMeta.value.requiresTooth && selectedTreatmentItems.value.length > 0,
+  () => scopeMeta.value.requiresTooth && combinedSelectedItems.value.length > 0,
 )
 const requiresSurface = computed(
-  () => scopeMeta.value.requiresSurface && selectedTreatmentItems.value.length > 0,
+  () => scopeMeta.value.requiresSurface && combinedSelectedItems.value.length > 0,
 )
 const hasSelectedTooth = computed(() => state.selectedTeeth.length > 0)
 const hasSelectedSurface = computed(() => state.selectedSurfaces.length > 0)
@@ -66,6 +72,19 @@ const meetsScopeGuard = computed(() => {
   return true
 })
 const canAddSelection = computed(() => hasSelectedTreatments.value && meetsScopeGuard.value)
+
+const showAlert = computed(() => {
+  return hasSelectedTreatments.value && !meetsScopeGuard.value && !isAlertDismissed.value
+})
+
+// Reset dismissal when selection changes
+watch(
+  () => [combinedSelectedItems.value, state.selectedTeeth, state.selectedSurfaces],
+  () => {
+    isAlertDismissed.value = false
+  },
+  { deep: true },
+)
 
 
 const filteredLog = computed(() => {
@@ -420,7 +439,48 @@ watch(
               />
             </div>
 
-            <div class="lg:col-span-5 lg:pl-2 min-w-0">
+            <div class="lg:col-span-5 lg:pl-2 min-w-0 relative">
+              <!-- Floating Validation Alert -->
+              <Transition
+                enter-active-class="transition duration-200 ease-out"
+                enter-from-class="transform -translate-y-2 opacity-0"
+                enter-to-class="transform translate-y-0 opacity-100"
+                leave-active-class="transition duration-150 ease-in"
+                leave-from-class="transform translate-y-0 opacity-100"
+                leave-to-class="transform -translate-y-2 opacity-0"
+              >
+                <div 
+                  v-if="showAlert" 
+                  class="absolute -top-4 -left-90  z-50 bg-red-50 border border-red-100 rounded-xl p-3 shadow-xl flex items-start gap-3"
+                >
+                  <div class="mt-0.5 flex-shrink-0">
+                    <div class="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center">
+                      <svg class="w-3.5 h-3.5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-[13px] font-bold text-red-700 leading-tight mb-1">
+                      Гүйцэтгэлийг үргэлжлүүлэхийн тулд:
+                    </p>
+                    <ul class="text-[12px] text-red-600 list-disc list-inside space-y-0.5 leading-tight">
+                      <li v-if="requiresTooth && !hasSelectedTooth">Шүд сонгоно уу</li>
+                      <li v-if="requiresSurface && !hasSelectedSurface">Гадаргуу сонгоно уу</li>
+                    </ul>
+                  </div>
+                  <button 
+                    type="button" 
+                    class="ml-2 text-red-400 hover:text-red-500 transition-colors p-1"
+                    @click="isAlertDismissed = true"
+                  >
+                    <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                    </svg>
+                  </button>
+                </div>
+              </Transition>
+
               <RightTreatmentWizard
                 class="lg:h-full"
                 :selected-surfaces="state.selectedSurfaces"
@@ -428,6 +488,8 @@ watch(
                 :selected-codes="state.selectedCodes"
                 :selected-status="state.selectedStatus"
                 :can-add="canAddSelection"
+                :requires-tooth="requiresTooth"
+                :requires-surface="requiresSurface"
                 @update:surfaces="handleSurfacesUpdate"
                 @update:diagnosis="handleDiagnosisUpdate"
                 @update:code="handleCodesUpdate"

@@ -1701,7 +1701,152 @@
   }
 
   /* ========================================
-     Scrollable Horizontal Tabs for Treatment Types
+     Carousel-with-Peek Navigation + Dropdown
+     ======================================== */
+  .treatment-carousel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    width: 100%;
+  }
+
+  .treatment-carousel__arrow {
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 150ms ease;
+  }
+
+  .treatment-carousel__arrow:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #475569;
+  }
+
+  .treatment-carousel__item {
+    padding: 0.5rem 0.75rem;
+    border: none;
+    background: transparent;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 150ms ease;
+  }
+
+  .treatment-carousel__item--prev,
+  .treatment-carousel__item--next {
+    color: #94a3b8;
+    opacity: 0.6;
+    flex: 0 0 110px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0.5rem 0.75rem;
+    transition: all 150ms ease;
+  }
+
+  .treatment-carousel__item--prev:hover,
+  .treatment-carousel__item--next:hover {
+    opacity: 0.8;
+    color: #64748b;
+  }
+
+  .treatment-carousel__active-wrapper {
+    position: relative;
+    flex: 0 0 140px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30%;
+    min-width: 140px;
+    max-width: 200px;
+  }
+
+  .treatment-carousel__item--active {
+    display: inline-flex;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    background: #ffffff;
+    border: 2px solid #2563eb;
+    border-radius: 999px;
+    color: #1e40af;
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  .treatment-carousel__item--active:hover {
+    background: #eff6ff;
+  }
+
+  /* Dropdown Styles */
+  .treatment-carousel__dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 180px;
+    max-height: 280px;
+    overflow-y: auto;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15), 0 4px 6px -2px rgba(15, 23, 42, 0.08);
+    z-index: 100;
+    padding: 4px;
+  }
+
+  .treatment-carousel__dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border: none;
+    background: transparent;
+    color: #334155;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-align: left;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 120ms ease;
+  }
+
+  .treatment-carousel__dropdown-item:hover {
+    background: #f8fafc;
+  }
+
+  .treatment-carousel__dropdown-item--active {
+    background: #eff6ff;
+    color: #1e40af;
+    font-weight: 600;
+  }
+
+  .treatment-carousel__dropdown-check {
+    color: #2563eb;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  /* ========================================
+     Scrollable Horizontal Tabs for Treatment Types (Legacy/Backup)
      ======================================== */
   .treatment-tabs-container {
     position: relative;
@@ -1998,7 +2143,40 @@
     flex-direction: column;
     gap: 8px;
     width: 100%;
-    padding: clamp(0.5rem, 1.2cqw, 1rem) 0 0;
+    padding: 0.5rem 0 0;
+  }
+
+  /* Inline single-row footer layout */
+  .treatment-wizard-footer--inline {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0.5rem 0;
+  }
+
+  /* Compact segmented control for inline footer */
+  .treatment-status-actions-segmented--compact {
+    flex: 0 0 auto;
+    min-width: 180px;
+    max-width: 220px;
+    padding: 2px;
+    border-radius: 10px;
+  }
+
+  /* Compact status segment buttons */
+  .treatment-status-segment--compact {
+    min-height: 44px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  /* Compact add button for inline footer */
+  .treatment-add-button-primary--compact {
+    flex: 1;
+    height: 52px;
+    max-width: none;
+    font-size: 1rem;
   }
 
   .treatment-footer-row {
@@ -2058,7 +2236,7 @@
   /* Full-width Primary Add Button */
   .treatment-add-button-primary {
     width: 100%;
-    height: 48px;
+    height: 52px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
