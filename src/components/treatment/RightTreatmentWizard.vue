@@ -534,38 +534,20 @@ function handleAdd() {
       </div>
 
       <div class="treatment-wizard__block treatment-wizard__block--codes min-w-0">
-        <div class="flex items-center justify-between">
-          <button
-            type="button"
-            class="treatment-icon-button"
-            @click="prevType"
-          >
-            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-              <path
-                fill-rule="evenodd"
-                d="M12.78 4.22a.75.75 0 010 1.06L8.06 10l4.72 4.72a.75.75 0 11-1.06 1.06l-5.25-5.25a.75.75 0 010-1.06l5.25-5.25a.75.75 0 011.06 0z"
-                clip-rule="evenodd"
-              />
-            </svg>
-          </button>
-
-          <div class="treatment-type-pill min-w-0">
-            {{ currentType?.label }}
+        <!-- Scrollable Horizontal Tabs for Treatment Types -->
+        <div class="treatment-tabs-container">
+          <div class="treatment-tabs-scroll">
+            <button
+              v-for="(type, index) in wizardTreatmentTypes"
+              :key="type.id"
+              type="button"
+              class="treatment-tab"
+              :class="currentTypeIndex === index ? 'treatment-tab--active' : ''"
+              @click="currentTypeIndex = index"
+            >
+              {{ type.label }}
+            </button>
           </div>
-
-          <button
-            type="button"
-            class="treatment-icon-button"
-            @click="nextType"
-          >
-            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-              <path
-                fill-rule="evenodd"
-                d="M7.22 4.22a.75.75 0 011.06 0l5.25 5.25a.75.75 0 010 1.06l-5.25 5.25a.75.75 0 11-1.06-1.06L11.94 10 7.22 5.28a.75.75 0 010-1.06z"
-                clip-rule="evenodd"
-              />
-            </svg>
-          </button>
         </div>
 
         <div
