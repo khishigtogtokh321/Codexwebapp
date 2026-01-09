@@ -31,13 +31,7 @@ const PAINT_COLORS = {
   1: '#ef4444', // Extraction (Red)
   2: '#ef4444', // Implant (Red)
   3: '#a855f7', // RCT (Purple)
-  6: '#3b82f6', // Filling (Blue)
   7: '#3b82f6', // Crown (Blue)
-  9: '#f97316', // Bridge (Orange)
-  11: '#14b8a6', // Denture (Teal)
-  13: '#14b8a6', // Sealant (Teal)
-  14: '#f97316', // Veneer (Orange)
-  15: '#64748b', // Watch (Slate)
 }
 
 const toothClasses = computed(() => {
@@ -64,9 +58,12 @@ const toothClasses = computed(() => {
 const markerColor = computed(() => PAINT_COLORS[props.paintType] || '#94a3b8')
 
 const numberColorClass = computed(() => {
-  if (props.status === 'missing') return 'text-gray-400 opacity-10' // Faded for missing
+  if (props.status === 'missing') return 'text-gray-400 opacity-50' // Faded number for missing
+  
+  // If there's a clinical marker (paintType), fade the number so the marker is clearer
+  if (props.paintType && props.paintType !== 0) return 'invisible' 
+  
   if (props.status === 'healthy') return 'text-gray-800'
-  if (props.paintType && props.paintType !== 0) return 'text-gray-800'
   return 'text-blue-600'
 })
 
@@ -81,10 +78,6 @@ function handleClick() {
       {{ toothNumber }}
     </span>
 
-    <!-- TOOTH IMAGE PLACEHOLDER (Original tooth) - HIDE IF MISSING -->
-    <!-- <div v-if="status !== 'missing'" class="absolute inset-x-0 bottom-0 top-6 px-1.5 flex items-center justify-center pointer-events-none">
-       <div class="w-full h-full bg-slate-100/30 rounded-t-lg border-x border-t border-slate-200/50"></div>
-    </div> -->
 
     <!-- TREATMENT VISUALS (SVG / SHAPES) - ONLY SHOW IF ACTIVE AND NOT MISSING -->
     <div v-if="isActive && status !== 'missing'" class="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden">
@@ -95,44 +88,183 @@ function handleClick() {
       </svg>
 
       <!-- paintType === 2 : Implant (solid green screw) -->
-        <div v-if="paintType === 2" class="absolute bottom-1 w-full flex justify-center pointer-events-none">
-          <svg class="w-5 h-6" viewBox="0 0 24 24" aria-hidden="true">
-            <!-- body -->
+        
+          <svg
+            v-if="paintType === 2"
+            class="w-full h-full"
+            viewBox="0 0 100 100"
+            preserveAspectRatio="xMidYMid slice"
+            aria-hidden="true"
+          >
             <defs>
-              <!-- ridge stripes like the screenshot -->
-              <pattern id="implantRidges" width="6" height="4" patternUnits="userSpaceOnUse">
-                <rect x="0" y="0" width="6" height="4" fill="#22c55e"/>
-                <rect x="0" y="3" width="6" height="1" fill="#16a34a"/>
+              <pattern :id="`implantRidges-${toothNumber}`" width="10" height="6" patternUnits="userSpaceOnUse">
+                <rect x="0" y="0" width="10" height="6" fill="#22c55e"/>
+                <rect x="0" y="4.5" width="10" height="1.5" fill="#16a34a"/>
               </pattern>
             </defs>
 
-            <!-- main cylinder -->
-            <rect x="9" y="3" width="6" height="16" rx="2" fill="url(#implantRidges)"/>
-            <!-- slight highlight strip -->
-            <rect x="10" y="4" width="1" height="14" rx="0.5" fill="#86efac" opacity="0.9"/>
+            <!-- main body (fills most of tile) -->
+            <rect x="38" y="14" width="24" height="62" rx="8" :fill="`url(#implantRidges-${toothNumber})`"/>
+
+            <!-- highlight -->
+            <rect x="42" y="18" width="4" height="54" rx="2" fill="#86efac" opacity="0.9"/>
 
             <!-- bottom tip -->
-            <path d="M9 19h6v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-2z" fill="#16a34a"/>
+            <path d="M38 74h24v10c0 6-4 10-10 10h-4c-6 0-10-4-10-10V74z" fill="#16a34a"/>
           </svg>
-        </div>
+
+     
 
       <!-- 3: RCT / Суваг (Vertical dashed line) -->
-      <svg v-if="paintType === 3" class="w-full h-full text-purple-500 opacity-60" viewBox="0 0 100 100">
-        <path d="M50 20 L50 80" stroke="currentColor" stroke-width="8" stroke-dasharray="10 5" stroke-linecap="round" />
+      <svg v-if="paintType === 3" class="w-full h-full" viewBox="0 0 100 100" aria-hidden="true">
+        <!-- 1 canal (default) -->
+        <path
+          v-if="!(toothNumber % 10 >= 6)"
+          d="M50 18 C48 35, 48 55, 46 82 C45 90, 46 95, 48 98"
+          stroke="#22c55e"
+          stroke-width="6"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+
+        <!-- 2 canals (molars/premolars-ish) -->
+        <g v-else>
+          <path
+            d="M44 18 C42 34, 42 56, 40 82 C39 90, 40 95, 42 98"
+            stroke="#22c55e"
+            stroke-width="6"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M56 18 C58 34, 58 56, 60 82 C61 90, 60 95, 58 98"
+            stroke="#22c55e"
+            stroke-width="6"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </g>
       </svg>
+
+
+      <!-- 6: Filling / Ломбо (Blue center blob) -->
+      
+        <svg
+          v-if="paintType === 6"
+          class="w-full h-full"
+          viewBox="0 0 100 100"
+          aria-hidden="true"
+        >
+          <defs>
+            <!-- unique ids to avoid collisions across many teeth -->
+            <radialGradient :id="`fillGrad-${toothNumber}`" cx="40%" cy="35%" r="70%">
+              <stop offset="0%" stop-color="#93c5fd" stop-opacity="0.95" />
+              <stop offset="55%" stop-color="#3b82f6" stop-opacity="0.95" />
+              <stop offset="100%" stop-color="#1d4ed8" stop-opacity="0.95" />
+            </radialGradient>
+
+            <filter :id="`fillShadow-${toothNumber}`" x="-30%" y="-30%" width="160%" height="160%">
+              <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#0b1220" flood-opacity="0.25" />
+            </filter>
+          </defs>
+          <g transform="translate(50 50) scale(1.45) translate(-50 -50)">
+          <!-- blob (slightly off-center looks more natural like the app) -->
+          <path
+            d="M32 48
+              C34 36, 46 30, 56 34
+              C66 38, 74 46, 70 58
+              C66 72, 52 76, 42 70
+              C34 66, 30 58, 32 48 Z"
+            :fill="`url(#fillGrad-${toothNumber})`"
+            :filter="`url(#fillShadow-${toothNumber})`"
+          />
+
+          <!-- highlight -->
+          <ellipse cx="48" cy="42" rx="10" ry="6" fill="#ffffff" opacity="0.25" />
+          </g>
+        </svg>
+
 
       <!-- 7: Crown / Бүрээс (Border overlay) -->
       <div v-if="paintType === 7" class="absolute inset-0 border-[6px] border-blue-400/40 rounded-sm"></div>
 
-      <!-- Fallback Dot for others (Filling, etc.) -->
-      <div
-        v-if="paintType && ![1, 2, 3, 7].includes(Number(paintType))"
-        class="absolute top-1 right-1 w-3 h-3 rounded-full shadow-md"
-        :style="{ 
-          background: status === 'planned' ? 'white' : markerColor,
-          border: `2px solid ${markerColor}`
-        }"
-      ></div>
+      <!-- 9: Bridge / Гүүр (Orange bracket) -->
+      <svg v-if="paintType === 9" class="w-full h-full text-orange-500" viewBox="0 0 100 100">
+        <path d="M10 40 H90 M10 40 V80 M90 40 V80" stroke="currentColor" stroke-width="8" fill="none" stroke-linecap="round" />
+      </svg>
+
+      <!-- 11: Denture / Хиймэл шүд (Teal Plate) -->
+      <svg v-if="paintType === 11" class="w-full h-full text-teal-500 opacity-30" viewBox="0 0 100 100">
+        <path d="M10 20 Q50 90 90 20 V80 H10 Z" fill="currentColor" />
+      </svg>
+
+      <!-- 13: Sealant / Чигжээс (Teal fissure lines) -->
+      <svg
+        v-if="paintType === 13"
+        class="absolute inset-0 w-full h-full pointer-events-none"
+        viewBox="0 0 100 100"
+        aria-hidden="true"
+      >
+        <text
+          x="50"
+          y="56"
+          text-anchor="middle"
+          dominant-baseline="middle"
+          font-size="92"
+          font-weight="700"
+          fill="#facc15"
+          stroke="#ca8a04"
+          stroke-width="3"
+          paint-order="stroke"
+          style="font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;"
+        >
+          S
+        </text>
+      </svg>
+      <!-- 14: Veneer / Өнгөлгөө (Upper/Lower separate crown marker) -->
+      <svg
+        v-if="paintType === 14"
+        class="w-full h-full"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="xMidYMid meet"
+        aria-hidden="true"
+      >
+        <!-- UPPER: crown is visually LOWER -> bar near bottom, stem goes UP -->
+        <g v-if="isUpper">
+          <!-- bar (bottom) -->
+          <path d="M32 74 H68" stroke="#22c55e" stroke-width="8" stroke-linecap="round" />
+          <!-- stem (up) -->
+          <path d="M50 74 V28" stroke="#22c55e" stroke-width="8" stroke-linecap="round" />
+          <!-- highlight -->
+          <path d="M50 70 V32" stroke="#bbf7d0" stroke-width="3" opacity="0.7" stroke-linecap="round" />
+        </g>
+
+        <!-- LOWER: crown is visually UPPER -> bar near top, stem goes DOWN -->
+        <g v-else>
+          <!-- bar (top) -->
+          <path d="M32 26 H68" stroke="#22c55e" stroke-width="8" stroke-linecap="round" />
+          <!-- stem (down) -->
+          <path d="M50 26 V72" stroke="#22c55e" stroke-width="8" stroke-linecap="round" />
+          <!-- highlight -->
+          <path d="M50 30 V68" stroke="#bbf7d0" stroke-width="3" opacity="0.7" stroke-linecap="round" />
+        </g>
+      </svg>
+
+
+
+
+
+      <!-- 15: Watch / Хяналт (Slate Eye) -->
+      <div v-if="paintType === 15" class="absolute top-1 right-1 w-1/2 h-1/2 flex items-center justify-center pointer-events-none">
+         <svg class="w-full h-full text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+            <circle cx="12" cy="12" r="3" />
+         </svg>
+      </div>
+
     </div>
 
     <!-- SELECTION CHECKMARK -->
