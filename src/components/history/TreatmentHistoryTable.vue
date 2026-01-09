@@ -24,9 +24,13 @@ const props = defineProps({
     type: Object,
     default: null,
   },
+  isExpanded: {
+    type: Boolean,
+    default: false,
+  },
 })
 
-const emit = defineEmits(['search', 'filter-status', 'edit', 'delete'])
+const emit = defineEmits(['search', 'filter-status', 'edit', 'delete', 'toggle-expand'])
 
 const isEditOpen = ref(false)
 const editDraft = ref(null)
@@ -118,7 +122,28 @@ watch(isEditOpen, (open) => {
 
 <template>
   <div class="dental-card history-grid">
-    <div class="history-grid__toolbar">
+    <div class="history-grid__toolbar relative !overflow-visible">
+      <!-- Expansion Toggle Button -->
+      <button
+        type="button"
+        class="absolute top-[8px] left-1/2 -translate-x-1/2 z-20 w-[37px] h-[37px] rounded-full bg-white border border-gray-200 shadow-[0_4px_12px_rgba(0,0,0,0.08),0_2px_4px_rgba(0,0,0,0.04)] flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-200 hover:shadow-[0_6px_16px_rgba(37,99,235,0.15)] active:scale-95 transition-all duration-300 group"
+        @click="emit('toggle-expand')"
+        :title="isExpanded ? 'Collapse' : 'Expand'"
+      >
+        <svg
+          class="w-6 h-6 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+          :class="isExpanded ? 'rotate-180' : 'rotate-0'"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+
       <div class="history-toolbar">
         <h2 class="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">Эмчилгээний түүх</h2>
         <div class="history-toolbar__controls">
@@ -131,7 +156,10 @@ watch(isEditOpen, (open) => {
         </div>
       </div>
     </div>
-    <div class="history-grid__table-shell">
+    <div 
+      class="history-grid__table-shell transition-all duration-300"
+      :class="{ 'is-expanded': isExpanded }"
+    >
       <table class="history-grid__table">
         <thead>
           <tr>
@@ -269,102 +297,123 @@ watch(isEditOpen, (open) => {
   >
     <div
       v-if="isEditOpen && editDraft"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-[6px] p-4 sm:p-6 transition-all duration-300"
       @click.self="closeEdit"
     >
       <Transition
-        enter-active-class="transition duration-200"
-        leave-active-class="transition duration-150"
-        enter-from-class="opacity-0 scale-95"
-        enter-to-class="opacity-100 scale-100"
-        leave-from-class="opacity-100 scale-100"
-        leave-to-class="opacity-0 scale-95"
+        enter-active-class="transition duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+        leave-active-class="transition duration-250 ease-in"
+        enter-from-class="opacity-0 scale-90 translate-y-12"
+        enter-to-class="opacity-100 scale-100 translate-y-0"
+        leave-from-class="opacity-100 scale-100 translate-y-0"
+        leave-to-class="opacity-0 scale-95 translate-y-8"
       >
         <div
           v-if="isEditOpen"
-          class="w-full max-w-3xl rounded-2xl bg-white shadow-2xl"
+          class="w-full max-w-2xl rounded-[24px] bg-white shadow-[0_20px_50px_rgba(0,0,0,0.15),0_0_0_1px_rgba(0,0,0,0.05)] border border-white/20 overflow-hidden flex flex-col max-h-[90vh]"
           role="dialog"
           aria-modal="true"
         >
-          <div class="flex items-start justify-between border-b border-gray-200 px-5 py-4">
-            <div class="min-w-0">
-              <p class="text-xs uppercase tracking-wide text-gray-500">Edit treatment</p>
-              <h3 class="text-lg font-semibold text-gray-900">
-                {{ patientTitle }}
-              </h3>
+          <!-- Modal Header -->
+          <div class="relative px-6 py-6 border-b border-slate-100 bg-slate-50/50">
+            <div class="flex items-start justify-between">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></span>
+                  <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Засах</p>
+                </div>
+                <h3 class="text-xl font-extrabold text-slate-800 tracking-tight">
+                  {{ patientTitle }}
+                </h3>
+              </div>
+              <button
+                type="button"
+                class="group relative h-10 w-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-all active:scale-95"
+                @click="closeEdit"
+                aria-label="Close"
+              >
+                <svg class="h-5 w-5 transition-transform duration-300 group-hover:rotate-90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
-            <button
-              type="button"
-              class="h-10 w-10 rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50"
-              @click="closeEdit"
-              aria-label="Close"
-            >
-              <svg class="h-5 w-5 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-              </svg>
-            </button>
           </div>
 
-          <form class="max-h-[80dvh] overflow-y-auto px-5 py-4" @submit.prevent="saveEdit">
-            <div class="grid gap-4 md:grid-cols-2">
-              <div class="space-y-2">
-                <label class="block text-sm font-medium text-gray-700">Date</label>
-                <input v-model="editDraft.date" type="date" class="input-field min-h-[44px] text-sm" />
+          <!-- Modal Body -->
+          <form class="flex-1 overflow-y-auto custom-scrollbar px-6 py-6" @submit.prevent="saveEdit">
+            <div class="grid gap-x-6 gap-y-5 md:grid-cols-2">
+              <!-- Date -->
+              <div class="space-y-1.5">
+                <label class="block text-[13px] font-bold text-slate-600 ml-1">Огноо</label>
+                <div class="relative group">
+                  <input v-model="editDraft.date" type="date" class="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm font-medium focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none" />
+                </div>
               </div>
 
-              <div class="space-y-2">
-                <label class="block text-sm font-medium text-gray-700">Tooth</label>
-                <input v-model="editDraft.tooth" type="text" class="input-field min-h-[44px] text-sm" />
+              <!-- Tooth -->
+              <div class="space-y-1.5">
+                <label class="block text-[13px] font-bold text-slate-600 ml-1">Шүд</label>
+                <input v-model="editDraft.tooth" type="text" class="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm font-medium focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none" placeholder="#36" />
               </div>
 
-              <div class="space-y-2">
-                <label class="block text-sm font-medium text-gray-700">Surface</label>
-                <input v-model="editDraft.surface" type="text" class="input-field min-h-[44px] text-sm" />
+              <!-- Surface -->
+              <div class="space-y-1.5">
+                <label class="block text-[13px] font-bold text-slate-600 ml-1">Гадаргуу</label>
+                <input v-model="editDraft.surface" type="text" class="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm font-medium focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none" placeholder="M, O, D" />
               </div>
 
-              <div class="space-y-2">
-                <label class="block text-sm font-medium text-gray-700">Status</label>
-                <select v-model="editDraft.status" class="input-field min-h-[44px] text-sm">
+              <!-- Status -->
+              <div class="space-y-1.5">
+                <label class="block text-[13px] font-bold text-slate-600 ml-1">Төлөв</label>
+                <select v-model="editDraft.status" class="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm font-medium focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none appearance-none">
                   <option v-for="option in statusOptions" :key="option.value" :value="option.value">
                     {{ option.label }}
                   </option>
                 </select>
               </div>
 
-              <div class="md:col-span-2 space-y-2">
-                <label class="block text-sm font-medium text-gray-700">Diagnosis</label>
-                <textarea v-model="editDraft.diagnosis" rows="3" class="input-field min-h-[88px] text-sm"></textarea>
+              <!-- Diagnosis -->
+              <div class="md:col-span-2 space-y-1.5">
+                <label class="block text-[13px] font-bold text-slate-600 ml-1">Онош</label>
+                <textarea v-model="editDraft.diagnosis" rows="3" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm font-medium focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none resize-none" placeholder="Онош оруулах..."></textarea>
               </div>
 
-              <div class="md:col-span-2 space-y-2">
-                <label class="block text-sm font-medium text-gray-700">Treatment</label>
-                <input v-model="editDraft.treatmentType" type="text" class="input-field min-h-[44px] text-sm" />
+              <!-- Treatment -->
+              <div class="md:col-span-2 space-y-1.5">
+                <label class="block text-[13px] font-bold text-slate-600 ml-1">Эмчилгээ</label>
+                <input v-model="editDraft.treatmentType" type="text" class="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm font-medium focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none" placeholder="Эмчилгээний төрөл..." />
               </div>
 
-              <div class="space-y-2">
-                <label class="block text-sm font-medium text-gray-700">Doctor</label>
-                <input v-model="editDraft.doctor" type="text" class="input-field min-h-[44px] text-sm" />
+              <!-- Doctor -->
+              <div class="space-y-1.5">
+                <label class="block text-[13px] font-bold text-slate-600 ml-1">Эмч</label>
+                <input v-model="editDraft.doctor" type="text" class="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm font-medium focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none" placeholder="Эмчийн нэр..." />
               </div>
 
-              <div class="space-y-2">
-                <label class="block text-sm font-medium text-gray-700">Price</label>
-                <input v-model="editDraft.price" type="text" class="input-field min-h-[44px] text-sm" />
+              <!-- Price -->
+              <div class="space-y-1.5">
+                <label class="block text-[13px] font-bold text-slate-600 ml-1">Үнэ</label>
+                <div class="relative">
+                  <input v-model="editDraft.price" type="text" class="w-full h-12 pl-4 pr-10 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm font-bold focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none" placeholder="0.00" />
+                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs italic">₮</span>
+                </div>
               </div>
             </div>
 
-            <div class="mt-5 flex flex-wrap justify-end gap-3">
+            <!-- Modal Footer -->
+            <div class="mt-8 flex flex-wrap-reverse justify-end gap-3 sticky bottom-0 bg-white pt-4 pb-2">
               <button
                 type="button"
-                class="min-h-[44px] rounded-lg border border-gray-300 px-4 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                class="flex-1 sm:flex-none h-12 px-8 rounded-xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 active:scale-95 transition-all"
                 @click="closeEdit"
               >
-                Cancel
+                Цуцлах
               </button>
               <button
                 type="submit"
-                class="min-h-[44px] rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700"
+                class="flex-1 sm:flex-none h-12 px-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-sm font-bold text-white shadow-[0_4px_12px_rgba(59,130,246,0.3)] hover:shadow-[0_6px_20px_rgba(59,130,246,0.4)] hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all"
               >
-                Save changes
+                Хадгалах
               </button>
             </div>
           </form>
@@ -375,5 +424,15 @@ watch(isEditOpen, (open) => {
 </template>
 
 <style scoped>
-/* Additional styles if needed */
+/* Expanded state height to show ~9 rows + header */
+.history-grid__table-shell.is-expanded {
+  max-height: calc(9 * 45px + 45px); /* approx 9 rows @ 45px each + header */
+  min-height: 400px;
+}
+
+@media (min-height: 900px) {
+  .history-grid__table-shell.is-expanded {
+    max-height: calc(100vh - 300px);
+  }
+}
 </style>

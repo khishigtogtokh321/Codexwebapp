@@ -36,6 +36,7 @@ const isQuickAddOpen = ref(false)
 const drawerTriggerRef = ref(null)
 const drawerCloseRef = ref(null)
 const isAlertDismissed = ref(false)
+const isHistoryExpanded = ref(false)
 
 const desktopExpanded = computed(() => isLgUp.value && (hovered.value || pinned.value))
 
@@ -301,6 +302,10 @@ function handleSetStatus({ toothNumber, status }) {
   setToothStatus(toothNumber, status)
 }
 
+function toggleHistoryExpansion() {
+  isHistoryExpanded.value = !isHistoryExpanded.value
+}
+
 function handlePatientSelected(patient) {
   activePatient.value = patient || activePatient.value
 }
@@ -421,98 +426,107 @@ watch(
 
       <TopBar :active-patient="activePatient" @patient-selected="handlePatientSelected" />
       <main class="flex-1 overflow-y-auto bg-gray-100">
-        <div class="p-4 md:p-6 space-y-4">
+        <div class="p-4 md:p-6 space-y-4 [perspective:1200px]">
       
 
-          <div class="grid gap-4 lg:grid-cols-12 items-start lg:items-stretch">
-            <div class="space-y-4 lg:col-span-7 min-w-0">
-              <ToothChart
-                class="h-auto lg:h-full"
-                :selected-teeth="selectedTeethList"
-                :tooth-statuses="toothStatuses"
-                :tooth-paint-types="toothPaintTypes"
-                :multi-select="true"
-                @teeth-select="selectTooth"
-                @select-all="selectTooth"
-                @clear-selection="clearSelectedTeeth"
-                @set-status="handleSetStatus"
-              />
-            </div>
+          <Transition
+            enter-active-class="transition-all duration-600 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+            enter-from-class="opacity-0 -translate-y-16 scale-95 [transform:rotateX(12deg)_translateZ(0)]"
+            enter-to-class="opacity-100 translate-y-0 scale-100 [transform:rotateX(0deg)_translateZ(0)]"
+            leave-active-class="transition-all duration-400 ease-[cubic-bezier(0.4,0,0.2,1)]"
+            leave-from-class="opacity-100 translate-y-0 scale-100 [transform:rotateX(0deg)_translateZ(0)]"
+            leave-to-class="opacity-0 -translate-y-16 scale-95 [transform:rotateX(12deg)_translateZ(0)]"
+          >
+            <div v-if="!isHistoryExpanded" class="grid gap-4 lg:grid-cols-12 items-start lg:items-stretch">
+              <div class="space-y-4 lg:col-span-7 min-w-0">
+                <ToothChart
+                  class="h-auto lg:h-full"
+                  :selected-teeth="selectedTeethList"
+                  :tooth-statuses="toothStatuses"
+                  :tooth-paint-types="toothPaintTypes"
+                  :multi-select="true"
+                  @teeth-select="selectTooth"
+                  @select-all="selectTooth"
+                  @clear-selection="clearSelectedTeeth"
+                  @set-status="handleSetStatus"
+                />
+              </div>
 
-            <div class="lg:col-span-5 lg:pl-2 min-w-0 relative">
-              <!-- Floating Validation Alert -->
-              <Transition
-                enter-active-class="transition duration-200 ease-out"
-                enter-from-class="transform -translate-y-2 opacity-0"
-                enter-to-class="transform translate-y-0 opacity-100"
-                leave-active-class="transition duration-150 ease-in"
-                leave-from-class="transform translate-y-0 opacity-100"
-                leave-to-class="transform -translate-y-2 opacity-0"
-              >
-                <div 
-                  v-if="showAlert" 
-                  class="absolute -top-4 -left-90  z-50 bg-red-50 border border-red-100 rounded-xl p-3 shadow-xl flex items-start gap-3"
+              <div class="lg:col-span-5 lg:pl-2 min-w-0 relative">
+                <!-- Floating Validation Alert -->
+                <Transition
+                  enter-active-class="transition duration-200 ease-out"
+                  enter-from-class="transform -translate-y-2 opacity-0"
+                  enter-to-class="transform translate-y-0 opacity-100"
+                  leave-active-class="transition duration-150 ease-in"
+                  leave-from-class="transform translate-y-0 opacity-100"
+                  leave-to-class="transform -translate-y-2 opacity-0"
                 >
-                  <div class="mt-0.5 flex-shrink-0">
-                    <div class="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center">
-                      <svg class="w-3.5 h-3.5 text-white" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                      </svg>
-                    </div>
-                  </div>
-                  <div class="flex-1">
-                    <p class="text-[13px] font-bold text-red-700 leading-tight mb-1">
-                      Гүйцэтгэлийг үргэлжлүүлэхийн тулд:
-                    </p>
-                    <ul class="text-[12px] text-red-600 list-disc list-inside space-y-0.5 leading-tight">
-                      <li v-if="requiresTooth && !hasSelectedTooth">Шүд сонгоно уу</li>
-                      <li v-if="requiresSurface && !hasSelectedSurface">Гадаргуу сонгоно уу</li>
-                    </ul>
-                  </div>
-                  <button 
-                    type="button" 
-                    class="ml-2 text-red-400 hover:text-red-500 transition-colors p-1"
-                    @click="isAlertDismissed = true"
+                  <div 
+                    v-if="showAlert" 
+                    class="absolute -top-4 -left-90  z-50 bg-red-50 border border-red-100 rounded-xl p-3 shadow-xl flex items-start gap-3"
                   >
-                    <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
-                    </svg>
-                  </button>
-                </div>
-              </Transition>
+                    <div class="mt-0.5 flex-shrink-0">
+                      <div class="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center">
+                        <svg class="w-3.5 h-3.5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                      </div>
+                    </div>
+                    <div class="flex-1">
+                      <p class="text-[13px] font-bold text-red-700 leading-tight mb-1">
+                        Гүйцэтгэлийг үргэлжлүүлэхийн тулд:
+                      </p>
+                      <ul class="text-[12px] text-red-600 list-disc list-inside space-y-0.5 leading-tight">
+                        <li v-if="requiresTooth && !hasSelectedTooth">Шүд сонгоно уу</li>
+                        <li v-if="requiresSurface && !hasSelectedSurface">Гадаргуу сонгоно уу</li>
+                      </ul>
+                    </div>
+                    <button 
+                      type="button" 
+                      class="ml-2 text-red-400 hover:text-red-500 transition-colors p-1"
+                      @click="isAlertDismissed = true"
+                    >
+                      <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                      </svg>
+                    </button>
+                  </div>
+                </Transition>
 
-              <RightTreatmentWizard
-                class="lg:h-full"
-                :selected-surfaces="state.selectedSurfaces"
-                :selected-diagnosis="state.selectedDiagnosis"
-                :selected-codes="state.selectedCodes"
-                :selected-status="state.selectedStatus"
-                :can-add="canAddSelection"
-                :requires-tooth="requiresTooth"
-                :requires-surface="requiresSurface"
-                @update:surfaces="handleSurfacesUpdate"
-                @update:diagnosis="handleDiagnosisUpdate"
-                @update:code="handleCodesUpdate"
-                @update:status="handleStatusChange"
-                @add="handleAddSelection"
-              />
+                <RightTreatmentWizard
+                  class="lg:h-full"
+                  :selected-surfaces="state.selectedSurfaces"
+                  :selected-diagnosis="state.selectedDiagnosis"
+                  :selected-codes="state.selectedCodes"
+                  :selected-status="state.selectedStatus"
+                  :can-add="canAddSelection"
+                  :requires-tooth="requiresTooth"
+                  :requires-surface="requiresSurface"
+                  @update:surfaces="handleSurfacesUpdate"
+                  @update:diagnosis="handleDiagnosisUpdate"
+                  @update:code="handleCodesUpdate"
+                  @update:status="handleStatusChange"
+                  @add="handleAddSelection"
+                />
+              </div>
             </div>
-          </div>
+          </Transition>
 
-          <div class="dental-card p-4 md:p-5 space-y-3">
-            <div class="overflow-x-auto">
-              <TreatmentHistoryTable
-                :treatments="filteredLog"
-                :loading="false"
-                :patient="activePatient"
-                :search-query="searchQuery"
-                :status-filter="statusFilter"
-                @search="handleSearch"
-                @filter-status="handleFilterStatus"
-                @edit="handleEditTreatment"
-                @delete="handleDeleteTreatment"
-              />
-            </div>
+          <div :class="['transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]', isHistoryExpanded ? 'h-full' : '']">
+            <TreatmentHistoryTable
+              :treatments="filteredLog"
+              :loading="false"
+              :patient="activePatient"
+              :search-query="searchQuery"
+              :status-filter="statusFilter"
+              :is-expanded="isHistoryExpanded"
+              @search="handleSearch"
+              @filter-status="handleFilterStatus"
+              @edit="handleEditTreatment"
+              @delete="handleDeleteTreatment"
+              @toggle-expand="toggleHistoryExpansion"
+            />
           </div>
         </div>
       </main>
