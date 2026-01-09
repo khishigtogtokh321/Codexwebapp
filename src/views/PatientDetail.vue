@@ -41,7 +41,7 @@ const patient = computed(() => {
     const storePatient = patientStore.getPatientById(resolvedId)
     
     // Fallback to mock patient with resolved ID
-    return storePatient || {
+    const p = storePatient || {
         ...mockPatient,
         id: resolvedId,
         name: mockPatient.name || 'Тодорхойгүй өвчтөн',
@@ -55,6 +55,13 @@ const patient = computed(() => {
         email: mockPatient.email || 'bat-erdene@example.mn',
         job: mockPatient.job || 'Программист',
     }
+
+    // Sync with global store if not already set or different
+    if (patientStore.currentPatient?.id !== p.id) {
+        patientStore.setCurrentPatient(p)
+    }
+
+    return p
 })
 
 const allergies = computed(() => [
@@ -155,7 +162,7 @@ onBeforeUnmount(() => {
         </aside>
 
         <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-            <TopBar :active-patient="patient" />
+            <TopBar />
 
             <div :class="['flex flex-1 min-h-0', isPortrait ? 'overflow-y-auto' : 'overflow-hidden']">
                 <div

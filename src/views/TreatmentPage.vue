@@ -13,8 +13,10 @@ import { formatToothNumber } from '@/utils/toothHelpers'
 import { getScopeMeta, SCOPE_TYPE } from '@/utils/treatmentScope'
 import patientService from '@/services/patientService'
 import { useTreatmentStore } from '@/stores/treatment'
+import { usePatientStore } from '@/stores/patient'
 
 const treatmentStore = useTreatmentStore()
+const patientStore = usePatientStore()
 
 const state = reactive({
   selectedTeeth: [],
@@ -27,7 +29,7 @@ const state = reactive({
 
 const searchQuery = ref('')
 const statusFilter = ref('all')
-const activePatient = ref(patientService.getDefaultPatient())
+const activePatient = computed(() => patientStore.currentPatient)
 const hovered = ref(false)
 const pinned = ref(false)
 const drawerOpen = ref(false)
@@ -306,9 +308,7 @@ function toggleHistoryExpansion() {
   isHistoryExpanded.value = !isHistoryExpanded.value
 }
 
-function handlePatientSelected(patient) {
-  activePatient.value = patient || activePatient.value
-}
+// Patient selection is now managed by patientStore
 
 function toggleSidebar() {
   pinned.value = !pinned.value
@@ -424,7 +424,7 @@ watch(
         <p class="text-sm font-semibold text-gray-800">Эмчилгээ</p>
       </div>
 
-      <TopBar :active-patient="activePatient" @patient-selected="handlePatientSelected" />
+      <TopBar />
       <main class="flex-1 overflow-y-auto bg-gray-100">
         <div class="p-4 md:p-6 space-y-4 [perspective:1200px]">
       

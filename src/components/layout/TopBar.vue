@@ -1,12 +1,11 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import patientService from '@/services/patientService'
+import { usePatientStore } from '@/stores/patient'
+
+const patientStore = usePatientStore()
 
 const props = defineProps({
-  activePatient: {
-    type: Object,
-    default: null,
-  },
+  // activePatient prop is now managed by patientStore
 })
 
 const emit = defineEmits(['patient-selected'])
@@ -19,10 +18,6 @@ const loading = ref(false)
 const errorMessage = ref('')
 const isFocused = ref(false)
 const selectedPatient = ref(null)
-const recentPatients = ref([])
-const RECENT_KEY = 'recentPatients'
-const MAX_RECENT = 6
-const MAX_RESULTS = 8
 let searchTimeout
 let activeSearchId = 0
 
@@ -30,16 +25,28 @@ const defaultAvatar =
   'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="32" fill="%23E5E7EB"/><path d="M32 32c5.523 0 10-4.03 10-9s-4.477-9-10-9-10 4.03-10 9 4.477 9 10 9z" fill="%23CBD5E1"/><path d="M16 48c0-5.523 7.163-10 16-10s16 4.477 16 10v2H16v-2z" fill="%23CBD5E1"/></svg>'
 
 const hasQuery = computed(() => searchQuery.value.trim().length >= 1)
-const showRecent = computed(() => !hasQuery.value && recentPatients.value.length > 0)
+const showRecent = computed(() => !hasQuery.value && patientStore.recentPatients.length > 0)
 const showDropdown = computed(() => isFocused.value && (hasQuery.value || showRecent.value))
 const limitedResults = computed(() => results.value.slice(0, MAX_RESULTS))
-const limitedRecent = computed(() => recentPatients.value.slice(0, MAX_RECENT))
+const limitedRecent = computed(() => patientStore.recentPatients)
 
-const activePatientDisplay = computed(() => selectedPatient.value || props.activePatient || null)
-const activePatientName = computed(() => (activePatientDisplay.value ? getDisplayName(activePatientDisplay.value) : 'Өвчтөн сонгогүй'))
-const activePatientMeta = computed(() =>
-  activePatientDisplay.value ? getPatientMeta(activePatientDisplay.value) : 'Карт · Утас · РД',
-)
+const activePatientDisplay = computed(() => patientStore.currentPatient)
+
+const activePatientAge = computed(() => {
+  const age = activePatientDisplay.value?.age
+  return Number.isFinite(age) ? `${age} нас` : null
+})
+
+const activePatientCard = computed(() => {
+  const card = getPatientCard(activePatientDisplay.value)
+  return card !== '-' ? `№ ${card}` : null
+})
+
+const activePatientMetaSummary = computed(() => {
+  const phone = getPatientPhone(activePatientDisplay.value)
+  const rd = getPatientRd(activePatientDisplay.value)
+  return phone !== '-' || rd !== '-' ? `${phone} · ${rd}` : null
+})
 
 const getDisplayName = (patient) => {
   if (!patient) return '-'
@@ -76,33 +83,7 @@ const normalizePatient = (patient) => {
   return normalized
 }
 
-const loadRecentPatients = () => {
-  try {
-    const stored = window.localStorage.getItem(RECENT_KEY)
-    const parsed = stored ? JSON.parse(stored) : []
-    if (Array.isArray(parsed)) {
-      recentPatients.value = parsed
-    }
-  } catch (error) {
-    recentPatients.value = []
-  }
-}
-
-const saveRecentPatients = () => {
-  try {
-    window.localStorage.setItem(RECENT_KEY, JSON.stringify(recentPatients.value))
-  } catch (error) {
-    // ignore storage errors
-  }
-}
-
-const addRecentPatient = (patient) => {
-  const normalized = normalizePatient(patient)
-  if (!normalized.id) return
-  const deduped = recentPatients.value.filter((item) => item.id !== normalized.id)
-  recentPatients.value = [normalized, ...deduped].slice(0, MAX_RECENT)
-  saveRecentPatients()
-}
+// Recent patients are now managed by patientStore
 
 const fetchPatients = async (query) => {
   const requestId = ++activeSearchId
@@ -155,7 +136,7 @@ const clearSearch = () => {
 const selectPatient = (patient) => {
   const normalized = normalizePatient(patient)
   selectedPatient.value = normalized
-  addRecentPatient(patient)
+  patientStore.setCurrentPatient(patient)
   emit('patient-selected', patient)
   if (normalized.id) {
     window.location.hash = `#patient?pid=${encodeURIComponent(normalized.id)}`
@@ -199,7 +180,6 @@ const handleEscape = (event) => {
 }
 
 onMounted(() => {
-  loadRecentPatients()
   window.addEventListener('pointerdown', handleOutsideClick)
   window.addEventListener('keydown', handleEscape)
 })
@@ -226,8 +206,8 @@ onBeforeUnmount(() => {
           type="search"
           inputmode="search"
           autocomplete="off"
-          placeholder="Өвчтөн хайх (овог, нэр, утас, РД, карт)"
-          class="ui-input"
+          placeholder="Өвчтөн хайх..."
+          class="ui-input !bg-slate-100/50 !backdrop-blur-sm focus:!bg-white focus:!ring-4 focus:!ring-blue-500/10 transition-all"
           :aria-expanded="showDropdown"
           aria-controls="patient-search-dropdown"
           @focus="handleFocus"
@@ -310,16 +290,39 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="topbar-patient-wrap">
-        <div class="topbar-patient">
-          <div class="topbar-patient__text">
-            <p class="topbar-patient__name">{{ activePatientName }}</p>
-            <p class="topbar-patient__meta">{{ activePatientMeta }}</p>
+        <div v-if="activePatientDisplay" class="flex items-center gap-3 sm:gap-4 px-2 py-1.5 sm:px-3 sm:py-2 rounded-2xl border border-slate-100/80 bg-white/50 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-all group">
+          <div class="text-right hidden sm:block">
+            <p class="text-sm font-bold text-slate-800 leading-tight group-hover:text-blue-600 transition-colors">
+              {{ getDisplayName(activePatientDisplay) }}
+            </p>
+            <div class="flex items-center justify-end gap-2 mt-1">
+              <span v-if="activePatientCard" class="text-[10px] text-slate-400 font-medium tracking-tight">
+                {{ activePatientCard }}
+              </span>
+              <span v-if="activePatientAge" class="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-bold rounded-full group-hover:bg-blue-100 transition-colors">
+                {{ activePatientAge }}
+              </span>
+            </div>
+            <!-- <p v-if="activePatientMetaSummary" class="text-[9px] text-slate-400 mt-0.5 opacity-70">
+              {{ activePatientMetaSummary }}
+            </p> -->
           </div>
-          <img
-            :src="activePatientDisplay?.avatar || defaultAvatar"
-            alt="Сонгосон өвчтөн"
-            class="ui-row__avatar"
-          />
+          <div class="relative flex-shrink-0">
+            <img
+              :src="activePatientDisplay?.avatar || defaultAvatar"
+              alt="Өвчтөн"
+              class="w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 border-white shadow-sm ring-1 ring-slate-100 group-hover:ring-blue-100 transition-all object-cover"
+            />
+            <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full shadow-sm"></span>
+          </div>
+        </div>
+        <div v-else class="flex items-center gap-3 px-4 py-2 rounded-2xl border border-slate-100 bg-slate-50/50 text-slate-400">
+          <p class="text-xs font-medium italic">Өвчтөн сонгогүй</p>
+          <div class="w-10 h-10 rounded-full border-2 border-dashed border-slate-200 bg-slate-100 flex items-center justify-center">
+            <svg class="w-5 h-5 opacity-30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </div>
         </div>
       </div>
     </div>

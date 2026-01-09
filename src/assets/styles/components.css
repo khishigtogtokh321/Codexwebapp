@@ -751,14 +751,14 @@
   }
 
   .ui-input {
-    width: 100%;
+    width: 70%;
     border: 1px solid #e2e8f0;
     border-radius: 999px;
     background: #f8fafc;
     color: #0f172a;
     font-size: 0.9rem;
-    min-height: 2.75rem;
-    padding: 0.55rem 2.75rem 0.55rem 2.75rem;
+    min-height: 2rem;
+    padding: 0.35rem 2rem 0.35rem 2rem;
     transition: border-color 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
   }
 

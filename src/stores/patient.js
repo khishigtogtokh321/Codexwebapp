@@ -1,9 +1,32 @@
 import { defineStore } from 'pinia'
 
+const RECENT_KEY = 'recentPatients'
+const CURRENT_PATIENT_KEY = 'currentPatient'
+const MAX_RECENT = 6
+
+const loadFromStorage = (key) => {
+    try {
+        const stored = window.localStorage.getItem(key)
+        return stored ? JSON.parse(stored) : null
+    } catch (error) {
+        console.error(`Error loading ${key} from storage:`, error)
+        return null
+    }
+}
+
+const saveToStorage = (key, value) => {
+    try {
+        window.localStorage.setItem(key, JSON.stringify(value))
+    } catch (error) {
+        console.error(`Error saving ${key} to storage:`, error)
+    }
+}
+
 export const usePatientStore = defineStore('patient', {
     state: () => ({
         patients: [],
-        currentPatient: null,
+        recentPatients: loadFromStorage(RECENT_KEY) || [],
+        currentPatient: loadFromStorage(CURRENT_PATIENT_KEY),
         loading: false,
         error: null
     }),
@@ -112,10 +135,33 @@ export const usePatientStore = defineStore('patient', {
 
         setCurrentPatient(patient) {
             this.currentPatient = patient
+            saveToStorage(CURRENT_PATIENT_KEY, patient)
+            if (patient) {
+                this.addRecentPatient(patient)
+            }
+        },
+
+        addRecentPatient(patient) {
+            if (!patient || !patient.id) return
+
+            // Normalize patient data for recent list if needed
+            const normalized = {
+                id: patient.id,
+                displayName: patient.displayName || patient.name || [patient.lastName, patient.firstName].filter(Boolean).join(' ').trim(),
+                cardNo: patient.cardNo || patient.cardNumber || '-',
+                phone: patient.phone || '-',
+                rd: patient.rd || '-',
+                avatar: patient.avatar || '',
+            }
+
+            const deduped = this.recentPatients.filter((item) => item.id !== normalized.id)
+            this.recentPatients = [normalized, ...deduped].slice(0, MAX_RECENT)
+            saveToStorage(RECENT_KEY, this.recentPatients)
         },
 
         clearCurrentPatient() {
             this.currentPatient = null
+            window.localStorage.removeItem(CURRENT_PATIENT_KEY)
         },
 
         clearError() {
