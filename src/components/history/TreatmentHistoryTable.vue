@@ -452,26 +452,34 @@ watch(isEditOpen, (open) => {
   }
 }
 
-/* Enable Horizontal Scroll and avoid squeezing */
+/* Enable Horizontal Scroll and avoid squeezing only on Portrait/Small screens */
+@media (max-width: 1023px) {
+  .history-grid__table {
+    min-width: 1000px;
+    table-layout: fixed;
+  }
+
+  .history-grid__table-shell {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 .history-grid__table {
-  min-width: 1000px !important;
-  table-layout: fixed;
   width: 100%;
 }
 
 .history-grid__cell, 
 .history-grid__table thead th {
-  padding: 10px 8px !important;
-  font-size: 12px !important;
-  white-space: nowrap !important;
+  padding: 10px 8px;
+  font-size: 13px;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .history-grid__table-shell {
-  overflow-x: auto !important;
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 .custom-scrollbar::-webkit-scrollbar {

@@ -407,178 +407,292 @@ function handleAdd() {
   >
 
     <div class="treatment-wizard__content">
-      <!-- Side-by-Side Dropdowns -->
-      <div class="grid grid-cols-2 gap-4 mb-6">
-        <div class="treatment-wizard__field relative">
-          <button
-            type="button"
-            ref="surfaceTriggerRef"
-            class="treatment-surface-trigger !w-full !rounded-xl !bg-slate-50/80 !border-slate-100"
-            @click="toggleSurfaceDropdown"
-          >
-            <span class="treatment-surface-trigger__label !text-slate-600">
-              {{ surfaceTriggerLabel }}
-            </span>
-            <svg class="h-4 w-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd" />
-            </svg>
-          </button>
-
-          <Teleport to="body">
-            <div
-              v-if="showSurfaceDropdown"
-              ref="surfaceDropdownRef"
-              class="treatment-surface-dropdown"
-              :class="surfaceDropdownPlacement === 'top' ? 'treatment-surface-dropdown--top' : 'treatment-surface-dropdown--bottom'"
-              :style="surfaceDropdownStyles"
+      <div class="treatment-wizard__row">
+        <div class="treatment-wizard__block treatment-wizard__field">
+          <div class="space-y-2">
+            <!-- <span class="treatment-wizard__field-label">Гадаргуу</span> -->
+            <div class="relative">
+            <button
+              type="button"
+              ref="surfaceTriggerRef"
+              class="treatment-surface-trigger"
+              @click="toggleSurfaceDropdown"
             >
-              <div class="treatment-surface-dropdown__content">
-                <div class="treatment-surface-grid">
-                  <div></div>
-                  <button type="button" class="treatment-surface-button" :class="selectedSurfaces.includes('B/F') ? 'treatment-surface-button--selected' : ''" @click="toggleSurface('B/F')">B/F</button>
-                  <div></div>
-                  <button type="button" class="treatment-surface-button" :class="selectedSurfaces.includes('M') ? 'treatment-surface-button--selected' : ''" @click="toggleSurface('M')">M</button>
-                  <button type="button" class="treatment-surface-button" :class="selectedSurfaces.includes('O/I') ? 'treatment-surface-button--selected' : ''" @click="toggleSurface('O/I')">O/I</button>
-                  <button type="button" class="treatment-surface-button" :class="selectedSurfaces.includes('D') ? 'treatment-surface-button--selected' : ''" @click="toggleSurface('D')">D</button>
-                  <div></div>
-                  <button type="button" class="treatment-surface-button" :class="selectedSurfaces.includes('L/P') ? 'treatment-surface-button--selected' : ''" @click="toggleSurface('L/P')">L/P</button>
-                  <div></div>
+              <span class="treatment-surface-trigger__label">
+                {{ surfaceTriggerLabel }}
+              </span>
+              <svg class="h-4 w-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path
+                  fill-rule="evenodd"
+                  d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </button>
+
+            <Teleport to="body">
+              <div
+                v-if="showSurfaceDropdown"
+                ref="surfaceDropdownRef"
+                class="treatment-surface-dropdown"
+                :class="surfaceDropdownPlacement === 'top'
+                  ? 'treatment-surface-dropdown--top'
+                  : 'treatment-surface-dropdown--bottom'"
+                :style="surfaceDropdownStyles"
+              >
+                <div class="treatment-surface-dropdown__content">
+                  <div class="treatment-surface-grid">
+                    <div></div>
+                    <button
+                      type="button"
+                      class="treatment-surface-button"
+                      :class="selectedSurfaces.includes('B/F') ? 'treatment-surface-button--selected' : ''"
+                      @click="toggleSurface('B/F')"
+                    >
+                      B/F
+                    </button>
+
+                    <div></div>
+
+                    <button
+                      type="button"
+                      class="treatment-surface-button"
+                      :class="selectedSurfaces.includes('M') ? 'treatment-surface-button--selected' : ''"
+                      @click="toggleSurface('M')"
+                    >
+                      M
+                    </button>
+
+                    <button
+                      type="button"
+                      class="treatment-surface-button"
+                      :class="selectedSurfaces.includes('O/I') ? 'treatment-surface-button--selected' : ''"
+                      @click="toggleSurface('O/I')"
+                    >
+                      O/I
+                    </button>
+
+                    <button
+                      type="button"
+                      class="treatment-surface-button"
+                      :class="selectedSurfaces.includes('D') ? 'treatment-surface-button--selected' : ''"
+                      @click="toggleSurface('D')"
+                    >
+                      D
+                    </button>
+
+                    <div></div>
+                    <button
+                      type="button"
+                      class="treatment-surface-button"
+                      :class="selectedSurfaces.includes('L/P') ? 'treatment-surface-button--selected' : ''"
+                      @click="toggleSurface('L/P')"
+                    >
+                      L/P
+                    </button>
+                    <div></div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </Teleport>
-        </div>
+            </Teleport>
 
-        <div class="treatment-wizard__field relative">
-          <div
-            ref="diagnosisTriggerRef"
-            class="treatment-diagnosis-trigger !w-full !rounded-xl !bg-slate-50/80 !border-slate-100"
-            @click="toggleDiagnosisDropdown"
-          >
-            <input
-              v-model="diagnosisQuery"
-              type="text"
-              placeholder="Онош сонгох"
-              class="treatment-input w-full bg-transparent text-slate-600 focus:outline-none !text-sm"
-              @focus="openDiagnosisDropdown"
-            />
-            <svg class="h-4 w-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd" />
-            </svg>
           </div>
-
-          <Teleport to="body">
-            <div
-              v-if="showDiagnosisDropdown"
-              ref="diagnosisDropdownRef"
-              class="treatment-diagnosis-dropdown"
-              :class="dropdownPlacement === 'top' ? 'treatment-diagnosis-dropdown--top' : 'treatment-diagnosis-dropdown--bottom'"
-              :style="dropdownStyles"
-            >
-              <button type="button" class="treatment-diagnosis-clear" @click.stop="clearDiagnosis">Алгасах</button>
-              <div class="treatment-diagnosis-list divide-y divide-slate-100">
-                <button
-                  v-for="item in filteredDiagnoses"
-                  :key="item.code"
-                  type="button"
-                  class="treatment-diagnosis-item"
-                  @click.stop="selectDiagnosis(item)"
-                >
-                  <p class="font-semibold">{{ item.code }}</p>
-                  <p class="text-xs text-slate-500">{{ item.name }}</p>
-                </button>
-              </div>
-            </div>
-          </Teleport>
         </div>
+      </div>
+
+        <div class="treatment-wizard__block treatment-wizard__field">
+          <div class="space-y-3">
+            <!-- <span class="treatment-wizard__field-label">Онош сонгох</span> -->
+            <div>
+              <div class="relative">
+              <div
+                ref="diagnosisTriggerRef"
+                class="treatment-diagnosis-trigger"
+                @click="toggleDiagnosisDropdown"
+              >
+                <input
+                  v-model="diagnosisQuery"
+                  type="text"
+                  placeholder="Онош сонгох"
+                  class="treatment-input w-full bg-transparent text-slate-600 focus:outline-none"
+                  @focus="openDiagnosisDropdown"
+                />
+                <svg class="h-4 w-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path
+                    fill-rule="evenodd"
+                    d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </div>
+
+              <Teleport to="body">
+                <div
+                  v-if="showDiagnosisDropdown"
+                  ref="diagnosisDropdownRef"
+                  class="treatment-diagnosis-dropdown"
+                  :class="dropdownPlacement === 'top'
+                    ? 'treatment-diagnosis-dropdown--top'
+                    : 'treatment-diagnosis-dropdown--bottom'"
+                  :style="dropdownStyles"
+                >
+                  <button
+                    type="button"
+                    class="treatment-diagnosis-clear"
+                    @click.stop="clearDiagnosis"
+                  >
+                    Алгасах
+                  </button>
+                  <div class="treatment-diagnosis-list divide-y divide-slate-100">
+                    <button
+                      v-for="item in filteredDiagnoses"
+                      :key="item.code"
+                      type="button"
+                      class="treatment-diagnosis-item"
+                      @click.stop="selectDiagnosis(item)"
+                    >
+                      <p class="font-semibold">{{ item.code }}</p>
+                      <p class="text-xs text-slate-500">{{ item.name }}</p>
+                    </button>
+                  </div>
+                </div>
+              </Teleport>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
       </div>
 
       <div class="treatment-wizard__block treatment-wizard__block--codes min-w-0">
         <!-- Carousel-with-Peek Navigation + Dropdown -->
-      <!-- Carousel -->
-      <div class="treatment-carousel !justify-center gap-2 mb-6">
-        <button type="button" class="treatment-carousel__arrow !w-9 !h-9 !bg-slate-50 !border-slate-100" @click="handlePrevType">
-          <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M12.78 4.22a.75.75 0 010 1.06L8.06 10l4.72 4.72a.75.75 0 11-1.06 1.06l-5.25-5.25a.75.75 0 010-1.06l5.25-5.25a.75.75 0 011.06 0z" clip-rule="evenodd" />
-          </svg>
-        </button>
-
-        <button type="button" class="treatment-carousel__item treatment-carousel__item--prev !text-[13px] opacity-40 px-2" @click="handlePrevType">
-          {{ prevType?.label }}
-        </button>
-
-        <div class="treatment-carousel__active-wrapper">
-          <button type="button" class="treatment-carousel__item treatment-carousel__item--active !bg-blue-50 !text-blue-600 !border-blue-200 !px-6 !py-2 !rounded-full !text-base font-bold shadow-sm" @click="toggleCategoryDropdown">
-            {{ currentType?.label }}
-            <svg class="w-4 h-4 ml-1.5" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd" />
+        <div class="treatment-carousel">
+          <!-- Left Arrow -->
+          <button
+            type="button"
+            class="treatment-carousel__arrow"
+            @click="handlePrevType"
+            aria-label="Previous category"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M12.78 4.22a.75.75 0 010 1.06L8.06 10l4.72 4.72a.75.75 0 11-1.06 1.06l-5.25-5.25a.75.75 0 010-1.06l5.25-5.25a.75.75 0 011.06 0z" clip-rule="evenodd" />
             </svg>
           </button>
 
-          <div v-if="showCategoryDropdown" class="treatment-carousel__dropdown">
-            <button v-for="(type, index) in wizardTreatmentTypes" :key="type.id" type="button" class="treatment-carousel__dropdown-item" :class="currentTypeIndex === index ? 'treatment-carousel__dropdown-item--active' : ''" @click="selectCategory(index)">
-              <span v-if="currentTypeIndex === index" class="treatment-carousel__dropdown-check">✓</span>
-              {{ type.label }}
-            </button>
-          </div>
-        </div>
-
-        <button type="button" class="treatment-carousel__item treatment-carousel__item--next !text-[13px] opacity-40 px-2" @click="handleNextType">
-          {{ nextType?.label }}
-        </button>
-
-        <button type="button" class="treatment-carousel__arrow !w-9 !h-9 !bg-slate-50 !border-slate-100" @click="handleNextType">
-          <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M7.22 4.22a.75.75 0 011.06 0l5.25 5.25a.75.75 0 010 1.06l-5.25 5.25a.75.75 0 11-1.06-1.06L11.94 10 7.22 5.28a.75.75 0 010-1.06z" clip-rule="evenodd" />
-          </svg>
-        </button>
-      </div>
-
-      <!-- Code Grid (3 Columns) -->
-      <div class="grid grid-cols-3 gap-3 min-w-0 mb-6 px-4">
-        <div v-for="item in currentCodes" :key="item.code" class="relative group">
+          <!-- Previous Category (Faded) -->
           <button
             type="button"
-            class="treatment-code-button !w-full !rounded-xl !bg-white !border-slate-100 !px-2 !py-3.5 shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all hover:border-blue-200"
-            :class="isCodeSelected(item.code) ? 'bg-blue-50 border-blue-300 ring-1 ring-blue-100 !shadow-blue-500/5' : ''"
-            @click="toggleCode(item.code)"
+            class="treatment-carousel__item treatment-carousel__item--prev"
+            @click="handlePrevType"
           >
-            <span class="block text-center text-[13px] font-bold text-slate-700">{{ item.nameMn || item.name }}</span>
+            {{ prevType?.label }}
           </button>
-          <div
-            class="treatment-code-tooltip"
-            :class="showTooltipCode === item.code ? 'treatment-code-tooltip--visible' : ''"
+
+          <!-- Active Category (Clickable for Dropdown) -->
+          <div class="treatment-carousel__active-wrapper">
+            <button
+              type="button"
+              class="treatment-carousel__item treatment-carousel__item--active"
+              @click="toggleCategoryDropdown"
+            >
+              {{ currentType?.label }}
+              <svg class="w-3 h-3 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd" />
+              </svg>
+            </button>
+
+            <!-- Category Dropdown -->
+            <div v-if="showCategoryDropdown" class="treatment-carousel__dropdown">
+              <button
+                v-for="(type, index) in wizardTreatmentTypes"
+                :key="type.id"
+                type="button"
+                class="treatment-carousel__dropdown-item"
+                :class="currentTypeIndex === index ? 'treatment-carousel__dropdown-item--active' : ''"
+                @click="selectCategory(index)"
+              >
+                <span v-if="currentTypeIndex === index" class="treatment-carousel__dropdown-check">✓</span>
+                {{ type.label }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Next Category (Faded) -->
+          <button
+            type="button"
+            class="treatment-carousel__item treatment-carousel__item--next"
+            @click="handleNextType"
           >
-            {{ item.code }}
+            {{ nextType?.label }}
+          </button>
+
+          <!-- Right Arrow -->
+          <button
+            type="button"
+            class="treatment-carousel__arrow"
+            @click="handleNextType"
+            aria-label="Next category"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M7.22 4.22a.75.75 0 011.06 0l5.25 5.25a.75.75 0 010 1.06l-5.25 5.25a.75.75 0 11-1.06-1.06L11.94 10 7.22 5.28a.75.75 0 010-1.06z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </div>
+
+        <div
+          class="treatment-code-grid grid gap-3 min-w-0 
+            [grid-template-columns:repeat(auto-fit,minmax(84px, 1fr))]
+            lg:gap-2 lg:[grid-template-columns:repeat(auto-fit,minmax(72px,1fr))]
+            xl:gap-3 xl:[grid-template-columns:repeat(auto-fit,minmax(88px,1fr))]]
+            "
+              >
+          <div v-for="item in currentCodes" :key="item.code" class="relative group">
+            <button
+              type="button"
+              class="treatment-code-button"
+              :class="isCodeSelected(item.code) ? 'bg-blue-50 border-blue-300 ring-1 ring-blue-200' : ''"
+              @click="toggleCode(item.code)"
+            >
+              <span class="block text-center">{{ item.code }}</span>
+            </button>
+            <div
+              class="treatment-code-tooltip"
+              :class="showTooltipCode === item.code ? 'treatment-code-tooltip--visible' : ''"
+            >
+              {{ item.nameMn || item.name }}
+            </div>
           </div>
         </div>
-      </div>
       </div>
 
     </div>
 
-    <div class="treatment-action-bar !bg-white !p-4 !rounded-b-2xl !border-t-slate-50">
-      <div class="flex items-center justify-between gap-4">
-        <div class="treatment-status-actions-segmented !bg-slate-100 !p-1 !rounded-xl !gap-1 !flex-1 !max-w-[320px]">
+    <div class="treatment-action-bar treatment-action-bar--inline">
+      <div class="treatment-wizard-footer treatment-wizard-footer--inline">
+        <!-- Inline layout: Status on left, Add button on right -->
+        <div class="treatment-status-actions-segmented treatment-status-actions-segmented--compact">
           <button
             v-for="option in statusOptions"
             :key="option.id"
             type="button"
-            class="flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all"
-            :class="isStatusActive(option.id) ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'"
+            class="treatment-status-segment treatment-status-segment--compact"
+            :class="isStatusActive(option.id) ? 'treatment-status-segment--active' : ''"
             @click="onSelectStatus(option.id)"
           >
             {{ option.label }}
           </button>
         </div>
-        <button
-          type="button"
-          class="treatment-add-button-primary !flex-1 !rounded-xl !h-11 !text-sm font-bold shadow-md hover:shadow-lg transition-all"
-          :disabled="!canAdd"
-          @click="handleAdd"
-        >
-          Нэмэх
-        </button>
+        <div class="flex-1  items-end gap-1.5">
+          <button
+            type="button"
+            class="treatment-add-button-primary treatment-add-button-primary--compact w-full"
+            :disabled="!canAdd"
+            @click="handleAdd"
+          >
+            Нэмэх
+          </button>
+        </div>
       </div>
     </div>
   </section>

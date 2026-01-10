@@ -361,7 +361,7 @@ watch(
         </template>
       </TopBar>
       <main class="flex-1 overflow-y-auto bg-gray-100">
-        <div class="p-4 md:p-6 space-y-4 [perspective:1200px]">
+        <div class="p-4 md:p-6 space-y-4">
       
 
           <Transition

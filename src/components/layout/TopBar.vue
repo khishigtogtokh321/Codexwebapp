@@ -193,11 +193,11 @@ onBeforeUnmount(() => {
 
 <template>
   <header class="topbar-shell">
-    <div class="topbar-inner !flex-row !items-center !justify-between gap-3 sm:gap-4">
+    <div class="topbar-inner flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-4">
       <!-- Slot for Menu Button on Tablet/Mobile -->
       <slot name="leading"></slot>
 
-      <div ref="rootRef" class="topbar-search !max-w-[420px]">
+      <div ref="rootRef" class="topbar-search">
         <span class="ui-input__icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0a7.5 7.5 0 10-10.61-10.6 7.5 7.5 0 0010.6 10.6z" />
@@ -210,7 +210,7 @@ onBeforeUnmount(() => {
           inputmode="search"
           autocomplete="off"
           placeholder="Өвчтөн хайх..."
-          class="ui-input !bg-slate-100/50 !backdrop-blur-sm focus:!bg-white focus:!ring-4 focus:!ring-blue-500/10 transition-all !min-h-[40px] !h-10 !text-sm"
+          class="ui-input bg-slate-100/50 backdrop-blur-sm focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all font-medium"
           :aria-expanded="showDropdown"
           aria-controls="patient-search-dropdown"
           @focus="handleFocus"
@@ -292,7 +292,7 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <div class="topbar-patient-wrap !w-auto">
+      <div class="topbar-patient-wrap">
         <div v-if="activePatientDisplay" class="flex items-center gap-2 sm:gap-3 px-2 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-slate-100/80 bg-white/50 shadow-sm group">
           <div class="text-right hidden sm:block">
             <p class="text-[13px] font-bold text-slate-800 leading-tight">
