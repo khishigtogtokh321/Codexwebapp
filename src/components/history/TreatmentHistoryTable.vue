@@ -452,54 +452,26 @@ watch(isEditOpen, (open) => {
   }
 }
 
-/* Responsiveness: Scale down items and remove horizontal scroll */
+/* Enable Horizontal Scroll and avoid squeezing */
 .history-grid__table {
-  min-width: 0 !important; /* Remove min-width to allow shrinking */
-  table-layout: auto;
+  min-width: 1000px !important;
+  table-layout: fixed;
+  width: 100%;
 }
 
 .history-grid__cell, 
 .history-grid__table thead th {
-  padding: 8px 4px !important; /* Smaller horizontal padding */
-  font-size: 11px !important; /* Base font size for small screens */
-  white-space: normal !important; /* Allow wrapping */
-  word-break: break-all;
+  padding: 10px 8px !important;
+  font-size: 12px !important;
+  white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* Specific column adjustments */
-.history-grid__cell--date {
-  min-width: 70px;
-  font-size: 10px !important;
-}
-
-.history-grid__cell--number {
-  min-width: 60px;
-  font-weight: 700 !important;
-}
-
-@media (min-width: 768px) {
-  .history-grid__cell, 
-  .history-grid__table thead th {
-    padding: 10px 8px !important;
-    font-size: 12px !important;
-    white-space: nowrap !important; /* Return to nowrap on larger screens */
-  }
-  
-  .history-grid__cell--date {
-    min-width: 90px;
-  }
-}
-
-@media (min-width: 1024px) {
-  .history-grid__cell, 
-  .history-grid__table thead th {
-    font-size: 13px !important;
-  }
-}
-
-/* Hide horizontal scroll hidden by shell overflow auto */
 .history-grid__table-shell {
-  overflow-x: hidden !important;
+  overflow-x: auto !important;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .custom-scrollbar::-webkit-scrollbar {

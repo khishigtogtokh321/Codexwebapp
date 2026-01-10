@@ -3,7 +3,6 @@ import { reactive, computed, nextTick, onBeforeUnmount, onMounted, ref, watch } 
 import TopBar from '@/components/layout/TopBar.vue'
 import SideNav from '@/components/layout/SideNav.vue'
 import ToothChart from '@/components/tooth/ToothChart.vue'
-import TreatmentQuickAddDrawer from '@/components/treatment/TreatmentQuickAddDrawer.vue'
 import TreatmentHistoryTable from '@/components/history/TreatmentHistoryTable.vue'
 import RightTreatmentWizard from '@/components/treatment/RightTreatmentWizard.vue'
 import { treatmentTypes, getTreatmentById } from '@/data/treatmentTypes'
@@ -23,7 +22,6 @@ const state = reactive({
   selectedSurfaces: [],
   selectedDiagnosis: null,
   selectedCodes: [],
-  selectedTreatmentTypeIds: [],
   selectedStatus: 'planned',
 })
 
@@ -34,7 +32,6 @@ const hovered = ref(false)
 const pinned = ref(false)
 const drawerOpen = ref(false)
 const isLgUp = ref(false)
-const isQuickAddOpen = ref(false)
 const drawerTriggerRef = ref(null)
 const drawerCloseRef = ref(null)
 const isAlertDismissed = ref(false)
@@ -45,15 +42,10 @@ const desktopExpanded = computed(() => isLgUp.value && (hovered.value || pinned.
 const { toothStatuses, toothPaintTypes, setToothStatus, updateToothStatusFromTreatment, updateStatusesFromHistory } = useToothStatus(mockToothStatuses)
 
 const selectedTeethList = computed(() => state.selectedTeeth)
-const selectedTreatmentItems = computed(() => getSelectedTreatments(state.selectedTreatmentTypeIds))
-
-const availableTreatments = computed(() => treatmentTypes)
-
 const hasSelectedTreatments = computed(
-  () => state.selectedCodes.length > 0 || state.selectedTreatmentTypeIds.length > 0,
+  () => state.selectedCodes.length > 0,
 )
 const combinedSelectedItems = computed(() => [
-  ...selectedTreatmentItems.value,
   ...state.selectedCodes,
 ])
 
@@ -147,20 +139,6 @@ function getSelectedCodeLabels(codes = []) {
     .filter(Boolean)
 }
 
-function getSelectedTreatmentLabels(typeIds = []) {
-  return getSelectedTreatments(typeIds)
-    .map((treatment) => treatment?.label || treatment?.id)
-    .filter(Boolean)
-}
-
-function getCombinedTreatmentLabels() {
-  const labels = [
-    ...getSelectedCodeLabels(state.selectedCodes),
-    ...getSelectedTreatmentLabels(state.selectedTreatmentTypeIds),
-  ]
-  return [...new Set(labels)]
-}
-
 function buildDiagnosisText() {
   const diagnosisLabel = getDiagnosisLabel(state.selectedDiagnosis)
   return diagnosisLabel || ''
@@ -199,10 +177,7 @@ function buildTreatmentEntry(tooth, treatmentLabel, paintType = null, price = ''
 function buildTreatmentEntries() {
   const teeth = state.selectedTeeth.length ? state.selectedTeeth : [null]
   const entries = []
-
-  // Get full treatment objects to access paintType
-  const selectedTypes = getSelectedTreatments(state.selectedTreatmentTypeIds)
-  const selectedCodes = state.selectedCodes // These already have code/nameMn
+  const selectedCodes = state.selectedCodes
 
   teeth.forEach((tooth) => {
     // 1. Process specific codes (Right Wizard)
@@ -214,31 +189,9 @@ function buildTreatmentEntries() {
       const code = codeItem.code || ''
       entries.push(buildTreatmentEntry(tooth, label, paintType, price, code))
     })
-
-    // 2. Process treatment types (Quick Add)
-    selectedTypes.forEach((t) => {
-      // Quick add types might not have explicit price/code in the generic object, 
-      // but if we had them mapped we could pass them. For now, pass empty or resolved defaults.
-      entries.push(buildTreatmentEntry(tooth, t.label, t.paintType, '', t.id))
-    })
   })
 
   return entries
-}
-
-function applyToothStatusUpdates(treatmentLabels = []) {
-  if (!state.selectedTeeth.length) return
-  const status = state.selectedStatus || 'done'
-  state.selectedTeeth.forEach((tooth) => {
-    treatmentLabels.forEach((label) => {
-      if (!label) return
-      updateToothStatusFromTreatment({
-        tooth: formatToothNumber(tooth),
-        treatmentType: label,
-        status,
-      })
-    })
-  })
 }
 
 function resetTreatmentDraft() {
@@ -246,7 +199,6 @@ function resetTreatmentDraft() {
   state.selectedSurfaces = []
   state.selectedDiagnosis = null
   state.selectedCodes = []
-  state.selectedTreatmentTypeIds = []
 }
 
 function handleAddSelection() {
@@ -260,24 +212,6 @@ function handleAddSelection() {
   // Clear selection after adding
   resetTreatmentDraft()
 }
-
-function openQuickAdd() {
-  isQuickAddOpen.value = true
-}
-
-function closeQuickAdd() {
-  isQuickAddOpen.value = false
-}
-
-function toggleQuickAddTreatment(typeId) {
-  const treatment = getTreatmentById(typeId)
-  if (!treatment) return
-  const next = state.selectedTreatmentTypeIds.includes(typeId)
-    ? state.selectedTreatmentTypeIds.filter((id) => id !== typeId)
-    : [...state.selectedTreatmentTypeIds, typeId]
-  state.selectedTreatmentTypeIds = next
-}
-
 
 function handleSearch(query) {
   searchQuery.value = query
@@ -409,22 +343,23 @@ watch(
     </aside>
 
     <div class="relative flex flex-1 flex-col overflow-hidden">
-      <div class="lg:hidden flex items-center gap-2 px-4 py-3 border-b border-gray-200 bg-white">
-        <button
-          type="button"
-          ref="drawerTriggerRef"
-          class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          aria-label="Open navigation"
-          @click="openMobileNav"
-        >
-          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
-        <p class="text-sm font-semibold text-gray-800">Эмчилгээ</p>
-      </div>
-
-      <TopBar />
+      <TopBar>
+        <template #leading>
+          <div class="lg:hidden flex items-center gap-2">
+            <button
+              type="button"
+              ref="drawerTriggerRef"
+              class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              aria-label="Open navigation"
+              @click="openMobileNav"
+            >
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+        </template>
+      </TopBar>
       <main class="flex-1 overflow-y-auto bg-gray-100">
         <div class="p-4 md:p-6 space-y-4 [perspective:1200px]">
       
@@ -531,24 +466,6 @@ watch(
         </div>
       </main>
     </div>
-
-    <button
-      type="button"
-      class="fixed bottom-6 right-6 z-40 min-h-[48px] inline-flex items-center justify-center gap-2 rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
-      @click="openQuickAdd"
-    >
-      + Эмчилгээ нэмэх
-    </button>
-
-    <TreatmentQuickAddDrawer
-      :open="isQuickAddOpen"
-      :selected-teeth="selectedTeethList"
-      :selected-surfaces="state.selectedSurfaces"
-      :selected-treatments="state.selectedTreatmentTypeIds"
-      :treatments="availableTreatments"
-      @close="closeQuickAdd"
-      @treatment-toggle="toggleQuickAddTreatment"
-    />
 
     <Transition
       enter-active-class="transition-opacity duration-200"

@@ -193,8 +193,11 @@ onBeforeUnmount(() => {
 
 <template>
   <header class="topbar-shell">
-    <div class="topbar-inner">
-      <div ref="rootRef" class="topbar-search">
+    <div class="topbar-inner !flex-row !items-center !justify-between gap-3 sm:gap-4">
+      <!-- Slot for Menu Button on Tablet/Mobile -->
+      <slot name="leading"></slot>
+
+      <div ref="rootRef" class="topbar-search !max-w-[420px]">
         <span class="ui-input__icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0a7.5 7.5 0 10-10.61-10.6 7.5 7.5 0 0010.6 10.6z" />
@@ -207,7 +210,7 @@ onBeforeUnmount(() => {
           inputmode="search"
           autocomplete="off"
           placeholder="Өвчтөн хайх..."
-          class="ui-input !bg-slate-100/50 !backdrop-blur-sm focus:!bg-white focus:!ring-4 focus:!ring-blue-500/10 transition-all"
+          class="ui-input !bg-slate-100/50 !backdrop-blur-sm focus:!bg-white focus:!ring-4 focus:!ring-blue-500/10 transition-all !min-h-[40px] !h-10 !text-sm"
           :aria-expanded="showDropdown"
           aria-controls="patient-search-dropdown"
           @focus="handleFocus"
@@ -289,37 +292,28 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <div class="topbar-patient-wrap">
-        <div v-if="activePatientDisplay" class="flex items-center gap-3 sm:gap-4 px-2 py-1.5 sm:px-3 sm:py-2 rounded-2xl border border-slate-100/80 bg-white/50 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-all group">
+      <div class="topbar-patient-wrap !w-auto">
+        <div v-if="activePatientDisplay" class="flex items-center gap-2 sm:gap-3 px-2 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-slate-100/80 bg-white/50 shadow-sm group">
           <div class="text-right hidden sm:block">
-            <p class="text-sm font-bold text-slate-800 leading-tight group-hover:text-blue-600 transition-colors">
+            <p class="text-[13px] font-bold text-slate-800 leading-tight">
               {{ getDisplayName(activePatientDisplay) }}
             </p>
-            <div class="flex items-center justify-end gap-2 mt-1">
-              <span v-if="activePatientCard" class="text-[10px] text-slate-400 font-medium tracking-tight">
-                {{ activePatientCard }}
-              </span>
-              <span v-if="activePatientAge" class="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-bold rounded-full group-hover:bg-blue-100 transition-colors">
-                {{ activePatientAge }}
-              </span>
-            </div>
-            <!-- <p v-if="activePatientMetaSummary" class="text-[9px] text-slate-400 mt-0.5 opacity-70">
-              {{ activePatientMetaSummary }}
-            </p> -->
+            <p v-if="activePatientCard" class="text-[10px] text-slate-400 font-medium">
+              {{ activePatientCard }}
+            </p>
           </div>
           <div class="relative flex-shrink-0">
             <img
               :src="activePatientDisplay?.avatar || defaultAvatar"
               alt="Өвчтөн"
-              class="w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 border-white shadow-sm ring-1 ring-slate-100 group-hover:ring-blue-100 transition-all object-cover"
+              class="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-white shadow-sm ring-1 ring-slate-100 object-cover"
             />
-            <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full shadow-sm"></span>
+            <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></span>
           </div>
         </div>
-        <div v-else class="flex items-center gap-3 px-4 py-2 rounded-2xl border border-slate-100 bg-slate-50/50 text-slate-400">
-          <p class="text-xs font-medium italic">Өвчтөн сонгогүй</p>
-          <div class="w-10 h-10 rounded-full border-2 border-dashed border-slate-200 bg-slate-100 flex items-center justify-center">
-            <svg class="w-5 h-5 opacity-30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <div v-else class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-100 bg-slate-50/50 text-slate-400">
+          <div class="w-8 h-8 rounded-full border-2 border-dashed border-slate-200 bg-slate-100 flex items-center justify-center">
+            <svg class="w-4 h-4 opacity-30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </div>
