@@ -43,7 +43,7 @@ const toothClasses = computed(() => {
     treated: 'bg-white border-gray-300', // Hide blue marker
     problem: 'bg-red-50 border-red-400',
     planned: 'bg-white border-gray-300', // Hide amber marker
-    missing: 'bg-transparent border-gray-200 border-dashed opacity-100', // Slot placeholder
+    missing: 'bg-transparent border-transparent opacity-100', // Slot placeholder
   }
 
   const statusClass = statusColors[props.status] || statusColors.healthy
@@ -58,7 +58,7 @@ const toothClasses = computed(() => {
 const markerColor = computed(() => PAINT_COLORS[props.paintType] || '#94a3b8')
 
 const numberColorClass = computed(() => {
-  if (props.status === 'missing') return 'text-gray-400 opacity-50' // Faded number for missing
+  if (props.status === 'missing') return 'text-slate-400' // Clean number for missing
   
   // If there's a clinical marker (paintType), fade the number so the marker is clearer
   if (props.paintType && props.paintType !== 0) return 'invisible' 
@@ -191,14 +191,14 @@ function handleClick() {
       <!-- 7: Crown / Бүрээс (Border overlay) -->
       <div v-if="paintType === 7" class="absolute inset-0 border-[6px] border-blue-400/40 rounded-sm"></div>
 
-      <!-- 9: Bridge / Гүүр (Orange bracket) -->
-      <svg v-if="paintType === 9" class="w-full h-full text-orange-500" viewBox="0 0 100 100">
-        <path d="M10 40 H90 M10 40 V80 M90 40 V80" stroke="currentColor" stroke-width="8" fill="none" stroke-linecap="round" />
+      <!-- 9: Filled Square (Orange) -->
+      <svg v-if="paintType === 9" class="w-full h-full text-orange-500" viewBox="0 0 100 100" aria-hidden="true">
+        <rect x="10" y="10" width="80" height="80" fill="currentColor" />
       </svg>
 
-      <!-- 11: Denture / Хиймэл шүд (Teal Plate) -->
-      <svg v-if="paintType === 11" class="w-full h-full text-teal-500 opacity-30" viewBox="0 0 100 100">
-        <path d="M10 20 Q50 90 90 20 V80 H10 Z" fill="currentColor" />
+      <!-- 11: Filled Square (Teal, opacity 30%) -->
+      <svg v-if="paintType === 11" class="w-full h-full text-teal-500 opacity-30" viewBox="0 0 100 100" aria-hidden="true">
+        <rect x="10" y="10" width="80" height="80" fill="currentColor" />
       </svg>
 
       <!-- 13: Sealant / Чигжээс (Teal fissure lines) -->
@@ -225,32 +225,33 @@ function handleClick() {
         </text>
       </svg>
       <!-- 14: Veneer / Өнгөлгөө (Upper/Lower separate crown marker) -->
-      <svg
+     <svg
         v-if="paintType === 14"
         class="w-full h-full"
         viewBox="0 0 100 100"
         preserveAspectRatio="xMidYMid meet"
         aria-hidden="true"
       >
-        <!-- UPPER: crown is visually LOWER -> bar near bottom, stem goes UP -->
-        <g v-if="isUpper">
-          <!-- bar (bottom) -->
-          <path d="M32 74 H68" stroke="#22c55e" stroke-width="8" stroke-linecap="round" />
-          <!-- stem (up) -->
-          <path d="M50 74 V28" stroke="#22c55e" stroke-width="8" stroke-linecap="round" />
-          <!-- highlight -->
-          <path d="M50 70 V32" stroke="#bbf7d0" stroke-width="3" opacity="0.7" stroke-linecap="round" />
-        </g>
+        <!-- V (both upper & lower) -->
+        <path
+          d="M34 30 L50 74 L66 30"
+          stroke="#22c55e"
+          stroke-width="8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="none"
+        />
 
-        <!-- LOWER: crown is visually UPPER -> bar near top, stem goes DOWN -->
-        <g v-else>
-          <!-- bar (top) -->
-          <path d="M32 26 H68" stroke="#22c55e" stroke-width="8" stroke-linecap="round" />
-          <!-- stem (down) -->
-          <path d="M50 26 V72" stroke="#22c55e" stroke-width="8" stroke-linecap="round" />
-          <!-- highlight -->
-          <path d="M50 30 V68" stroke="#bbf7d0" stroke-width="3" opacity="0.7" stroke-linecap="round" />
-        </g>
+        <!-- highlight -->
+        <path
+          d="M36 34 L50 70 L64 34"
+          stroke="#bbf7d0"
+          stroke-width="3"
+          opacity="0.7"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="none"
+        />
       </svg>
 
 

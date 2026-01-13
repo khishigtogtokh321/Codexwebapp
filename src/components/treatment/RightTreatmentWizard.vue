@@ -654,7 +654,7 @@ function handleAdd() {
               :class="isCodeSelected(item.code) ? 'bg-blue-50 border-blue-300 ring-1 ring-blue-200' : ''"
               @click="toggleCode(item.code)"
             >
-              <span class="block text-center">{{ item.code }}</span>
+              <span class="text-center">{{ item.code }}</span>
             </button>
             <div
               class="treatment-code-tooltip"

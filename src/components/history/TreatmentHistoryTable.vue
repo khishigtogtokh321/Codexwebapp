@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import HistorySearchBar from '@/components/history/HistorySearchBar.vue'
 import { formatDate } from '@/utils/formatters'
+import diagnoses from '@/data/diagnoses'
 
 const props = defineProps({
   treatments: {
@@ -30,11 +31,25 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['search', 'filter-status', 'edit', 'delete', 'toggle-expand'])
+const emit = defineEmits(['search', 'filter-status', 'edit', 'delete', 'toggle-expand', 'discount'])
 
 const isEditOpen = ref(false)
 const editDraft = ref(null)
 const isMobileOrTablet = ref(false)
+
+// Edit Modal Dropdown states
+const showSurfaceDropdown = ref(false)
+const showDiagnosisDropdown = ref(false)
+const diagnosisQuery = ref('')
+const tempSurfaces = ref([])
+
+// Discount Modal states
+const isDiscountOpen = ref(false)
+const discountDraft = ref(null)
+const discountOptions = [
+  { id: 1, name: 'Кассын хөнгөлөлт' },
+  { id: 2, name: 'Хөнгөлөлт 3%' },
+]
 
 const checkScreenSize = () => {
   isMobileOrTablet.value = window.innerWidth < 1024
@@ -63,6 +78,19 @@ const patientCardText = computed(() => {
 
 const patientTitle = computed(() => `${patientName.value} • Age ${patientAgeText.value} • Card ${patientCardText.value}`)
 
+const filteredDiagnoses = computed(() => {
+  if (!diagnosisQuery.value) return diagnoses.slice(0, 50)
+  const q = diagnosisQuery.value.toLowerCase()
+  return diagnoses.filter(d => 
+    d.code.toLowerCase().includes(q) || 
+    d.name.toLowerCase().includes(q)
+  ).slice(0, 50)
+})
+
+const surfaceTriggerLabel = computed(() => 
+  tempSurfaces.value.length ? tempSurfaces.value.join(', ') : 'Гадаргуу'
+)
+
 function normalizeDateInput(value) {
   if (!value) return ''
   if (typeof value === 'string' && value.length >= 10 && value[4] === '-' && value[7] === '-') {
@@ -79,6 +107,20 @@ function openEdit(treatment) {
     date: normalizeDateInput(treatment.date),
     status: treatment.status || 'planned',
   }
+  
+  // Initialize surface array
+  tempSurfaces.value = treatment.surface 
+    ? String(treatment.surface).split(',').map(s => s.trim()).filter(Boolean)
+    : []
+
+  // Initialize diagnosis query
+  const diag = treatment.diagnosis
+  if (typeof diag === 'object' && diag) {
+    diagnosisQuery.value = diag.code || diag.name || ''
+  } else {
+    diagnosisQuery.value = diag || ''
+  }
+  
   isEditOpen.value = true
 }
 
@@ -89,8 +131,78 @@ function closeEdit() {
 
 function saveEdit() {
   if (!editDraft.value) return
+  
+  // Sync back surfaces
+  editDraft.value.surface = tempSurfaces.value.join(', ')
+  
   emit('edit', { ...editDraft.value })
   closeEdit()
+}
+
+function handleDiscount(treatment) {
+  discountDraft.value = {
+    ...treatment,
+    discountDate: new Date().toISOString().slice(0, 10),
+    treatmentDate: normalizeDateInput(treatment.date),
+    treatmentPrice: treatment.price || 0,
+    discountAmount: 0,
+    doctor: treatment.doctor || 'DP - Practice, Practice',
+    note: '',
+    selectedDiscountId: null
+  }
+  isDiscountOpen.value = true
+}
+
+function closeDiscount() {
+  isDiscountOpen.value = false
+  discountDraft.value = null
+}
+
+function saveDiscount() {
+  if (!discountDraft.value) return
+  emit('discount', { ...discountDraft.value })
+  closeDiscount()
+}
+
+function deleteDiscount() {
+  // Emit delete or handle delete logic
+  closeDiscount()
+}
+
+function toggleSurface(surface) {
+  if (tempSurfaces.value.includes(surface)) {
+    tempSurfaces.value = tempSurfaces.value.filter(s => s !== surface)
+  } else {
+    tempSurfaces.value = [...tempSurfaces.value, surface]
+  }
+}
+
+function selectDiagnosis(item) {
+  editDraft.value.diagnosis = item
+  diagnosisQuery.value = `${item.code} - ${item.name}`
+  showDiagnosisDropdown.value = false
+}
+
+function clearDiagnosis() {
+  editDraft.value.diagnosis = null
+  diagnosisQuery.value = ''
+  showDiagnosisDropdown.value = false
+}
+
+
+function toggleSurfaceDropdown() {
+  showSurfaceDropdown.value = !showSurfaceDropdown.value
+  if (showSurfaceDropdown.value) showDiagnosisDropdown.value = false
+}
+
+function toggleDiagnosisDropdown() {
+  showDiagnosisDropdown.value = !showDiagnosisDropdown.value
+  if (showDiagnosisDropdown.value) showSurfaceDropdown.value = false
+}
+
+function openDiagnosisDropdown() {
+  showDiagnosisDropdown.value = true
+  showSurfaceDropdown.value = false
 }
 
 function getStatusClass(status) {
@@ -100,12 +212,14 @@ function getStatusClass(status) {
 }
 
 function getStatusLabel(status) {
-  return status === 'done' ? 'Хийгдсэн' : 'Төлөвлөсөн'
+  return status === 'done' ? 'Дууссан' : 'Төлөвлөгөөт'
 }
 
 function handleDelete(treatmentId) {
   emit('delete', treatmentId)
 }
+
+
 
 const handleKeydown = (event) => {
   if (event.key === 'Escape' && isEditOpen.value) closeEdit()
@@ -193,7 +307,7 @@ watch(isEditOpen, (open) => {
             <th>Тайлбар</th>
             <th class="history-grid__cell--number">Үнэ</th>
             <th>Тэмдэглэл</th>
-            <th>Төлөв</th>
+            <th class="text-center">Үйлдэл</th>
           </tr>
         </thead>
         <tbody>
@@ -230,7 +344,12 @@ watch(isEditOpen, (open) => {
                 {{ formatDate(treatment.date) }}
               </td>
               <td class="history-grid__cell history-grid__cell--date">
-                {{ treatment.status === 'done' ? formatDate(treatment.date) : '' }}
+                <span
+                  :class="getStatusClass(treatment.status)"
+                  class="history-grid__status"
+                >
+                  {{ getStatusLabel(treatment.status) }}
+                </span>
               </td>
               <td class="history-grid__cell">
                 <span class="history-grid__ellipsis" :title="treatment.diagnosis">
@@ -263,12 +382,28 @@ watch(isEditOpen, (open) => {
                 </span>
               </td>
               <td class="history-grid__cell">
-                <span
-                  :class="getStatusClass(treatment.status)"
-                  class="history-grid__status"
-                >
-                  {{ getStatusLabel(treatment.status) }}
-                </span>
+                <div class="flex items-center justify-center gap-1.5" @click.stop>
+                  <button
+                    type="button"
+                    class="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all"
+                    title="Засах"
+                    @click="openEdit(treatment)"
+                  >
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    class="p-1.5 rounded-lg text-slate-400 hover:text-green-600 hover:bg-green-50 transition-all"
+                    title="Хөнгөлөлт"
+                    @click="handleDiscount(treatment)"
+                  >
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                       <path stroke-linecap="round" stroke-linejoin="round" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                    </svg>
+                  </button>
+                </div>
               </td>
             </tr>
           </template>
@@ -361,7 +496,38 @@ watch(isEditOpen, (open) => {
                 <!-- Surface -->
                 <div class="space-y-1">
                   <label class="block text-[12px] font-bold text-slate-500 ml-1">Гадаргуу</label>
-                  <input v-model="editDraft.surface" type="text" class="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm font-medium focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none" placeholder="M, O, D" />
+                  <div class="relative">
+                    <button
+                      type="button"
+                      class="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm font-medium focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none flex items-center justify-between"
+                      @click="toggleSurfaceDropdown"
+                    >
+                      <span>{{ surfaceTriggerLabel }}</span>
+                      <svg class="h-4 w-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd" />
+                      </svg>
+                    </button>
+
+                    <!-- Surface Dropdown -->
+                    <div
+                      v-if="showSurfaceDropdown"
+                      class="absolute top-full left-0 mt-1 w-full bg-white rounded-xl shadow-xl border border-slate-200 z-50 p-2"
+                    >
+                       <div class="treatment-surface-grid">
+                        <div></div>
+                        <button type="button" class="treatment-surface-button" :class="tempSurfaces.includes('B/F') ? 'treatment-surface-button--selected' : ''" @click="toggleSurface('B/F')">B/F</button>
+                        <div></div>
+
+                        <button type="button" class="treatment-surface-button" :class="tempSurfaces.includes('M') ? 'treatment-surface-button--selected' : ''" @click="toggleSurface('M')">M</button>
+                        <button type="button" class="treatment-surface-button" :class="tempSurfaces.includes('O/I') ? 'treatment-surface-button--selected' : ''" @click="toggleSurface('O/I')">O/I</button>
+                        <button type="button" class="treatment-surface-button" :class="tempSurfaces.includes('D') ? 'treatment-surface-button--selected' : ''" @click="toggleSurface('D')">D</button>
+
+                        <div></div>
+                        <button type="button" class="treatment-surface-button" :class="tempSurfaces.includes('L/P') ? 'treatment-surface-button--selected' : ''" @click="toggleSurface('L/P')">L/P</button>
+                        <div></div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <!-- Status -->
@@ -373,19 +539,65 @@ watch(isEditOpen, (open) => {
                     </option>
                   </select>
                 </div>
-
-                <!-- Diagnosis -->
-                <div class="sm:col-span-2 space-y-1">
-                  <label class="block text-[12px] font-bold text-slate-500 ml-1">Онош</label>
-                  <textarea v-model="editDraft.diagnosis" rows="2" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm font-medium focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none resize-none" placeholder="Онош оруулах..."></textarea>
-                </div>
-
+                
                 <!-- Treatment -->
                 <div class="sm:col-span-2 space-y-1">
                   <label class="block text-[12px] font-bold text-slate-500 ml-1">Эмчилгээ</label>
                   <input v-model="editDraft.treatmentType" type="text" class="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm font-medium focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none" placeholder="Эмчилгээний төрөл..." />
                 </div>
 
+                <!-- Diagnosis -->
+                <div class="sm:col-span-2 space-y-1">
+                  <label class="block text-[12px] font-bold text-slate-500 ml-1">Онош</label>
+                  <div class="relative">
+                    <div class="relative">
+                      <input
+                        v-model="diagnosisQuery"
+                        type="text"
+                        class="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm font-medium focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none"
+                        placeholder="Онош хайх..."
+                        @focus="openDiagnosisDropdown"
+                      />
+                      <button
+                        v-if="diagnosisQuery"
+                        type="button"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        @click="clearDiagnosis"
+                      >
+                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                      </button>
+                    </div>
+
+                    <!-- Diagnosis Dropdown -->
+                    <div
+                      v-if="showDiagnosisDropdown"
+                      class="absolute top-full left-0 mt-1 w-full bg-white rounded-xl shadow-xl border border-slate-200 z-50 max-h-60 overflow-y-auto custom-scrollbar"
+                    >
+                      <button
+                        type="button"
+                        class="w-full text-left px-4 py-2 text-xs font-semibold text-slate-500 hover:bg-slate-50 border-b border-slate-100"
+                        @click="clearDiagnosis"
+                      >
+                        Алгасах
+                      </button>
+                      <div class="divide-y divide-slate-100">
+                        <button
+                          v-for="item in filteredDiagnoses"
+                          :key="item.code"
+                          type="button"
+                          class="w-full text-left px-4 py-2.5 hover:bg-blue-50 transition-colors"
+                          @click="selectDiagnosis(item)"
+                        >
+                          <p class="text-sm font-semibold text-slate-800">{{ item.code }}</p>
+                          <p class="text-xs text-slate-500">{{ item.name }}</p>
+                        </button>
+                         <div v-if="filteredDiagnoses.length === 0" class="p-4 text-center text-xs text-slate-400">
+                          Онош олдсонгүй
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 <!-- Doctor -->
                 <div class="space-y-1">
                   <label class="block text-[12px] font-bold text-slate-500 ml-1">Эмч</label>
@@ -432,6 +644,141 @@ watch(isEditOpen, (open) => {
                 </div>
               </div>
             </form>
+          </div>
+        </Transition>
+      </div>
+    </Transition>
+
+    <!-- Discount Modal -->
+    <Transition
+      enter-active-class="transition-opacity duration-200"
+      leave-active-class="transition-opacity duration-150"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div
+        v-if="isDiscountOpen && discountDraft"
+        class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-[8px] p-4 sm:p-6"
+        @click.self="closeDiscount"
+      >
+        <Transition
+          enter-active-class="transition duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+          leave-active-class="transition duration-250 ease-in"
+          enter-from-class="opacity-0 scale-90 translate-y-12"
+          enter-to-class="opacity-100 scale-100 translate-y-0"
+          leave-from-class="opacity-100 scale-100 translate-y-0"
+          leave-to-class="opacity-0 scale-95 translate-y-8"
+        >
+          <div
+            v-if="isDiscountOpen"
+            class="w-full max-w-3xl rounded-lg bg-white shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+            role="dialog"
+            aria-modal="true"
+          >
+            <!-- Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <h3 class="text-xl font-normal text-gray-800">Хөнгөлөлт</h3>
+              <button @click="closeDiscount" class="text-gray-400 hover:text-gray-600">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Body -->
+            <div class="p-6 overflow-y-auto">
+              <div class="flex gap-8">
+                <!-- Left Column -->
+                <div class="flex-1 space-y-3">
+                  <div class="grid grid-cols-[140px_1fr] items-center gap-2">
+                    <label class="text-right text-sm text-gray-600">Огноо</label>
+                    <input v-model="discountDraft.date" type="date" class="border border-gray-300 rounded px-3 py-1.5 text-sm w-40" />
+                  </div>
+                  <div class="grid grid-cols-[140px_1fr] items-center gap-2">
+                    <label class="text-right text-sm text-gray-600">Хөнгөлөлт огноо</label>
+                    <input v-model="discountDraft.discountDate" type="date" class="border border-gray-300 rounded px-3 py-1.5 text-sm w-40" />
+                  </div>
+                  <div class="grid grid-cols-[140px_1fr] items-center gap-2">
+                    <label class="text-right text-sm text-gray-600">(эмчилгээ огноо)</label>
+                    <input v-model="discountDraft.treatmentDate" type="date" disabled class="border border-gray-300 rounded px-3 py-1.5 text-sm w-40 bg-gray-50 text-gray-500" />
+                  </div>
+                   <div class="grid grid-cols-[140px_1fr] items-center gap-2">
+                    <label class="text-right text-sm text-gray-600">(эмчилгээ төлбөр)</label>
+                    <input :value="Number(discountDraft.treatmentPrice).toLocaleString()" type="text" disabled class="border border-gray-300 rounded px-3 py-1.5 text-sm w-40 bg-gray-50 text-gray-500 text-right" />
+                  </div>
+                  
+                  <div class="grid grid-cols-[140px_1fr] items-center gap-2 mt-6">
+                    <label class="text-right text-sm text-gray-600">Хөнгөлөлтийн дүн</label>
+                    <input v-model="discountDraft.discountAmount" type="number" class="border border-gray-300 rounded px-3 py-1.5 text-sm w-32 text-right" placeholder="0.00" />
+                  </div>
+
+                  <div class="grid grid-cols-[140px_1fr] items-center gap-2 mt-4">
+                    <label class="text-right text-sm text-gray-600">Эмчлэгч</label>
+                    <div class="flex items-center gap-1 w-full max-w-[240px]">
+                      <div class="border border-gray-300 rounded px-3 py-1.5 text-sm flex-1 bg-white flex items-center justify-between">
+                         <span class="truncate">{{ discountDraft.doctor }}</span>
+                         <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                      </div>
+                      <button class="px-2 py-1.5 border border-gray-300 rounded bg-gray-50 hover:bg-gray-100 text-xs text-gray-600">...</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="w-64 flex flex-col">
+                  <label class="text-sm font-semibold text-gray-700 mb-1 pl-1">Хөнгөлөлт</label>
+                  <div class="border border-gray-400 h-48 overflow-y-auto bg-white">
+                    <div 
+                      v-for="opt in discountOptions" 
+                      :key="opt.id"
+                      class="px-2 py-1 text-sm cursor-pointer hover:bg-blue-50"
+                      :class="discountDraft.selectedDiscountId === opt.id ? 'bg-blue-100 text-blue-900' : 'text-gray-900'"
+                      @click="discountDraft.selectedDiscountId = opt.id"
+                    >
+                      {{ opt.name }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Note -->
+              <div class="mt-8">
+                <label class="block text-sm text-gray-600 mb-1 ml-[140px]">Тэмдэглэл</label>
+                <div class="flex">
+                  <div class="w-[140px]"></div>
+                  <textarea v-model="discountDraft.note" rows="4" class="flex-1 max-w-[400px] border border-gray-400 p-2 text-sm focus:outline-none focus:border-blue-500"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+              <button 
+                type="button" 
+                class="px-6 py-2 border-2 border-amber-400 text-amber-600 font-bold text-sm hover:bg-amber-50 rounded bg-white"
+                @click="deleteDiscount"
+              >
+                <u>У</u>стгах
+              </button>
+              <div class="flex items-center gap-3">
+                 <button 
+                  type="button" 
+                  class="px-6 py-2 border-2 text-green-600 border-green-600 font-bold text-sm hover:bg-green-50 rounded bg-white flex items-center gap-1"
+                  @click="saveDiscount"
+                >
+                  <span>Тийм</span>
+                </button>
+                <button 
+                  type="button" 
+                  class="px-6 py-2 border-2 border-gray-500 text-gray-700 font-bold text-sm hover:bg-gray-100 rounded bg-white"
+                  @click="closeDiscount"
+                >
+                  Цуцлах
+                </button>
+              </div>
+            </div>
           </div>
         </Transition>
       </div>

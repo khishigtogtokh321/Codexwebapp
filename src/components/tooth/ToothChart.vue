@@ -420,11 +420,11 @@ function handleImpacted() {
   border-color: #2563eb;
   background: #eff6ff;
   color: #1d4ed8;
-  box-shadow: 0 10px 30px -20px rgba(37, 99, 235, 0.4);
+  /* box-shadow: 0 10px 30px -20px rgba(37, 99, 235, 0.4); */
 }
 
 .selector-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.1;
   cursor: not-allowed;
 }
 

@@ -689,65 +689,48 @@
     padding: 0.75rem 1rem;
   }
 
-  @media (min-width: 768px) {
+  @media (min-width: 1024px) {
     .topbar-inner {
-      flex-direction: row;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
       align-items: center;
-      justify-content: space-between;
-      padding: 0.75rem 1.5rem;
+      padding: 0.75rem 2rem;
+      gap: 3rem;
     }
   }
 
   .topbar-search {
     position: relative;
-    flex: 1;
-    min-width: 0;
     width: 100%;
-    max-width: 36rem;
+    min-width: 0;
   }
 
-  .topbar-patient-wrap {
+  .ui-input--search {
+    background: #f1f5f9 !important;
+    border-color: transparent !important;
+    border-radius: 9999px !important;
+    padding-left: 2.55rem !important;
+    height: 40px !important;
+    font-size: 0.875rem !important;
+    transition: all 0.2s ease;
+  }
+
+  .ui-input--search:focus {
+    background: #ffffff !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.05) !important;
+  }
+
+  .topbar-center {
+    min-width: 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  .topbar-user-wrap {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    width: 100%;
-  }
-
-  @media (min-width: 768px) {
-    .topbar-patient-wrap {
-      width: auto;
-      min-width: 16rem;
-    }
-  }
-
-  .topbar-patient {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 999px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-  }
-
-  .topbar-patient__text {
-    min-width: 0;
-    text-align: right;
-  }
-
-  .topbar-patient__name {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: #0f172a;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .topbar-patient__meta {
-    font-size: 0.75rem;
-    color: #64748b;
-    line-height: 1.2;
   }
 
   .ui-input {
@@ -1747,7 +1730,9 @@
   .treatment-carousel__item--next {
     color: #94a3b8;
     opacity: 0.6;
-    flex: 0 0 110px;
+    flex: 1;
+    min-width: 0;
+
     text-align: center;
     white-space: nowrap;
     overflow: hidden;
@@ -1764,12 +1749,12 @@
 
   .treatment-carousel__active-wrapper {
     position: relative;
-    flex: 0 0 140px;
+    flex: 1.5;
     display: flex;
     justify-content: center;
     align-items: center;
     width: 30%;
-    min-width: 140px;
+    min-width: 100px;
     max-width: 200px;
   }
 
@@ -1784,7 +1769,7 @@
     gap: 0.25rem;
     padding: 0.5rem 0.75rem;
     background: #ffffff;
-    border: 2px solid #e8efef ;
+    border: 2px solid #e8efef;
     border-radius: 999px;
     color: #121318;
     font-size: 0.9rem;
@@ -1794,6 +1779,8 @@
   .treatment-carousel__item--active:hover {
     background: #eff6ff;
   }
+
+
 
   /* Dropdown Styles */
   .treatment-carousel__dropdown {
@@ -1942,12 +1929,27 @@
 
   .treatment-code-button {
     width: 100%;
-    min-height: var(--treatment-control-height);
+    /* Fixed height ensures consistent grid rows */
+    height: 54px;
+    min-height: 54px;
+
     border-radius: 0.75rem;
     border: 1px solid #e2e8f0;
     background: #ffffff;
-    padding: var(--treatment-code-padding-y) var(--treatment-code-padding-x);
-    font-size: var(--treatment-code-font);
+
+    /* Flex centering for multi-line text */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Wrap & Scale Logic */
+    padding: 0.25rem 0.5rem;
+    text-align: center;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.1;
+    font-size: clamp(11px, 0.8rem, 14px);
+
     font-weight: 600;
     color: #334155;
     transition: background-color 150ms ease, border-color 150ms ease;
