@@ -70,16 +70,31 @@ const allergies = computed(() => [
 ])
 
 const recalls = computed(() => [
-    { dueDate: '2026.06.28', plannedDate: '-', note: 'Урьдчилан сэргийлэх үзлэг' },
-    { dueDate: '2024.12.01', plannedDate: '2024.11.25', note: 'Шүдний өнгө шалгах' },
+    { 
+        type: 'Урьдчилан сэргийлэх үзлэг', 
+        previousDate: '2026-01-13', 
+        dueDate: '2026-07-13', 
+        plannedDate: '', 
+        frequency: '6с', 
+        status: '', 
+        note: '' 
+    },
+    { 
+        type: 'Шүдний өнгө шалгах', 
+        previousDate: '2024-11-25', 
+        dueDate: '2024-12-01', 
+        plannedDate: '2024-11-25', 
+        frequency: '1с', 
+        status: 'Дууссан', 
+        note: 'Шүдний өнгө шалгах' 
+    },
 ])
 
 const primaryTabs = [
-    { key: 'treatment', label: 'Эмчилгээ', component: PatientTreatmentTab },
-    { key: 'plan', label: 'Эмчилгээний төлөвлөгөө', component: PatientPlanTab },
-    { key: 'schedule', label: 'Цаг товлох', component: PatientScheduleTab },
     { key: 'recall', label: 'Дахин дуудах хуваарь', component: PatientFilesTab },
-    { key: 'files', label: 'Файл', component: PatientHistoryTab },
+    // { key: 'treatment', label: 'Эмчилгээ', component: PatientTreatmentTab },
+    // { key: 'plan', label: 'Эмчилгээний төлөвлөгөө', component: PatientPlanTab },
+    // { key: 'schedule', label: 'Цаг товлох', component: PatientScheduleTab },
 ]
 
 const activeTab = ref(primaryTabs[0].key)
@@ -309,14 +324,15 @@ onBeforeUnmount(() => {
                                             <span class="pill pill--soft">{{ showSafety ? 'Хаах' : 'Нээх' }}</span>
                                         </button>
                                         <div v-if="showSafety" class="space-y-3">
-                                            <AllergyCard class="min-w-0" :allergies="allergies" />
                                             <DateTimeCard class="min-w-0" />
+                                            <AllergyCard class="min-w-0" :allergies="allergies" />
+                                            
                                         </div>
                                     </div>
                                 </template>
                                 <template v-else>
-                                    <AllergyCard class="min-w-0" :allergies="allergies" />
                                     <DateTimeCard class="min-w-0" />
+                                    <AllergyCard class="min-w-0" :allergies="allergies" />
                                 </template>
                             </div>
 
