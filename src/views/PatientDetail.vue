@@ -69,26 +69,7 @@ const allergies = computed(() => [
     { label: 'Тоос' },
 ])
 
-const recalls = computed(() => [
-    { 
-        type: 'Урьдчилан сэргийлэх үзлэг', 
-        previousDate: '2026-01-13', 
-        dueDate: '2026-07-13', 
-        plannedDate: '', 
-        frequency: '6с', 
-        status: '', 
-        note: '' 
-    },
-    { 
-        type: 'Шүдний өнгө шалгах', 
-        previousDate: '2024-11-25', 
-        dueDate: '2024-12-01', 
-        plannedDate: '2024-11-25', 
-        frequency: '1с', 
-        status: 'Дууссан', 
-        note: 'Шүдний өнгө шалгах' 
-    },
-])
+const recalls = computed(() => patientStore.recalls)
 
 const primaryTabs = [
     { key: 'recall', label: 'Дахин дуудах хуваарь', component: PatientFilesTab },
@@ -135,6 +116,18 @@ const activeTabProps = computed(() => {
         label: activeTabConfig.value.label,
     }
 })
+
+function handleRecallAdd(recall) {
+    patientStore.addRecall(recall)
+}
+
+function handleRecallEdit(recall) {
+    patientStore.updateRecall(recall)
+}
+
+function handleRecallDelete(recall) {
+    patientStore.deleteRecall(recall)
+}
 
 function toggleNav() {
     pinned.value = !pinned.value
@@ -351,7 +344,13 @@ onBeforeUnmount(() => {
                                         'flex min-h-0 min-w-0 flex-col',
                                         isPortrait ? 'overflow-visible' : 'flex-1 overflow-hidden',
                                     ]">
-                                    <component :is="activeTabConfig.component" v-bind="activeTabProps" />
+                                    <component 
+                                        :is="activeTabConfig.component" 
+                                        v-bind="activeTabProps"
+                                        @add="handleRecallAdd" 
+                                        @edit="handleRecallEdit" 
+                                        @delete="handleRecallDelete" 
+                                    />
                                 </div>
                             </div>
                         </div>

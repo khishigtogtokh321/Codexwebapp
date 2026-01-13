@@ -2647,7 +2647,7 @@
 
   .ui-tabs--underline {
     gap: 1.25rem;
-    border-bottom: 1px solid #e2e8f0;
+    /* border-bottom: 1px solid #e2e8f0; */
     padding-bottom: 0.25rem;
   }
 
@@ -2657,8 +2657,8 @@
     justify-content: center;
     min-height: 44px;
     padding: 0.55rem 0.9rem;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
+    /* border-radius: 12px;
+    border: 1px solid #e2e8f0; */
     background: #f8fafc;
     color: #0f172a;
     font-weight: 700;
@@ -2673,10 +2673,10 @@
     padding: 0.55rem 0.1rem;
     color: #475569;
     box-shadow: none;
-    border-bottom: 3px solid transparent;
+    /* border-bottom: 3px solid transparent; */
   }
 
-  .ui-tab--active {
+  /* .ui-tab--active {
     background: #ecfdf3;
     border-color: #a7f3d0;
     color: #047857;
@@ -2688,7 +2688,7 @@
     border-bottom-color: #10b981;
     color: #0f172a;
     box-shadow: none;
-  }
+  } */
 
   @media (hover: hover) and (pointer: fine) {
     .ui-tab:hover {

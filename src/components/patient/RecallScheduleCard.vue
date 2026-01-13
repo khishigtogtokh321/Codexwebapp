@@ -12,9 +12,10 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['add', 'save'])
+const emit = defineEmits(['add', 'save', 'edit', 'delete'])
 
 const isModalOpen = ref(false)
+const isEditing = ref(false)
 const draft = ref({
   type: '',
   frequency: { year: 0, month: 6, week: 0, day: 0 },
@@ -42,6 +43,7 @@ const statusOptions = [
 ]
 
 function openAdd() {
+  isEditing.value = false
   draft.value = {
     type: '',
     frequency: { year: 0, month: 6, week: 0, day: 0 },
@@ -57,6 +59,41 @@ function openAdd() {
   isModalOpen.value = true
 }
 
+function openEdit(recall) {
+  isEditing.value = true
+  // Parse frequency string back to object if possible, or just mock for now as we don't have the parser logic yet
+  // For simplicity, we'll keep the frequency object reset or try to parse simple cases like "6с"
+  // A robust parser would be needed for complex strings.
+  // Assuming the user just wants to see the modal open with data for now.
+  
+  // Simple parser for demo:
+  let freqObj = { year: 0, month: 0, week: 0, day: 0 }
+  if (recall.frequency) {
+     const parts = recall.frequency.split(' ')
+     parts.forEach(p => {
+       if (p.includes('ж')) freqObj.year = parseInt(p)
+       if (p.includes('с')) freqObj.month = parseInt(p)
+       if (p.includes('д-7')) freqObj.week = parseInt(p)
+       if (p.includes('ө')) freqObj.day = parseInt(p)
+     })
+  }
+
+  draft.value = {
+    ...recall,
+    frequency: freqObj,
+    // Ensure all fields exist
+    permanent: recall.permanent || false,
+    untilDate: recall.untilDate || '',
+    previousDate: recall.previousDate || '',
+    calculatedDate: recall.calculatedDate || '',
+    dueDate: recall.dueDate || '',
+    plannedDate: recall.plannedDate || '',
+    status: recall.status || 'Хоосон',
+    note: recall.note || ''
+  }
+  isModalOpen.value = true
+}
+
 function handleSave() {
   // Format frequency string for display (e.g., "6с")
   let freqStr = ''
@@ -66,11 +103,24 @@ function handleSave() {
   if (week > 0) freqStr += `${week}д-7 `
   if (day > 0) freqStr += `${day}ө `
   
-  emit('add', {
+  const payload = {
     ...draft.value,
     frequency: freqStr.trim()
-  })
+  }
+
+  if (isEditing.value) {
+    emit('edit', payload)
+  } else {
+    emit('add', payload)
+  }
   isModalOpen.value = false
+}
+
+function handleDelete() {
+  if (isEditing.value) {
+    emit('delete', draft.value)
+    closeModal()
+  }
 }
 
 function closeModal() {
@@ -105,6 +155,7 @@ function closeModal() {
             <th>Давтамж</th>
             <th>Төлөв</th>
             <th>Тэмдэглэл</th>
+            <th class="w-[80px] text-center">Үйлдэл</th>
           </tr>
         </thead>
         <tbody>
@@ -116,9 +167,33 @@ function closeModal() {
             <td class="history-grid__cell">{{ recall.frequency }}</td>
             <td class="history-grid__cell">{{ recall.status }}</td>
             <td class="history-grid__cell">{{ recall.note }}</td>
+            <td class="history-grid__cell">
+              <div class="flex items-center justify-center gap-1.5" @click.stop>
+                <button
+                  type="button"
+                  class="p-1 px-2 rounded hover:bg-blue-50 text-blue-600 transition-colors"
+                  title="Засах"
+                  @click="openEdit(recall)"
+                >
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  class="p-1 px-2 rounded hover:bg-red-50 text-red-500 transition-colors"
+                  title="Устгах"
+                  @click="emit('delete', recall)"
+                >
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+            </td>
           </tr>
            <tr v-if="recalls.length === 0" class="history-grid__row">
-            <td colspan="7" class="history-grid__cell history-grid__cell--muted">
+            <td colspan="8" class="history-grid__cell history-grid__cell--muted">
               Төлөвлөгдсөн дуудлага байхгүй
             </td>
           </tr>
@@ -206,32 +281,30 @@ function closeModal() {
                    </div>
                 </div>
 
-                <!-- Dates -->
-                <div class="space-y-3 pt-2">
-                  <div class="grid grid-cols-[180px_1fr] items-center gap-4">
+                <!-- Dates & Status Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 pt-2">
+                  <div class="grid grid-cols-[140px_1fr] items-center gap-2">
                      <label class="text-right text-sm text-slate-600">Өмнөх огноо</label>
-                     <input v-model="draft.previousDate" type="date" class="border border-slate-300 rounded px-3 py-1.5 text-sm w-40 bg-slate-50" />
+                     <input v-model="draft.previousDate" type="date" class="border border-slate-300 rounded px-3 py-1.5 text-sm w-full bg-slate-50" />
                   </div>
-                  <div class="grid grid-cols-[180px_1fr] items-center gap-4">
-                     <label class="text-right text-sm text-slate-600">Тооцоолсон дуудах огноо</label>
-                     <input v-model="draft.calculatedDate" type="date" class="border border-slate-300 rounded px-3 py-1.5 text-sm w-40 bg-slate-50" disabled />
+                  <div class="grid grid-cols-[140px_1fr] items-center gap-2">
+                     <label class="text-right text-sm text-slate-600">Тооцоолсон огноо</label>
+                     <input v-model="draft.calculatedDate" type="date" class="border border-slate-300 rounded px-3 py-1.5 text-sm w-full bg-slate-50" disabled />
                   </div>
-                   <div class="grid grid-cols-[180px_1fr] items-center gap-4">
+                   <div class="grid grid-cols-[140px_1fr] items-center gap-2">
                      <label class="text-right text-sm text-slate-600">Дуудах огноо</label>
-                     <input v-model="draft.dueDate" type="date" class="border border-slate-300 rounded px-3 py-1.5 text-sm w-40" />
+                     <input v-model="draft.dueDate" type="date" class="border border-slate-300 rounded px-3 py-1.5 text-sm w-full" />
                   </div>
-                   <div class="grid grid-cols-[180px_1fr] items-center gap-4">
+                   <div class="grid grid-cols-[140px_1fr] items-center gap-2">
                      <label class="text-right text-sm text-slate-600">Төлөвлөсөн огноо</label>
-                     <input v-model="draft.plannedDate" type="date" class="border border-slate-300 rounded px-3 py-1.5 text-sm w-40 bg-slate-50" />
+                     <input v-model="draft.plannedDate" type="date" class="border border-slate-300 rounded px-3 py-1.5 text-sm w-full bg-slate-50" />
                   </div>
-                </div>
-
-                <!-- Status -->
-                <div class="grid grid-cols-[180px_1fr] items-center gap-4">
-                  <label class="text-right text-sm text-slate-600">Төлөв</label>
-                  <select v-model="draft.status" class="w-40 border border-slate-300 rounded px-3 py-1.5 text-sm outline-none focus:border-blue-500">
-                    <option v-for="s in statusOptions" :key="s" :value="s">{{ s }}</option>
-                  </select>
+                  <div class="grid grid-cols-[140px_1fr] items-center gap-2">
+                    <label class="text-right text-sm text-slate-600">Төлөв</label>
+                    <select v-model="draft.status" class="w-full border border-slate-300 rounded px-3 py-1.5 text-sm outline-none focus:border-blue-500">
+                      <option v-for="s in statusOptions" :key="s" :value="s">{{ s }}</option>
+                    </select>
+                  </div>
                 </div>
 
                 <!-- Note -->
@@ -246,12 +319,15 @@ function closeModal() {
             <!-- Footer -->
              <div class="flex items-center justify-between px-6 py-4 border-t border-slate-100 bg-slate-50/50">
               <button 
+                v-if="isEditing"
                 type="button" 
                 class="px-6 py-2 border-2 border-amber-500 text-amber-600 font-bold text-sm hover:bg-amber-50 rounded bg-white"
-                @click="closeModal"
+                @click="handleDelete"
               >
                 <u>У</u>стгах
               </button>
+              <div v-else></div> <!-- Spacer -->
+
               <div class="flex items-center gap-3">
                  <button 
                   type="button" 

@@ -28,7 +28,29 @@ export const usePatientStore = defineStore('patient', {
         recentPatients: loadFromStorage(RECENT_KEY) || [],
         currentPatient: loadFromStorage(CURRENT_PATIENT_KEY),
         loading: false,
-        error: null
+        error: null,
+        recalls: [
+            {
+                id: 1,
+                type: 'Урьдчилан сэргийлэх үзлэг',
+                previousDate: '2026-01-13',
+                dueDate: '2026-07-13',
+                plannedDate: '',
+                frequency: '6с',
+                status: '',
+                note: ''
+            },
+            {
+                id: 2,
+                type: 'Шүдний өнгө шалгах',
+                previousDate: '2024-11-25',
+                dueDate: '2024-12-01',
+                plannedDate: '2024-11-25',
+                frequency: '1с',
+                status: 'Дууссан',
+                note: 'Шүдний өнгө шалгах'
+            },
+        ]
     }),
 
     getters: {
@@ -166,6 +188,25 @@ export const usePatientStore = defineStore('patient', {
 
         clearError() {
             this.error = null
+        },
+
+        addRecall(recall) {
+            const newRecall = {
+                ...recall,
+                id: Date.now() + Math.floor(Math.random() * 1000)
+            }
+            this.recalls.push(newRecall)
+        },
+
+        updateRecall(recall) {
+            const index = this.recalls.findIndex(r => r.id === recall.id)
+            if (index !== -1) {
+                this.recalls[index] = { ...recall }
+            }
+        },
+
+        deleteRecall(recall) {
+            this.recalls = this.recalls.filter(r => r.id !== recall.id)
         }
     }
 })
