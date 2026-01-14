@@ -1130,7 +1130,7 @@
       --treatment-diagnosis-padding-y: clamp(0.35rem, 1.2vw, 0.6rem);
       --treatment-code-padding-x: clamp(0.6rem, 1.6vw, 0.9rem);
       --treatment-code-padding-y: clamp(0.55rem, 1.4vw, 0.85rem);
-      --treatment-code-font: clamp(0.72rem, 1.6vw, 0.88rem);
+      --treatment-code-font: clamp(0.6rem, 2.5vw, 0.9rem);
       --treatment-action-offset: clamp(0.6rem, 2vw, 1.25rem);
       --treatment-action-gap: clamp(0.4rem, 2vw, 1rem);
       --treatment-pill-padding-x: clamp(0.6rem, 2vw, 1rem);
@@ -1749,13 +1749,11 @@
 
   .treatment-carousel__active-wrapper {
     position: relative;
-    flex: 1.5;
+    flex: 3;
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 30%;
-    min-width: 100px;
-    max-width: 200px;
+    min-width: 0;
   }
 
   .treatment-carousel__item--active {
@@ -1772,8 +1770,8 @@
     border: 2px solid #e8efef;
     border-radius: 999px;
     color: #121318;
-    font-size: 0.9rem;
-    font-weight: 700;
+    font-size: clamp(0.75rem, 4cqw, 0.9rem);
+    font-weight: 600;
   }
 
   .treatment-carousel__item--active:hover {
@@ -1929,10 +1927,8 @@
 
   .treatment-code-button {
     width: 100%;
-    /* Fixed height ensures consistent grid rows */
-    height: 54px;
-    min-height: 54px;
-
+    height: clamp(34px, 7cqw, 50px);
+    min-height: 0;
     border-radius: 0.75rem;
     border: 1px solid #e2e8f0;
     background: #ffffff;
@@ -1943,7 +1939,7 @@
     justify-content: center;
 
     /* Wrap & Scale Logic */
-    padding: 0.25rem 0.5rem;
+    padding: var(--treatment-code-padding-y) var(--treatment-code-padding-x);
     text-align: center;
     white-space: normal;
     word-break: break-word;

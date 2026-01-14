@@ -287,9 +287,9 @@ function handleClick() {
 <style scoped>
 .tooth-item {
   width: 100%;
-  aspect-ratio: 0.85;
+  aspect-ratio: 0.65;
   min-width: 0;
-  font-size: clamp(0.6rem, 1.2vw, 0.78rem);
+  font-size: clamp(0.75rem, 1.2vw, 0.78rem);
 }
 
 .tooth-number {
