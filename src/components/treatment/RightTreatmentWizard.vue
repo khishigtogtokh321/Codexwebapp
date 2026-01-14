@@ -412,111 +412,15 @@ function handleAdd() {
           <div class="space-y-2">
             <!-- <span class="treatment-wizard__field-label">Гадаргуу</span> -->
             <div class="relative">
-            <button
-              type="button"
-              ref="surfaceTriggerRef"
-              class="treatment-surface-trigger"
-              @click="toggleSurfaceDropdown"
-            >
-              <span class="treatment-surface-trigger__label">
-                {{ surfaceTriggerLabel }}
-              </span>
-              <svg class="h-4 w-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path
-                  fill-rule="evenodd"
-                  d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </button>
-
-            <Teleport to="body">
-              <div
-                v-if="showSurfaceDropdown"
-                ref="surfaceDropdownRef"
-                class="treatment-surface-dropdown"
-                :class="surfaceDropdownPlacement === 'top'
-                  ? 'treatment-surface-dropdown--top'
-                  : 'treatment-surface-dropdown--bottom'"
-                :style="surfaceDropdownStyles"
+              <button
+                type="button"
+                ref="surfaceTriggerRef"
+                class="treatment-surface-trigger"
+                @click="toggleSurfaceDropdown"
               >
-                <div class="treatment-surface-dropdown__content">
-                  <div class="treatment-surface-grid">
-                    <div></div>
-                    <button
-                      type="button"
-                      class="treatment-surface-button"
-                      :class="selectedSurfaces.includes('B/F') ? 'treatment-surface-button--selected' : ''"
-                      @click="toggleSurface('B/F')"
-                    >
-                      B/F
-                    </button>
-
-                    <div></div>
-
-                    <button
-                      type="button"
-                      class="treatment-surface-button"
-                      :class="selectedSurfaces.includes('M') ? 'treatment-surface-button--selected' : ''"
-                      @click="toggleSurface('M')"
-                    >
-                      M
-                    </button>
-
-                    <button
-                      type="button"
-                      class="treatment-surface-button"
-                      :class="selectedSurfaces.includes('O/I') ? 'treatment-surface-button--selected' : ''"
-                      @click="toggleSurface('O/I')"
-                    >
-                      O/I
-                    </button>
-
-                    <button
-                      type="button"
-                      class="treatment-surface-button"
-                      :class="selectedSurfaces.includes('D') ? 'treatment-surface-button--selected' : ''"
-                      @click="toggleSurface('D')"
-                    >
-                      D
-                    </button>
-
-                    <div></div>
-                    <button
-                      type="button"
-                      class="treatment-surface-button"
-                      :class="selectedSurfaces.includes('L/P') ? 'treatment-surface-button--selected' : ''"
-                      @click="toggleSurface('L/P')"
-                    >
-                      L/P
-                    </button>
-                    <div></div>
-                  </div>
-                </div>
-              </div>
-            </Teleport>
-
-          </div>
-        </div>
-      </div>
-
-        <div class="treatment-wizard__block treatment-wizard__field">
-          <div class="space-y-3">
-            <!-- <span class="treatment-wizard__field-label">Онош сонгох</span> -->
-            <div>
-              <div class="relative">
-              <div
-                ref="diagnosisTriggerRef"
-                class="treatment-diagnosis-trigger"
-                @click="toggleDiagnosisDropdown"
-              >
-                <input
-                  v-model="diagnosisQuery"
-                  type="text"
-                  placeholder="Онош сонгох"
-                  class="treatment-input w-full bg-transparent text-slate-600 focus:outline-none"
-                  @focus="openDiagnosisDropdown"
-                />
+                <span class="treatment-surface-trigger__label">
+                  {{ surfaceTriggerLabel }}
+                </span>
                 <svg class="h-4 w-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path
                     fill-rule="evenodd"
@@ -524,45 +428,138 @@ function handleAdd() {
                     clip-rule="evenodd"
                   />
                 </svg>
-              </div>
+              </button>
 
               <Teleport to="body">
                 <div
-                  v-if="showDiagnosisDropdown"
-                  ref="diagnosisDropdownRef"
-                  class="treatment-diagnosis-dropdown"
-                  :class="dropdownPlacement === 'top'
-                    ? 'treatment-diagnosis-dropdown--top'
-                    : 'treatment-diagnosis-dropdown--bottom'"
-                  :style="dropdownStyles"
+                  v-if="showSurfaceDropdown"
+                  ref="surfaceDropdownRef"
+                  class="treatment-surface-dropdown"
+                  :class="surfaceDropdownPlacement === 'top'
+                    ? 'treatment-surface-dropdown--top'
+                    : 'treatment-surface-dropdown--bottom'"
+                  :style="surfaceDropdownStyles"
                 >
-                  <button
-                    type="button"
-                    class="treatment-diagnosis-clear"
-                    @click.stop="clearDiagnosis"
-                  >
-                    Алгасах
-                  </button>
-                  <div class="treatment-diagnosis-list divide-y divide-slate-100">
-                    <button
-                      v-for="item in filteredDiagnoses"
-                      :key="item.code"
-                      type="button"
-                      class="treatment-diagnosis-item"
-                      @click.stop="selectDiagnosis(item)"
-                    >
-                      <p class="font-semibold">{{ item.code }}</p>
-                      <p class="text-xs text-slate-500">{{ item.name }}</p>
-                    </button>
+                  <div class="treatment-surface-dropdown__content">
+                    <div class="treatment-surface-grid">
+                      <div></div>
+                      <button
+                        type="button"
+                        class="treatment-surface-button"
+                        :class="selectedSurfaces.includes('B/F') ? 'treatment-surface-button--selected' : ''"
+                        @click="toggleSurface('B/F')"
+                      >
+                        B/F
+                      </button>
+
+                      <div></div>
+
+                      <button
+                        type="button"
+                        class="treatment-surface-button"
+                        :class="selectedSurfaces.includes('M') ? 'treatment-surface-button--selected' : ''"
+                        @click="toggleSurface('M')"
+                      >
+                        M
+                      </button>
+
+                      <button
+                        type="button"
+                        class="treatment-surface-button"
+                        :class="selectedSurfaces.includes('O/I') ? 'treatment-surface-button--selected' : ''"
+                        @click="toggleSurface('O/I')"
+                      >
+                        O/I
+                      </button>
+
+                      <button
+                        type="button"
+                        class="treatment-surface-button"
+                        :class="selectedSurfaces.includes('D') ? 'treatment-surface-button--selected' : ''"
+                        @click="toggleSurface('D')"
+                      >
+                        D
+                      </button>
+
+                      <div></div>
+                      <button
+                        type="button"
+                        class="treatment-surface-button"
+                        :class="selectedSurfaces.includes('L/P') ? 'treatment-surface-button--selected' : ''"
+                        @click="toggleSurface('L/P')"
+                      >
+                        L/P
+                      </button>
+                      <div></div>
+                    </div>
                   </div>
                 </div>
               </Teleport>
-
             </div>
           </div>
         </div>
-      </div>
 
+        <div class="treatment-wizard__block treatment-wizard__field">
+          <div class="space-y-3">
+            <!-- <span class="treatment-wizard__field-label">Онош сонгох</span> -->
+            <div>
+              <div class="relative">
+                <div
+                  ref="diagnosisTriggerRef"
+                  class="treatment-diagnosis-trigger"
+                  @click="toggleDiagnosisDropdown"
+                >
+                  <input
+                    v-model="diagnosisQuery"
+                    type="text"
+                    placeholder="Онош сонгох"
+                    class="treatment-input w-full bg-transparent text-slate-600 focus:outline-none"
+                    @focus="openDiagnosisDropdown"
+                  />
+                  <svg class="h-4 w-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path
+                      fill-rule="evenodd"
+                      d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </div>
+
+                <Teleport to="body">
+                  <div
+                    v-if="showDiagnosisDropdown"
+                    ref="diagnosisDropdownRef"
+                    class="treatment-diagnosis-dropdown"
+                    :class="dropdownPlacement === 'top'
+                      ? 'treatment-diagnosis-dropdown--top'
+                      : 'treatment-diagnosis-dropdown--bottom'"
+                    :style="dropdownStyles"
+                  >
+                    <button
+                      type="button"
+                      class="treatment-diagnosis-clear"
+                      @click.stop="clearDiagnosis"
+                    >
+                      Алгасах
+                    </button>
+                    <div class="treatment-diagnosis-list divide-y divide-slate-100">
+                      <button
+                        v-for="item in filteredDiagnoses"
+                        :key="item.code"
+                        type="button"
+                        class="treatment-diagnosis-item"
+                        @click.stop="selectDiagnosis(item)"
+                      >
+                        <p class="font-semibold">{{ item.code }}</p>
+                        <p class="text-xs text-slate-500">{{ item.name }}</p>
+                      </button>
+                    </div>
+                  </div>
+                </Teleport>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="treatment-wizard__block treatment-wizard__block--codes min-w-0">
@@ -683,16 +680,15 @@ function handleAdd() {
             {{ option.label }}
           </button>
         </div>
-        <div class="flex-1  items-end gap-1.5">
-          <button
-            type="button"
-            class="treatment-add-button-primary treatment-add-button-primary--compact w-full"
-            :disabled="!canAdd"
-            @click="handleAdd"
-          >
-            Нэмэх
-          </button>
-        </div>
+        
+        <button
+          type="button"
+          class="treatment-add-button-primary treatment-add-button-primary--compact"
+          :disabled="!canAdd"
+          @click="handleAdd"
+        >
+          Нэмэх
+        </button>
       </div>
     </div>
   </section>

@@ -671,6 +671,56 @@
     border-color: #cbd5e1;
   }
 
+  /* Tablet Portrait: Optimize history table search for touch */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .history-search {
+      gap: 0.75rem;
+    }
+
+    .history-search__input {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .history-search__field {
+      min-height: 44px;
+      max-height: none;
+      padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+      font-size: 0.9rem;
+    }
+
+    .history-search__select-wrap {
+      flex: 0 0 auto;
+      min-width: 120px;
+    }
+
+    .history-search__select {
+      min-height: 44px;
+      max-height: none;
+      font-size: 0.9rem;
+    }
+
+    .history-search__clear {
+      min-height: 44px;
+      max-height: none;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
+
+    .history-grid__table-shell {
+      max-height: clamp(16rem, 35vh, 24rem);
+    }
+
+    .history-grid__table {
+      font-size: 0.85rem;
+    }
+
+    .history-grid__cell {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.85rem;
+    }
+  }
+
   .topbar-shell {
     width: 100%;
     border-bottom: 1px solid #e2e8f0;
@@ -689,13 +739,13 @@
     padding: 0.75rem 1rem;
   }
 
-  @media (min-width: 1024px) {
+  @media (min-width: 768px) {
     .topbar-inner {
       display: grid;
       grid-template-columns: auto 1fr auto;
       align-items: center;
-      padding: 0.75rem 2rem;
-      gap: 3rem;
+      padding: 0.75rem 1.5rem;
+      gap: 1.5rem;
     }
   }
 
@@ -734,14 +784,14 @@
   }
 
   .ui-input {
-    width: 70%;
+    width: 100%;
     border: 1px solid #e2e8f0;
     border-radius: 999px;
     background: #f8fafc;
     color: #0f172a;
     font-size: 0.9rem;
-    min-height: 2rem;
-    padding: 0.35rem 2rem 0.35rem 2rem;
+    min-height: 2.25rem;
+    padding: 0.35rem 1rem 0.35rem 2.5rem;
     transition: border-color 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
   }
 
@@ -1079,6 +1129,115 @@
     }
   }
 
+  /* ========================================
+     Treatment Page - Tablet Portrait Layout
+     Responsive grid system for <1024px screens
+     ======================================== */
+
+  .treatment-page-grid {
+    display: grid;
+    gap: 1rem;
+    align-items: start;
+  }
+
+  /* Mobile & Tablet Portrait: Single column stacked layout */
+  @media (max-width: 1023px) {
+    .treatment-page-grid {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    .treatment-page-grid__chart {
+      min-width: 0;
+    }
+
+    .treatment-page-grid__wizard {
+      min-width: 0;
+      position: relative;
+    }
+  }
+
+  /* Desktop: 12-column grid */
+  @media (min-width: 1024px) {
+    .treatment-page-grid {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      align-items: stretch;
+    }
+
+    .treatment-page-grid__chart {
+      grid-column: span 7;
+      min-width: 0;
+    }
+
+    .treatment-page-grid__wizard {
+      grid-column: span 5;
+      padding-left: 0.5rem;
+      min-width: 0;
+      position: relative;
+    }
+  }
+
+  /* Tablet Portrait specific optimizations (768px - 1023px) */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .treatment-page-grid {
+      gap: 1.5rem;
+    }
+
+    .treatment-page-grid__chart .tooth-selector {
+      padding: 1.25rem;
+    }
+
+    .treatment-page-grid__wizard .treatment-wizard {
+      padding: 1.25rem;
+      max-width: none;
+      width: 100%;
+    }
+
+    /* Override wizard width constraints for tablet */
+    .treatment-wizard--single {
+      max-width: none;
+      width: 100%;
+    }
+
+    .treatment-wizard--responsive {
+      --treatment-wizard-width: 100%;
+    }
+  }
+
+  /* Validation Alert - Responsive positioning */
+  .treatment-validation-alert {
+    position: absolute;
+    z-index: 50;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 0.75rem;
+    padding: 0.75rem;
+    box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.15), 0 4px 6px -2px rgba(239, 68, 68, 0.1);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  /* Tablet & Mobile: Alert above wizard, centered */
+  @media (max-width: 1023px) {
+    .treatment-validation-alert {
+      top: -0.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 2rem);
+      max-width: 320px;
+    }
+  }
+
+  /* Desktop: Alert to the left of wizard */
+  @media (min-width: 1024px) {
+    .treatment-validation-alert {
+      top: -1rem;
+      left: -22.5rem;
+      width: 280px;
+    }
+  }
+
   .treatment-wizard {
     container-type: inline-size;
     --tw-hit: 2.75rem;
@@ -1267,7 +1426,7 @@
     min-width: 0;
   }
 
-  @media (max-width: 1023px) {
+  @media (max-width: 767px) {
     .treatment-wizard__row {
       grid-template-columns: 1fr;
     }
@@ -1484,6 +1643,29 @@
     .treatment-code-grid {
       grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
       gap: 0.5rem;
+    }
+  }
+
+  /* Tablet Portrait: Fixed 4 columns for consistent layout */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .treatment-code-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.625rem;
+    }
+
+    .treatment-code-button {
+      height: 48px;
+      font-size: 0.85rem;
+    }
+
+    .treatment-carousel__arrow {
+      width: 44px;
+      height: 44px;
+    }
+
+    .treatment-carousel__item--active {
+      font-size: 0.9rem;
+      padding: 0.625rem 1rem;
     }
   }
 
@@ -2016,11 +2198,20 @@
   }
 
   /* Footer layout wrapper - responsive 2 row -> 1 row */
+  /* Footer layout wrapper - responsive 2 row -> 1 row */
   .treatment-action-bar--inline>div {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     width: 100%;
+  }
+
+  @media (min-width: 768px) {
+    .treatment-action-bar--inline>div {
+      flex-direction: row;
+      align-items: center;
+      gap: 1rem;
+    }
   }
 
   /* Wide tablet: try to fit in 1 row, with wrap fallback */
@@ -2175,6 +2366,35 @@
     height: 52px;
     max-width: none;
     font-size: 1rem;
+  }
+
+  /* Tablet Portrait: Keep footer controls inline for wider tablet view */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .treatment-wizard-footer--inline {
+      flex-direction: row !important;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .treatment-status-actions-segmented--compact {
+      flex: 0 1 auto;
+      width: auto;
+      max-width: 240px;
+      min-width: 200px;
+    }
+
+    .treatment-add-button-primary--compact {
+      flex: 1;
+      width: auto;
+      height: 44px;
+      font-size: 0.95rem;
+    }
+
+    .treatment-status-segment--compact {
+      min-height: 44px;
+      font-size: 0.85rem;
+    }
   }
 
   .treatment-footer-row {

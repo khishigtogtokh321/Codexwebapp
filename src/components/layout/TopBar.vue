@@ -202,7 +202,7 @@ onBeforeUnmount(() => {
 
 <template>
   <header class="topbar-shell">
-    <div class="topbar-inner flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-4">
+    <div class="topbar-inner flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4">
       
       <!-- 1. LEFT: Menu, Patient Info & Search -->
       <div class="flex items-center flex-1 min-w-0">
@@ -229,7 +229,7 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- SEARCH: Now on the left, next to patient info -->
-        <div ref="rootRef" class="topbar-search ">
+        <div ref="rootRef" class="topbar-search flex-1 max-w-md">
           <span class="ui-input__icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
               <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0a7.5 7.5 0 10-10.61-10.6 7.5 7.5 0 0010.6 10.6z" />
@@ -327,7 +327,7 @@ onBeforeUnmount(() => {
       </div>
 
       <!-- 2. SPACER/CENTER: Empty now -->
-      <div class="hidden lg:block lg:flex-1"></div>
+      <div class="hidden md:block md:flex-1"></div>
 
       <!-- 3. RIGHT: Doctor Profile -->
       <div class="topbar-user-wrap flex-1 flex justify-end">

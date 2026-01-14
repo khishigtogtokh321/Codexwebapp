@@ -372,8 +372,8 @@ watch(
             leave-from-class="opacity-100 translate-y-0 scale-100 [transform:rotateX(0deg)_translateZ(0)]"
             leave-to-class="opacity-0 -translate-y-16 scale-95 [transform:rotateX(12deg)_translateZ(0)]"
           >
-            <div v-if="!isHistoryExpanded" class="grid gap-4 lg:grid-cols-12 items-start lg:items-stretch">
-              <div class="space-y-4 lg:col-span-7 min-w-0">
+            <div v-if="!isHistoryExpanded" class="treatment-page-grid">
+              <div class="treatment-page-grid__chart">
                 <ToothChart
                   class="h-auto lg:h-full"
                   :selected-teeth="selectedTeethList"
@@ -387,7 +387,7 @@ watch(
                 />
               </div>
 
-              <div class="lg:col-span-5 lg:pl-2 min-w-0 relative">
+              <div class="treatment-page-grid__wizard">
                 <!-- Floating Validation Alert -->
                 <Transition
                   enter-active-class="transition duration-200 ease-out"
@@ -399,7 +399,7 @@ watch(
                 >
                   <div 
                     v-if="showAlert" 
-                    class="absolute -top-4 -left-90  z-50 bg-red-50 border border-red-100 rounded-xl p-3 shadow-xl flex items-start gap-3"
+                    class="treatment-validation-alert"
                   >
                     <div class="mt-0.5 flex-shrink-0">
                       <div class="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center">
