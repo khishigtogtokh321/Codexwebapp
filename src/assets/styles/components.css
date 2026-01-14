@@ -627,6 +627,78 @@
     background: #ffffff;
   }
 
+  /* 
+    Tablet Portrait Optimization for History Table
+    Goal: Fit all columns without horizontal scroll 
+  */
+  @media (max-width: 1023px) {
+    .history-grid__table-shell {
+      overflow-x: hidden;
+      /* Prevent scroll if we can fit it */
+    }
+
+    .history-grid__table {
+      table-layout: fixed;
+      /* Force fixed layout to respect widths */
+      min-width: 0;
+      /* Allow shrinking */
+    }
+
+    .history-grid__table thead th,
+    .history-grid__cell {
+      padding: 0.35rem 0.2rem;
+      /* Very tight padding */
+      font-size: 0.75rem;
+      /* Smaller font */
+    }
+
+    /* Specific column adjustments to squeeze content - Total ~740px fit */
+    .history-grid__cell--date {
+      width: 68px;
+    }
+
+    .history-grid__cell--code {
+      width: 35px;
+    }
+
+    .history-grid__cell--number {
+      width: 65px;
+    }
+
+    .history-grid__cell--actions {
+      width: 55px;
+      min-width: auto;
+    }
+
+    .history-grid__cell {
+      max-width: 65px;
+      /* Aggressive max-width for truncating Doctor, Tooth, etc */
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Allow Diagnosis/Note to take slightly more if space allows, but still cap */
+    td:nth-child(3),
+    /* Diagnosis */
+    td:nth-child(8),
+    /* Desc */
+    td:nth-child(10)
+
+    /* Note */
+      {
+      max-width: 80px;
+    }
+
+
+
+    .history-grid__status {
+      padding: 0 0.3rem;
+      font-size: 0.65rem;
+      min-height: 1.25rem;
+    }
+  }
+
   .history-search__icon {
     position: absolute;
     left: 0.7rem;
