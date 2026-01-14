@@ -1641,8 +1641,15 @@
 
   @media (min-width: 1024px) {
     .treatment-code-grid {
-      grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
       gap: 0.5rem;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .treatment-code-grid {
+      grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+      gap: 0.75rem;
     }
   }
 
@@ -1651,6 +1658,23 @@
     .treatment-code-grid {
       grid-template-columns: repeat(4, 1fr);
       gap: 0.625rem;
+      height: 230px;
+      /* Perfectly fits 4 rows of 50px buttons + 10px gaps */
+      overflow-y: auto;
+      scrollbar-width: thin;
+      padding-right: 0.5rem;
+      max-height: none;
+      /* Override base clamp */
+      align-content: start;
+    }
+
+    .treatment-code-grid::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .treatment-code-grid::-webkit-scrollbar-thumb {
+      background: #e2e8f0;
+      border-radius: 4px;
     }
 
     .treatment-code-button {

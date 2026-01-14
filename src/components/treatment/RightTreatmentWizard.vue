@@ -637,13 +637,7 @@ function handleAdd() {
           </button>
         </div>
 
-        <div
-          class="treatment-code-grid grid gap-3 min-w-0 
-            [grid-template-columns:repeat(auto-fit,minmax(84px, 1fr))]
-            lg:gap-2 lg:[grid-template-columns:repeat(auto-fit,minmax(72px,1fr))]
-            xl:gap-3 xl:[grid-template-columns:repeat(auto-fit,minmax(88px,1fr))]]
-            "
-              >
+        <div class="treatment-code-grid">
           <div v-for="item in currentCodes" :key="item.code" class="relative group">
             <button
               type="button"
