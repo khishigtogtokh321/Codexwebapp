@@ -399,7 +399,7 @@ function handleAdd() {
     ref="wizardRef"
     :class="[
       'treatment-wizard',
-      'card',
+      'dental-card',
       'treatment-wizard--responsive',
       'treatment-wizard--single',
       'treatment-wizard--match'

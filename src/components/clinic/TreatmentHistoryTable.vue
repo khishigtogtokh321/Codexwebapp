@@ -76,9 +76,9 @@ const summaryBadges = computed(() => [
     </template>
 
     <div class="hidden md:block">
-      <div class="table-shell">
-        <div class="table-shell__scroll">
-          <table class="table">
+      <div class="dental-table-shell">
+        <div class="dental-table-shell__scroll">
+          <table class="dental-table">
             <thead>
               <tr>
                 <th class="text-left">Огноо</th>

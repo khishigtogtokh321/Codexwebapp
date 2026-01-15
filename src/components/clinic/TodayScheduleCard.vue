@@ -30,7 +30,7 @@ function handleFilter() {
   <div class="section-card section-card--dense">
     <div class="flex items-center justify-between">
       <p class="text-lg font-semibold text-gray-900">{{ title }}</p>
-      <button type="button" class="btn btn--ghost px-3 py-1.5 text-sm font-semibold" @click="handleFilter">
+      <button type="button" class="dental-btn dental-btn--ghost px-3 py-1.5 text-sm font-semibold" @click="handleFilter">
         {{ filterLabel }}
       </button>
     </div>

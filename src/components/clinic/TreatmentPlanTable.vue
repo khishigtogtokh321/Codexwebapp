@@ -39,19 +39,19 @@ function handleRowClick(plan) {
   <SectionCard title="Төлөвлөгөө" dense>
     <template #actions>
       <div v-if="showActions" class="flex items-center gap-2">
-        <button type="button" class="btn btn--ghost" @click="$emit('add')">
+        <button type="button" class="dental-btn dental-btn--ghost" @click="$emit('add')">
           <span class="text-base leading-none">+</span>
           Нэмэх
         </button>
-        <button type="button" class="btn btn--primary" @click="$emit('save')">
+        <button type="button" class="dental-btn dental-btn--primary" @click="$emit('save')">
           Хадгалах
         </button>
       </div>
     </template>
 
-    <div class="table-shell">
-      <div class="table-shell__scroll">
-        <table class="table">
+    <div class="dental-table-shell">
+      <div class="dental-table-shell__scroll">
+        <table class="dental-table">
           <thead>
             <tr>
               <th class="text-left">Огноо</th>
