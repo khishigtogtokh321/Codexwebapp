@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { mockPatients } from '@/data/mockData'
 
 const RECENT_KEY = 'recentPatients'
 const CURRENT_PATIENT_KEY = 'currentPatient'
@@ -24,7 +25,7 @@ const saveToStorage = (key, value) => {
 
 export const usePatientStore = defineStore('patient', {
     state: () => ({
-        patients: [],
+        patients: mockPatients,
         recentPatients: loadFromStorage(RECENT_KEY) || [],
         currentPatient: loadFromStorage(CURRENT_PATIENT_KEY),
         loading: false,

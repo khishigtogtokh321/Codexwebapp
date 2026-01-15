@@ -3,7 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import TopBar from '@/components/layout/TopBar.vue'
 import SideNav from '@/components/layout/SideNav.vue'
 import patientService from '@/services/patientService'
-import { mockPatient } from '@/data'
+import { mockPatients } from '@/data'
 import { getInitials } from '@/utils/formatters'
 import { usePatientStore } from '@/stores/patient'
 
@@ -52,74 +52,10 @@ function normalizePatient(patient, index = 0) {
 }
 
 function loadPatients() {
-  const primary = patientService.getDefaultPatient()
-  const seedPatients = [
-    {
-      ...primary,
-      id: primary?.id || primary?.cardNumber || 'P-001',
-      firstName: primary?.firstName || 'Анударь',
-      lastName: primary?.lastName || 'Бат-Эрдэнэ',
-      rd: primary?.register || 'УЖ80010123',
-      phone: primary?.phone || '99112233',
-      cardNo: primary?.cardNumber || '2024-001',
-      lastVisit: '2024-11-20',
-      lastTreatment: 'Шүд цэвэрлэгээ',
-    },
-    {
-      id: 'P-002',
-      firstName: 'Мөнх-Эрдэнэ',
-      lastName: 'Сарангэрэл',
-      phone: '88110022',
-      rd: 'УЖ81042111',
-      cardNo: '2024-002',
-      lastVisit: '2024-10-18',
-      lastTreatment: 'Сувгийн эмчилгээ',
-    },
-    {
-      id: 'P-003',
-      firstName: 'Сувдмаа',
-      lastName: 'Ганчимэг',
-      phone: '99003344',
-      rd: 'УЖ95090212',
-      cardNo: '2024-003',
-      lastVisit: '2024-09-04',
-      lastTreatment: 'Цоорлын эмчилгээ',
-    },
-    {
-      id: 'P-004',
-      firstName: 'Тэмүүлэн',
-      lastName: 'Энхжин',
-      phone: '95117788',
-      rd: 'УЖ88021477',
-      cardNo: '2024-004',
-      lastVisit: '2024-08-26',
-      lastTreatment: 'Шүдний цэвэрлэгээ',
-    },
-    {
-      id: 'P-005',
-      firstName: 'Номин',
-      lastName: 'Төрмандах',
-      phone: '70112233',
-      rd: 'УЖ99010134',
-      cardNo: '2024-005',
-      lastVisit: '2024-07-12',
-      lastTreatment: 'Үзлэг',
-    },
-    {
-      id: mockPatient.id || 'P-006',
-      fullName: mockPatient.name,
-      phone: mockPatient.phone,
-      rd: mockPatient.registerNo || 'УЖ93030566',
-      cardNo: mockPatient.id || mockPatient.cardNumber || '2024-006',
-      lastVisit: mockPatient.lastVisit || '2024-06-18',
-      lastTreatment: 'Төлөвлөгөөт үзлэг',
-    },
-  ]
-
   patientStore.loading = true
   window.clearTimeout(loadTimeout)
   loadTimeout = window.setTimeout(() => {
-    patientStore.patients = seedPatients.map((patient, index) => normalizePatient(patient, index))
+    patientStore.patients = mockPatients.map((patient, index) => normalizePatient(patient, index))
     patientStore.loading = false
   }, 260)
 }
@@ -221,22 +157,23 @@ watch(
 
     <div class="flex min-w-0 flex-1 flex-col">
       <div class="flex flex-col">
-        <div class="flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 shadow-sm lg:hidden">
-          <button
-            type="button"
-            ref="drawerTriggerRef"
-            class="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            aria-label="Open navigation"
-            @click="openMobileNav"
-          >
-            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-          <p class="text-base font-semibold text-gray-900">Өвчтөнүүд</p>
-        </div>
-
-        <TopBar />
+        <TopBar>
+            <template #leading>
+              <div class="lg:hidden flex items-center gap-3">
+                <button
+                  type="button"
+                  ref="drawerTriggerRef"
+                  class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  aria-label="Open navigation"
+                  @click="openMobileNav"
+                >
+                  <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
+              </div>
+            </template>
+          </TopBar>
 
         <main class="flex-1 bg-slate-50">
           <div class="mx-auto w-full max-w-[1500px] px-4 pb-16 pt-6 lg:px-6 lg:pb-12">

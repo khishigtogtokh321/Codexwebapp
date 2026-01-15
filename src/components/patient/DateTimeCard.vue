@@ -16,30 +16,27 @@ defineProps({
 </script>
 
 <template>
-   <div class="card card--soft">
-    <div class="card__header">
-      <div class="card__title">{{ title }}</div>
-    </div>
-    <div class="recall-table" role="table">
-         <div class="recall-row recall-row--head" role="row">
-            <div class="recall-cell recall-cell--header" role="columnheader">Огноо</div>
-            <div class="recall-cell recall-cell--header" role="columnheader">Цаг</div>
-            <div class="recall-cell recall-cell--header" role="columnheader">Эмч</div>
-        </div>
-        <div v-if="items.length" class="recall-body" role="rowgroup">
-        <div v-for="(item, index) in items" :key="index" class="recall-row" role="row">
-            <div class="recall-cell" role="cell">{{ item.date }}</div>
-            <div class="recall-cell" role="cell">{{ item.time }}</div>
-            <div class="recall-cell recall-cell--note" role="cell">
-                {{ item.doctor }}
-            </div>
-            </div>
-        </div>
-        <div v-else class="recall-empty" role="row">
-            Мэдээлэл алга.
-        </div>
-
-        
-    </div>
-    </div>
+  <div class="overflow-hidden border border-slate-200 rounded-lg">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="bg-slate-50 border-b border-slate-200">
+          <th class="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Date</th>
+          <th class="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Time</th>
+          <th class="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Doctor</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        <tr v-for="(item, index) in items" :key="index" class="hover:bg-slate-50/50 transition-colors">
+          <td class="px-4 py-2.5 text-xs font-semibold text-slate-700">{{ item.date }}</td>
+          <td class="px-4 py-2.5 text-xs font-semibold text-slate-700">{{ item.time }}</td>
+          <td class="px-4 py-2.5 text-xs font-medium text-slate-500">{{ item.doctor }}</td>
+        </tr>
+        <tr v-if="!items.length">
+          <td colspan="3" class="px-4 py-4 text-xs font-medium text-slate-400 italic text-center">
+            No upcoming appointments
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </template>

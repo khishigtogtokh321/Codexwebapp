@@ -1,56 +1,11 @@
-const mockPatients = [
-  {
-    id: 'P-001',
-    cardNumber: '2024-001',
-    age: 32,
-    firstName: 'Анударь',
-    lastName: 'Бат-Эрдэнэ',
-    phone: '99112233',
-    avatar: '',
-  },
-  {
-    id: 'P-002',
-    cardNumber: '2024-002',
-    age: 41,
-    firstName: 'Мөнх-Эрдэнэ',
-    lastName: 'Сарангэрэл',
-    phone: '88110022',
-    avatar: '',
-  },
-  {
-    id: 'P-003',
-    cardNumber: '2024-003',
-    age: 29,
-    firstName: 'Сувдмаа',
-    lastName: 'Ганчимэг',
-    phone: '99003344',
-    avatar: '',
-  },
-  {
-    id: 'P-004',
-    cardNumber: '2024-004',
-    age: 36,
-    firstName: 'Тэмүүлэн',
-    lastName: 'Энхжин',
-    phone: '95117788',
-    avatar: '',
-  },
-  {
-    id: 'P-005',
-    cardNumber: '2024-005',
-    age: 24,
-    firstName: 'Номин',
-    lastName: 'Төрмандах',
-    phone: '70112233',
-    avatar: '',
-  },
-]
+import { mockPatients } from '@/data/mockData'
 
 const normalize = (value = '') => value.toString().toLowerCase()
 
 const matchesQuery = (patient, query) => {
   const q = normalize(query)
   return [
+    patient.name,
     patient.firstName,
     patient.lastName,
     patient.phone,
@@ -61,7 +16,7 @@ const matchesQuery = (patient, query) => {
     patient.id,
     patient.rd,
     patient.registerNo,
-  ].some((field) => normalize(field).includes(q))
+  ].some((field) => normalize(field || '').includes(q))
 }
 
 const searchPatients = (query) =>

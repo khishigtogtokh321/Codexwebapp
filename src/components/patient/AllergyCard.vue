@@ -16,25 +16,21 @@ const activeAllergies = computed(() => props.allergies.filter((item) => item?.la
 </script>
 
 <template>
-  <div class="card card--soft">
-    <div class="card__header">
-      <div class="card__title-wrap">
-        <span class="card__title">{{ title }}</span>
-        <span v-if="activeAllergies.length" class="pill pill--badge">{{ activeAllergies.length }}</span>
-      </div>
-    </div>
-
+  <div class="space-y-3">
     <div class="flex flex-wrap gap-2" role="list">
-      <span
+      <div
         v-for="(allergy, index) in activeAllergies"
         :key="`${allergy.label}-${index}`"
-        class="pill pill--alert"
+        class="inline-flex items-center px-2 py-1 bg-rose-50 text-rose-700 text-[11px] font-bold border border-rose-200 rounded uppercase tracking-wider"
         role="listitem"
       >
+        <span class="w-1.5 h-1.5 rounded-full bg-rose-500 mr-2"></span>
         {{ allergy.label }}
-      </span>
+      </div>
 
-      <span v-if="!activeAllergies.length" class="text-sm text-slate-500">Харшлын мэдээлэл байхгүй</span>
+      <div v-if="!activeAllergies.length" class="text-xs font-medium text-slate-400 italic">
+        No clinical allergies reported
+      </div>
     </div>
   </div>
 </template>

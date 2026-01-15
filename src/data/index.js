@@ -12,6 +12,7 @@ export {
 } from './treatmentTypes.js'
 export {
   mockPatient,
+  mockPatients,
   mockTreatmentHistory,
   mockToothStatuses,
   mockPatientStats,

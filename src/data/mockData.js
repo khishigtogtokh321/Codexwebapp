@@ -3,19 +3,75 @@
  * Includes patient information, treatment history, and tooth statuses
  */
 
-// Sample patient data
-export const mockPatient = {
-  id: '2024-00123',
-  name: 'Б. Батбаяр',
-  age: 32,
-  gender: 'male',
-  phone: '99112233',
-  email: 'batbayar@example.com',
-  address: 'Улаанбаатар, Баянгол дүүрэг',
-  avatar: 'BB', // Initials for avatar
-  registrationDate: '2023-05-15',
-  lastVisit: '2024-11-20',
-}
+// Detailed Mock Patients
+export const mockPatients = [
+  {
+    id: '2024-00123',
+    name: 'Батбаярын Батбаяр',
+    rd: 'УБ92051512',
+    cardNo: '2024-00123',
+    age: 32,
+    gender: 'Эр',
+    phone: '99112233',
+    email: 'batbayar.b@example.mn',
+    address: 'Улаанбаатар, Баянгол дүүрэг, 4-р хороо, 10-р хороолол, 12-р байр, 45 тоот',
+    birthDate: '1992.05.15',
+    job: 'Программист',
+    avatar: 'BB',
+    registrationDate: '2023-05-15',
+    lastVisit: '2024-11-20',
+  },
+  {
+    id: '2024-00124',
+    name: 'Гантулгын Ану',
+    rd: 'ЧД95082025',
+    cardNo: '2024-00124',
+    age: 28,
+    gender: 'Эм',
+    phone: '88001122',
+    email: 'anu.g@example.mn',
+    address: 'Улаанбаатар, Сүхбаатар дүүрэг, 1-р хороо, Олимпийн гудамж, 5-р байр',
+    birthDate: '1995.08.20',
+    job: 'Дизайнер',
+    avatar: 'GA',
+    registrationDate: '2023-06-10',
+    lastVisit: '2024-12-05',
+  },
+  {
+    id: '2024-00125',
+    name: 'Эрдэнэбилэгийн Мөнх-Эрдэнэ',
+    rd: 'БЗ90010115',
+    cardNo: '2024-00125',
+    age: 34,
+    gender: 'Эр',
+    phone: '95115566',
+    email: 'munkherdene.e@example.mn',
+    address: 'Улаанбаатар, Баянзүрх дүүрэг, 26-р хороо, Хүннү 2222 хороолол, 110-р байр',
+    birthDate: '1990.01.01',
+    job: 'Инженер',
+    avatar: 'EM',
+    registrationDate: '2022-11-20',
+    lastVisit: '2024-12-18',
+  },
+  {
+    id: 'P-002',
+    name: 'Сарангэрэлийн Мөнх-Эрдэнэ',
+    rd: 'УЖ81042111',
+    cardNo: '2024-002',
+    age: 43,
+    gender: 'Эм',
+    phone: '88110022',
+    email: 'sarangerel.m@example.mn',
+    address: 'Улаанбаатар, Чингэлтэй дүүрэг, 4-р хороо, 24-р байр',
+    birthDate: '1981.04.21',
+    job: 'Нягтлан бодогч',
+    avatar: 'SM',
+    registrationDate: '2023-01-15',
+    lastVisit: '2024-12-25',
+  }
+]
+
+export const mockPatient = mockPatients[0]
 
 // Sample treatment history
 export const mockTreatmentHistory = [
